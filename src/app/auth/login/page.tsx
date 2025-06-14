@@ -3,6 +3,7 @@
 import { useState } from "react";
 import API from "@/lib/axios";
 import { IAuthLogin } from "@/types/auth";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [form, setForm] = useState<IAuthLogin>({ email: "", password: "" });
@@ -19,10 +20,10 @@ export default function Login() {
 
     try {
       const { data } = await API.post("/auth/login", form);
-      alert("Login successful!");
+      toast.success("Login successful!");
       console.log(data); // Store token/cookie/etc. here
     } catch (error: any) {
-      alert(error.response?.data?.message || "Login failed");
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -58,7 +59,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          className="w-full bg-[#6096B4] text-white py-2 rounded hover:bg-[#497187] transition"
         >
           {loading ? "Logging in..." : "Login"}
         </button>

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import API from "@/lib/axios";
 import { IAuthRegister } from "@/types/auth";
+import { FaGoogle, FaFacebookF, FaGithub, FaXTwitter } from "react-icons/fa6";
+import Link from "next/link";
 
 export default function RegisterForm() {
   const [form, setForm] = useState<IAuthRegister>({
@@ -10,6 +12,7 @@ export default function RegisterForm() {
     email: "",
     password: "",
     role: "USER",
+    phone: "",
   });
 
   const [error, setError] = useState("");
@@ -36,30 +39,41 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md text-black">
-      <h2 className="text-2xl font-bold mb-4 text-center">
+    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md transition-all duration-300 ease-in-out text-black">
+      <h2 className="text-2xl font-bold text-[#333] mb-1 text-center">
         Register as {form.role === "ADMIN" ? "Company" : "Job Seeker"}
       </h2>
+      <p className="text-sm text-gray-600 text-center mb-6">
+        Join QuickDev and start your journey today.
+      </p>
 
-      <div className="mb-4 flex justify-center space-x-4">
+      {/* Role Toggle */}
+      <div className="flex justify-center mb-4 space-x-4">
         <button
+          type="button"
           onClick={() => setForm({ ...form, role: "USER" })}
-          className={`px-4 py-2 rounded ${
-            form.role === "USER" ? "bg-blue-500 text-white" : "bg-gray-200"
+          className={`px-4 py-2 rounded-full border text-sm transition ${
+            form.role === "USER"
+              ? "bg-[#6096B4] text-white"
+              : "bg-gray-100 text-gray-700"
           }`}
         >
           Job Seeker
         </button>
         <button
+          type="button"
           onClick={() => setForm({ ...form, role: "ADMIN" })}
-          className={`px-4 py-2 rounded ${
-            form.role === "ADMIN" ? "bg-blue-500 text-white" : "bg-gray-200"
+          className={`px-4 py-2 rounded-full border text-sm transition ${
+            form.role === "ADMIN"
+              ? "bg-[#6096B4] text-white"
+              : "bg-gray-100 text-gray-700"
           }`}
         >
           Company
         </button>
       </div>
 
+      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {form.role === "ADMIN" && (
           <>
@@ -70,7 +84,7 @@ export default function RegisterForm() {
               value={form.name}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-2 rounded transition"
             />
             <input
               type="text"
@@ -79,7 +93,7 @@ export default function RegisterForm() {
               value={form.phone || ""}
               onChange={handleChange}
               required
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 p-2 rounded transition"
             />
           </>
         )}
@@ -90,7 +104,7 @@ export default function RegisterForm() {
           value={form.email}
           onChange={handleChange}
           required
-          className="w-full border p-2 rounded"
+          className="w-full border border-gray-300 p-2 rounded transition"
         />
         <input
           type="password"
@@ -99,18 +113,50 @@ export default function RegisterForm() {
           value={form.password}
           onChange={handleChange}
           required
-          className="w-full border p-2 rounded"
+          className="w-full border border-gray-300 p-2 rounded transition"
         />
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className="w-full bg-[#6096B4] text-white py-2 rounded hover:bg-[#4a7b98] transition-all"
         >
-          Register as {form.role === "ADMIN" ? "Company" : "User"}
+          Sign up
         </button>
       </form>
 
+      {/* Error / Success */}
       {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
       {success && <p className="text-green-500 mt-4 text-center">{success}</p>}
+
+      {/* Divider */}
+      <div className="flex items-center my-6">
+        <div className="flex-grow h-px bg-gray-300" />
+        <span className="mx-2 text-gray-500 text-sm">or sign up with</span>
+        <div className="flex-grow h-px bg-gray-300" />
+      </div>
+
+      {/* Social Sign In */}
+      <div className="grid grid-cols-2 gap-3">
+        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+          <FaGoogle className="mr-2" /> Google
+        </button>
+        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+          <FaFacebookF className="mr-2" /> Facebook
+        </button>
+        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+          <FaXTwitter className="mr-2" /> X
+        </button>
+        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+          <FaGithub className="mr-2" /> GitHub
+        </button>
+      </div>
+
+      {/* Sign in redirect */}
+      <p className="text-sm text-center text-gray-600 mt-6">
+        Already have an account?{" "}
+        <Link href="/auth/login" className="text-[#6096B4] hover:underline">
+          Sign in
+        </Link>
+      </p>
     </div>
   );
 }
