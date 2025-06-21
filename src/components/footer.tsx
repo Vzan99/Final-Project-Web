@@ -8,9 +8,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-6 py-10 grid md:grid-cols-4 sm:grid-cols-2 gap-8 text-sm">
         {/* Brand */}
         <div>
-          <h3 className="text-lg font-semibold text-[#6096B4] mb-3">
-            QuickDev
-          </h3>
+          <h3 className="text-lg font-semibold text-[#6096B4] mb-3">Precise</h3>
           <p>Connecting top talent with leading tech companies.</p>
         </div>
 
@@ -91,7 +89,7 @@ export default function Footer() {
 
       {/* Bottom */}
       <div className="border-t border-[#BDCDD6] py-4 text-center text-xs text-gray-500">
-        &copy; {new Date().getFullYear()} QuickDev. All rights reserved.
+        &copy; {new Date().getFullYear()} Precise. All rights reserved.
       </div>
     </footer>
   );
