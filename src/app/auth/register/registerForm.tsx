@@ -44,7 +44,7 @@ export default function RegisterForm() {
         Register as {form.role === "ADMIN" ? "Company" : "Job Seeker"}
       </h2>
       <p className="text-sm text-gray-600 text-center mb-6">
-        Join QuickDev and start your journey today.
+        Join Precise and start your journey today.
       </p>
 
       {/* Role Toggle */}

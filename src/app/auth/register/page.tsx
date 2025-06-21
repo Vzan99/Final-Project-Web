@@ -3,33 +3,30 @@ import Image from "next/image";
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 bg-gray-100">
-      {/* Left side: Greeting + Image – hidden on mobile */}
-      <div className="hidden md:flex flex-col items-center justify-start p-10 bg-white text-black">
-        {/* Text */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold mb-2">Welcome to QuickDev</h1>
-          <p className="text-lg max-w-sm">
+    <main className="flex flex-col md:flex-row justify-center items-start bg-white pt-16 pb-12 px-4 md:px-8">
+      {/* Left side*/}
+      <div className="hidden md:flex flex-col items-center justify-center w-1/2 pr-8">
+        <div className="text-center mb-6 max-w-md">
+          <h1 className="text-4xl font-bold mb-4 text-[#6096B4]">
+            Welcome to Precise
+          </h1>
+          <p className="text-lg text-gray-700 mb-6">
             Your gateway to top IT careers and hiring the right tech talent.
           </p>
-        </div>
-
-        {/* Image */}
-        <div className="w-full max-w-md">
           <Image
             src="/icon_register.png"
             alt="Register illustration"
             width={500}
             height={350}
-            className="object-contain"
+            className="object-contain mx-auto"
           />
         </div>
       </div>
 
-      {/* Right side: Register form – always visible */}
-      <div className="flex items-center justify-center p-6 bg-white">
+      {/* Right side: Just center the form */}
+      <div className="w-full md:w-1/2 flex justify-center">
         <RegisterForm />
       </div>
-    </div>
+    </main>
   );
 }
