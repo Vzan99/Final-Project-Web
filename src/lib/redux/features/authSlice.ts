@@ -4,6 +4,7 @@ import API from "@/lib/axios";
 interface UserProfile {
   name: string;
   email: string;
+  role: "USER" | "ADMIN" | "DEVELOPER";
   profile: {
     birthDate: string | null;
     gender: string | null;
