@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface Props {
   user: any;
-  loading?: boolean; // ✅ Add loading prop
+  loading?: boolean;
   profileOpen: boolean;
   setProfileOpen: (open: boolean) => void;
   onLogout: () => void;
@@ -42,31 +42,31 @@ export default function DesktopNav({
             {profileOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow z-50 p-1">
               <Link
                 href="/profile"
-                className="block px-4 py-2 text-sm hover:bg-gray-100"
+                className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                 onClick={() => setProfileOpen(false)}
               >
                 My Profile
               </Link>
               <Link
                 href="/jobs/saved"
-                className="block px-4 py-2 text-sm hover:bg-gray-100"
+                className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                 onClick={() => setProfileOpen(false)}
               >
                 Saved Jobs
               </Link>
               <Link
                 href="/jobs/applied"
-                className="block px-4 py-2 text-sm hover:bg-gray-100"
+                className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                 onClick={() => setProfileOpen(false)}
               >
                 Applied Jobs
               </Link>
               <button
                 onClick={onLogout}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded cursor-pointer"
               >
                 Sign Out
               </button>

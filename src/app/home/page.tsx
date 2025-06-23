@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SearchBar from "@/components/searchBar";
-import SignInCardSection from "@/components/signInCardSection";
+import SignInCardSection from "@/app/home/signInCardSection";
 
 export default function HomePage() {
   return (
