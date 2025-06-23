@@ -1,0 +1,18 @@
+import * as Yup from "yup";
+
+export const jobSchema = Yup.object({
+  title: Yup.string().trim().required("Title is required"),
+  description: Yup.string().trim().required("Description is required"),
+  location: Yup.string().trim().required("Location is required"),
+  category: Yup.string().trim().required("Category is required"),
+  deadline: Yup.string().trim().required("Deadline is required"),
+  salary: Yup.number().positive().nullable(),
+  experienceLevel: Yup.string().oneOf(["Entry", "Mid", "Senior"]).required(),
+  jobType: Yup.string()
+    .oneOf(["Full-time", "Part-time", "Contract"])
+    .required(),
+  isRemote: Yup.boolean().required(),
+  tags: Yup.array().of(Yup.string().trim()),
+  bannerUrl: Yup.string().url("Invalid URL").nullable(),
+  hasTest: Yup.boolean().required(),
+});
