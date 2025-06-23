@@ -8,7 +8,7 @@ export default function RegisterPage() {
       <div className="hidden md:flex flex-col items-center justify-center w-1/2 pr-8">
         <div className="text-center mb-6 max-w-md">
           <h1 className="text-4xl font-bold mb-4 text-[#6096B4]">
-            Welcome to QuickDev
+            Welcome to Precise
           </h1>
           <p className="text-lg text-gray-700 mb-6">
             Your gateway to top IT careers and hiring the right tech talent.

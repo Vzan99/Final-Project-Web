@@ -44,7 +44,7 @@ export default function RegisterForm() {
         Register as {form.role === "ADMIN" ? "Company" : "Job Seeker"}
       </h2>
       <p className="text-sm text-gray-600 text-center mb-6">
-        Join QuickDev and start your journey today.
+        Join Precise and start your journey today.
       </p>
 
       {/* Role Toggle */}
@@ -127,28 +127,22 @@ export default function RegisterForm() {
       {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
       {success && <p className="text-green-500 mt-4 text-center">{success}</p>}
 
-      {/* Divider */}
-      <div className="flex items-center my-6">
-        <div className="flex-grow h-px bg-gray-300" />
-        <span className="mx-2 text-gray-500 text-sm">or sign up with</span>
-        <div className="flex-grow h-px bg-gray-300" />
-      </div>
+      {/* Divider and Social Register - only for Job Seeker */}
+      {form.role === "USER" && (
+        <>
+          <div className="flex items-center my-6">
+            <div className="flex-grow h-px bg-gray-300" />
+            <span className="mx-2 text-gray-500 text-sm">or sign up with</span>
+            <div className="flex-grow h-px bg-gray-300" />
+          </div>
 
-      {/* Social Sign In */}
-      <div className="grid grid-cols-2 gap-3">
-        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-          <FaGoogle className="mr-2" /> Google
-        </button>
-        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-          <FaFacebookF className="mr-2" /> Facebook
-        </button>
-        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-          <FaXTwitter className="mr-2" /> X
-        </button>
-        <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-          <FaGithub className="mr-2" /> GitHub
-        </button>
-      </div>
+          <div className="grid grid-cols-1">
+            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+              <FaGoogle className="mr-2" /> Google
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Sign in redirect */}
       <p className="text-sm text-center text-gray-600 mt-6">

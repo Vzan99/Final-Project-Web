@@ -1,127 +1,117 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Dialog } from "@headlessui/react";
+import { Pencil } from "lucide-react";
+import ProfileForm from "./profileForm";
+import ProfileImageUpload from "./profileImageUpload";
+import ResumeUpload from "./resumeUpload";
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>(null);
-
-  useEffect(() => {
-    async function fetchProfile() {
-      const res = await fetch("/api/profile");
-      const data = await res.json();
-      setProfile(data);
-    }
-    fetchProfile();
-  }, []);
-
-  if (!profile) return <div className="text-center py-12">Loading...</div>;
-
-  const {
-    name,
-    email,
-    profile: {
-      birthDate,
-      gender,
-      education,
-      address,
-      photoUrl,
-      resumeUrl,
-      skills,
-    },
-    certificates,
-  } = profile;
+  const [isEditOpen, setEditOpen] = useState(false);
+  const userName = "john.doe@example.com".split("@")[0]; // Replace with actual user email
+  const userLocation = "Jakarta, Indonesia"; // Replace with actual user data
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 space-y-6">
-      <div className="bg-white p-6 rounded-2xl shadow">
-        <div className="flex items-center gap-4">
-          {photoUrl ? (
-            <img
-              src={photoUrl}
-              alt="Profile"
-              className="w-20 h-20 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-20 h-20 rounded-full bg-gray-300" />
-          )}
-          <div>
-            <h2 className="text-xl font-bold">{name}</h2>
-            <p className="text-gray-500">{email}</p>
+    <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black">
+      <div className="max-w-5xl mx-auto px-4 md:px-0">
+        {/* Top Section: Banner + Profile Image */}
+        <div className="relative bg-white rounded-t-xl h-48">
+          <div className="absolute bottom-[-3rem] left-8">
+            <ProfileImageUpload />
           </div>
         </div>
 
-        <div className="mt-6 space-y-2">
-          <p>
-            <strong>Gender:</strong> {gender}
-          </p>
-          <p>
-            <strong>Birth Date:</strong>{" "}
-            {new Date(birthDate).toLocaleDateString()}
-          </p>
-          <p>
-            <strong>Education:</strong> {education}
-          </p>
-          <p>
-            <strong>Address:</strong> {address}
-          </p>
-        </div>
-
-        {resumeUrl && (
-          <div className="mt-4">
-            <a
-              href={resumeUrl}
-              className="text-blue-600 underline"
-              target="_blank"
-              rel="noopener noreferrer"
+        {/* Name + Location + Edit Button */}
+        <div className="bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mt-10">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">{userName}</h1>
+              <p className="text-sm text-gray-600">{userLocation}</p>
+            </div>
+            <button
+              onClick={() => setEditOpen(true)}
+              className="mt-4 md:mt-0 inline-flex items-center gap-2 bg-[#89A8B2] text-white px-4 py-2 rounded hover:bg-[#7a98a1]"
             >
-              View Resume
-            </a>
+              <Pencil size={16} /> Edit Profile
+            </button>
           </div>
-        )}
+        </div>
 
-        <div className="mt-6">
-          <h3 className="font-semibold mb-2">Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {skills.map((skill: string) => (
-              <span
-                key={skill}
-                className="bg-[#93BFCF] text-white px-3 py-1 rounded-full text-sm"
-              >
-                {skill}
-              </span>
-            ))}
+        {/* Grid Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Left Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Resume
+              </h2>
+              <ResumeUpload />
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Contact Info
+              </h2>
+              <p className="text-sm text-gray-600">Edit your contact details</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">
+                Activity
+              </h2>
+              <p className="text-sm text-gray-600">You haven't posted yet</p>
+            </div>
+          </div>
+
+          {/* Right Main Section */}
+          <div className="md:col-span-2 space-y-6">
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Experience
+              </h2>
+              <p className="text-gray-600 text-sm">No experience added yet.</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Skills</h2>
+              <p className="text-gray-600 text-sm">Add your key skills here.</p>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">
+                Education
+              </h2>
+              <p className="text-gray-600 text-sm">No education added yet.</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {certificates.length > 0 && (
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3 className="text-lg font-semibold mb-4">Certificates</h3>
-          <ul className="space-y-3">
-            {certificates.map((cert: any) => (
-              <li key={cert.id} className="border-b pb-2">
-                <a
-                  href={cert.certificateUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  View Certificate
-                </a>
-                <p className="text-sm text-gray-600">
-                  Code: {cert.verificationCode}
-                </p>
-                <p className="text-sm text-gray-600">
-                  Issued: {new Date(cert.issuedAt).toLocaleDateString()} | Exp:{" "}
-                  {cert.expiresAt
-                    ? new Date(cert.expiresAt).toLocaleDateString()
-                    : "N/A"}
-                </p>
-              </li>
-            ))}
-          </ul>
+      <Dialog
+        open={isEditOpen}
+        onClose={() => setEditOpen(false)}
+        className="relative z-50"
+      >
+        {/* Overlay */}
+        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+
+        {/* Centered modal container */}
+        <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white max-w-xl w-full rounded-xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+            <ProfileForm />
+
+            <div className="text-right mt-4">
+              <button
+                onClick={() => setEditOpen(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-      )}
-    </div>
+      </Dialog>
+    </main>
   );
 }
