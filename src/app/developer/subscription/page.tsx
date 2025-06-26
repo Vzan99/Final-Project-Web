@@ -2,15 +2,15 @@ import axios from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { Analytics, PendingSubscription } from "@/types/subscription";
 
-export default function AdminSubscriptionPage() {
+export default function DeveloperSubscriptionPage() {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [pendingSubs, setPendingSubs] = useState<PendingSubscription[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
-      axios.get("/subscription/admin/analytics"),
-      axios.get("/subscription/admin"),
+      axios.get("/subscription/developer/analytics"),
+      axios.get("/subscription/developer"),
     ])
       .then(([analyticsRes, listRes]) => {
         setAnalytics(analyticsRes.data);
@@ -24,7 +24,7 @@ export default function AdminSubscriptionPage() {
 
   const handleApprove = async (id: string) => {
     try {
-      await axios.patch(`/subscription/admin/${id}/approve`);
+      await axios.patch(`/subscription/developer/${id}/approve`);
       setPendingSubs((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
       alert("Failed to approve subscription");
@@ -37,9 +37,6 @@ export default function AdminSubscriptionPage() {
 
   return (
     <div className="max-w-5xl mx-auto mt-10 space-y-8 p-6">
-      {/* Analytics panel di sini */}
-      {/* ... kode sebelumnya tetap ... */}
-
       {/* Approval Panel */}
       <div className="bg-white p-6 rounded-2xl shadow-md">
         <h3 className="text-xl font-bold mb-4">Pending Approvals</h3>
