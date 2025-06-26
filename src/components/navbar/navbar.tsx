@@ -86,6 +86,7 @@ export default function Navbar() {
             onLogout={handleLogout}
             profileOpen={profileOpen}
             setProfileOpen={setProfileOpen}
+            showNavbar={showNavbar}
           />
           <div className="md:hidden">
             <button

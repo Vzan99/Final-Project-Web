@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useEffect } from "react";
 
 interface Props {
   user: any;
@@ -9,6 +10,7 @@ interface Props {
   profileOpen: boolean;
   setProfileOpen: (open: boolean) => void;
   onLogout: () => void;
+  showNavbar: boolean;
 }
 
 export default function DesktopNav({
@@ -17,7 +19,14 @@ export default function DesktopNav({
   profileOpen,
   setProfileOpen,
   onLogout,
+  showNavbar,
 }: Props) {
+  useEffect(() => {
+    if (!showNavbar && profileOpen) {
+      setProfileOpen(false);
+    }
+  }, [showNavbar, profileOpen, setProfileOpen]);
+
   return (
     <div className="hidden md:flex space-x-8 items-center">
       <Link href="/" className="hover:text-[#497187]">

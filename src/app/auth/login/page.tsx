@@ -5,7 +5,7 @@ import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaGoogle, FaFacebookF, FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaGoogle } from "react-icons/fa6";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { fetchUser } from "@/lib/redux/features/authSlice";
 
@@ -129,18 +129,9 @@ export default function LoginPage() {
           </div>
 
           {/* Social Sign In */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1">
             <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
               <FaGoogle className="mr-2" /> Google
-            </button>
-            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-              <FaFacebookF className="mr-2" /> Facebook
-            </button>
-            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-              <FaXTwitter className="mr-2" /> X
-            </button>
-            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
-              <FaGithub className="mr-2" /> GitHub
             </button>
           </div>
 

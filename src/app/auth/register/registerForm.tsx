@@ -3,8 +3,9 @@
 import { useState } from "react";
 import API from "@/lib/axios";
 import { IAuthRegister } from "@/types/auth";
-import { FaGoogle, FaFacebookF, FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaGoogle } from "react-icons/fa6";
 import Link from "next/link";
+import { toast } from "react-toastify";
 
 export default function RegisterForm() {
   const [form, setForm] = useState<IAuthRegister>({
@@ -15,8 +16,7 @@ export default function RegisterForm() {
     phone: "",
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,17 +24,20 @@ export default function RegisterForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setLoading(true);
 
     try {
       const endpoint =
         form.role === "ADMIN" ? "/auth/register/admin" : "/auth/register/user";
 
       await API.post(endpoint, form);
-      setSuccess("Registration successful!");
+      toast.success(
+        "Registration successful! A link has been sent to your email to verify your email"
+      );
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Registration failed.");
+      toast.error(err?.response?.data?.message || "Registration failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,6 +60,7 @@ export default function RegisterForm() {
               ? "bg-[#6096B4] text-white"
               : "bg-gray-100 text-gray-700"
           }`}
+          disabled={loading}
         >
           Job Seeker
         </button>
@@ -68,6 +72,7 @@ export default function RegisterForm() {
               ? "bg-[#6096B4] text-white"
               : "bg-gray-100 text-gray-700"
           }`}
+          disabled={loading}
         >
           Company
         </button>
@@ -84,7 +89,8 @@ export default function RegisterForm() {
               value={form.name}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 p-2 rounded transition"
+              disabled={loading}
+              className="w-full border border-gray-300 p-2 rounded transition disabled:opacity-50"
             />
             <input
               type="text"
@@ -93,7 +99,8 @@ export default function RegisterForm() {
               value={form.phone || ""}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 p-2 rounded transition"
+              disabled={loading}
+              className="w-full border border-gray-300 p-2 rounded transition disabled:opacity-50"
             />
           </>
         )}
@@ -104,7 +111,8 @@ export default function RegisterForm() {
           value={form.email}
           onChange={handleChange}
           required
-          className="w-full border border-gray-300 p-2 rounded transition"
+          disabled={loading}
+          className="w-full border border-gray-300 p-2 rounded transition disabled:opacity-50"
         />
         <input
           type="password"
@@ -113,19 +121,19 @@ export default function RegisterForm() {
           value={form.password}
           onChange={handleChange}
           required
-          className="w-full border border-gray-300 p-2 rounded transition"
+          disabled={loading}
+          className="w-full border border-gray-300 p-2 rounded transition disabled:opacity-50"
         />
         <button
           type="submit"
-          className="w-full bg-[#6096B4] text-white py-2 rounded hover:bg-[#4a7b98] transition-all"
+          disabled={loading}
+          className={`w-full bg-[#6096B4] text-white py-2 rounded hover:bg-[#4a7b98] transition-all flex justify-center items-center ${
+            loading ? "animate-pulse cursor-not-allowed" : ""
+          }`}
         >
-          Sign up
+          {loading ? "Signing up..." : "Sign up"}
         </button>
       </form>
-
-      {/* Error / Success */}
-      {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
-      {success && <p className="text-green-500 mt-4 text-center">{success}</p>}
 
       {/* Divider and Social Register - only for Job Seeker */}
       {form.role === "USER" && (
@@ -137,7 +145,10 @@ export default function RegisterForm() {
           </div>
 
           <div className="grid grid-cols-1">
-            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+            <button
+              disabled={loading}
+              className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition"
+            >
               <FaGoogle className="mr-2" /> Google
             </button>
           </div>
