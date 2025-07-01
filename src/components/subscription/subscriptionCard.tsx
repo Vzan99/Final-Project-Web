@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "@/lib/axios";
+import API from "@/lib/axios";
 import { MySubscription } from "@/types/subscription";
 
 export default function SubscriptionCard() {
@@ -10,8 +10,7 @@ export default function SubscriptionCard() {
   const router = useRouter();
 
   useEffect(() => {
-    axios
-      .get("/me/subscription")
+    API.get("/subscriptions/user/me")
       .then((res) => setSubscription(res.data))
       .catch((err) => console.error(err));
   }, []);
