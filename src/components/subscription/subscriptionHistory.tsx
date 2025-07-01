@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "@/lib/axios";
+import API from "@/lib/axios";
 import { Subscription } from "@/types/subscription";
 
 export default function SubscriptionHistory() {
@@ -9,8 +9,7 @@ export default function SubscriptionHistory() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get("/subscription/user/history")
+    API.get("/subscriptions/user/history")
       .then((res) => setHistory(res.data))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));

@@ -1,4 +1,6 @@
-import axios from "@/lib/axios";
+"use client";
+
+import API from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { Analytics, PendingSubscription } from "@/types/subscription";
 
@@ -9,8 +11,8 @@ export default function DeveloperSubscriptionPage() {
 
   useEffect(() => {
     Promise.all([
-      axios.get("/subscription/developer/analytics"),
-      axios.get("/subscription/developer"),
+      API.get("/subscriptions/developer/analytics"),
+      API.get("/subscriptions/developer"),
     ])
       .then(([analyticsRes, listRes]) => {
         setAnalytics(analyticsRes.data);
@@ -24,7 +26,7 @@ export default function DeveloperSubscriptionPage() {
 
   const handleApprove = async (id: string) => {
     try {
-      await axios.patch(`/subscription/developer/${id}/approve`);
+      await API.patch(`/subscriptions/developer/${id}/approve`);
       setPendingSubs((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
       alert("Failed to approve subscription");

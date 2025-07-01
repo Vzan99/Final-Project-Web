@@ -21,6 +21,12 @@ interface UserProfile {
     issuedAt: string;
     expiresAt: string;
   }[];
+  subscription?: {
+    status: "ACTIVE" | "INACTIVE" | "PENDING";
+    type: "STANDARD" | "PROFESSIONAL";
+    startDate: string;
+    endDate: string;
+  } | null;
 }
 
 interface AuthState {
