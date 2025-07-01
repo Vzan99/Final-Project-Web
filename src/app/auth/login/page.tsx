@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { fetchUser } from "@/lib/redux/features/authSlice";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -35,6 +36,19 @@ export default function LoginPage() {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      toast.error(`Google login failed: ${error.message}`);
     }
   };
 
@@ -116,7 +130,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#6096B4] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#4d7a96] transition"
+            className={`w-full bg-[#6096B4] text-white py-2 rounded hover:bg-[#4a7b98] transition-all flex justify-center items-center ${
+              loading ? "animate-pulse cursor-not-allowed" : ""
+            }`}
           >
             {loading ? "Logging in..." : "Login"}
           </button>
@@ -130,7 +146,11 @@ export default function LoginPage() {
 
           {/* Social Sign In */}
           <div className="grid grid-cols-1">
-            <button className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition">
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition"
+            >
               <FaGoogle className="mr-2" /> Google
             </button>
           </div>
