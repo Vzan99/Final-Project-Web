@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
+import PreSelectionTestQuestionForm from "@/components/dashboard/pre-selection-test/PreSelectionTestQuestionForm";
 
 interface JobDetail {
   id: string;
@@ -31,6 +32,7 @@ export default function JobDetailPage() {
 
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showTestForm, setShowTestForm] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -94,12 +96,11 @@ export default function JobDetailPage() {
           <strong>Deadline:</strong> {job.deadline.slice(0, 10)}
         </p>
         <p>
-          <strong>Pre-Selection Test:</strong>{" "}
-          {job.hasTest ? "✅ Yes" : "❌ No"}
+          <strong>Pre-Selection Test:</strong> {job.hasTest ? "Yes" : "No"}
         </p>
       </div>
 
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-4 flex-wrap">
         <button
           onClick={() => router.push(`/dashboard/jobs/${job.id}/edit`)}
           className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
@@ -114,17 +115,28 @@ export default function JobDetailPage() {
           View Applicants
         </button>
 
+        <button
+          onClick={() => router.push(`/dashboard/jobs/${job.id}/interviews`)}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+        >
+          Lihat Interview
+        </button>
+
         {job.hasTest && (
           <button
-            onClick={() =>
-              router.push(`/dashboard/jobs/${job.id}/pretest-editor`)
-            }
+            onClick={() => setShowTestForm((prev) => !prev)}
             className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
-            Edit Pre-Test
+            {showTestForm ? "Tutup Pre-Test Form" : "Tambah Pre-Test"}
           </button>
         )}
       </div>
+
+      {job.hasTest && showTestForm && (
+        <div className="mt-6">
+          <PreSelectionTestQuestionForm />
+        </div>
+      )}
     </div>
   );
 }

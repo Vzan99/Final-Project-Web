@@ -58,16 +58,6 @@ export default function DashboardOverviewPage() {
           <h3 className="font-semibold">Avg Assessment Score</h3>
           <p className="text-xl">{data?.skillAssessmentAvgScore}</p>
         </div>
-        <div className="bg-white shadow rounded p-4 border col-span-1 sm:col-span-2 lg:col-span-3">
-          <h3 className="font-semibold mb-2">Users by Role</h3>
-          <ul className="list-disc ml-5">
-            {data?.userByRole.map((role) => (
-              <li key={role.role}>
-                {role.role}: <strong>{role.total}</strong>
-              </li>
-            ))}
-          </ul>
-        </div>
       </div>
     </div>
   );
