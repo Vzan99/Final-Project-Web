@@ -6,6 +6,7 @@ import { IAuthRegister } from "@/types/auth";
 import { FaGoogle } from "react-icons/fa6";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterForm() {
   const [form, setForm] = useState<IAuthRegister>({
@@ -37,6 +38,27 @@ export default function RegisterForm() {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Registration failed.");
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast.error(`Google login failed: ${error.message}`);
+        setLoading(false);
+        return;
+      }
+    } catch (error) {
+      toast.error("Google sign-in failed.");
       setLoading(false);
     }
   };
@@ -147,6 +169,7 @@ export default function RegisterForm() {
           <div className="grid grid-cols-1">
             <button
               disabled={loading}
+              onClick={handleGoogleRegister}
               className="flex items-center justify-center border border-gray-300 py-2 rounded text-sm text-gray-700 hover:bg-gray-50 transition"
             >
               <FaGoogle className="mr-2" /> Google
