@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import CustomToastContainer from "@/components/customToastContainer";
-import Navbar from "@/components/navbar/navbar";
+import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import StoreProvider from "@/components/storeProvider";
 import AuthProvider from "@/components/authProvider";
