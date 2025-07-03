@@ -5,8 +5,9 @@ import { Dialog } from "@headlessui/react";
 import { Pencil } from "lucide-react";
 import ProfileForm from "./profileForm";
 import API from "@/lib/axios";
+import { X } from "lucide-react";
 
-type ProfileData = {
+type UserProfileData = {
   id: string;
   name: string;
   email: string;
@@ -22,11 +23,11 @@ type ProfileData = {
   certificates?: any[];
 };
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
   const [isEditOpen, setEditOpen] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [resumeFilename, setResumeFilename] = useState<string | null>(null);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profile, setProfile] = useState<UserProfileData | null>(null);
 
   const fileImageRef = useRef<HTMLInputElement>(null);
   const fileResumeRef = useRef<HTMLInputElement>(null);
@@ -77,49 +78,51 @@ export default function ProfilePage() {
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
-        >
-          <div className="absolute bottom-[-3rem] left-8">
-            <div className="text-center space-y-4">
-              <div className="relative w-32 h-32 mx-auto">
-                <img
-                  src={profileImage || "/placeholder_user.png"}
-                  alt="Profile"
-                  className="rounded-full object-cover w-full h-full border border-[#B3C8CF]"
-                />
-                <button
-                  type="button"
-                  className="absolute bottom-0 right-0 bg-[#89A8B2] text-white rounded-full p-1 hover:bg-[#7a98a1]"
-                  onClick={() => fileImageRef.current?.click()}
-                >
-                  <Pencil size={16} />
-                </button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  ref={fileImageRef}
-                  hidden
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        ></div>
 
         {/* Name + Location + Edit Button */}
-        <div className="bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mt-10">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{userName}</h1>
-              <p className="text-sm text-gray-600">
-                {userLocation || "Location not provided"}
-              </p>
+        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
+          {/* Profile Image Overlapping */}
+          <div className="absolute -top-16 left-8">
+            <div className="relative w-32 h-32">
+              <img
+                src={profileImage || "/placeholder_user.png"}
+                alt="Profile"
+                className="rounded-full object-cover w-full h-full border-6 border-white"
+              />
+              <button
+                type="button"
+                className="absolute bottom-0 right-0 bg-[#89A8B2] text-white rounded-full p-1 hover:bg-[#7a98a1]"
+                onClick={() => fileImageRef.current?.click()}
+              >
+                <Pencil size={16} />
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                ref={fileImageRef}
+                hidden
+              />
             </div>
-            <button
-              onClick={() => setEditOpen(true)}
-              className="mt-4 md:mt-0 inline-flex items-center gap-2 bg-[#89A8B2] text-white px-4 py-2 rounded hover:bg-[#7a98a1]"
-            >
-              <Pencil size={16} /> Edit Profile
-            </button>
+          </div>
+
+          {/* Name + Location (with margin for the photo) */}
+
+          {/* Edit Button far right */}
+          <button
+            onClick={() => setEditOpen(true)}
+            className="ml-auto bg-[#89A8B2] text-white rounded-full p-2 hover:bg-[#7a98a1] transition self-start"
+            aria-label="Edit Profile"
+            title="Edit Profile"
+          >
+            <Pencil size={18} />
+          </button>
+          <div className="flex flex-col justify-center mt-4">
+            <h1 className="text-2xl font-bold text-gray-800">{userName}</h1>
+            <p className="text-sm text-gray-600">
+              {userLocation || "Location not provided"}
+            </p>
           </div>
         </div>
 
@@ -197,15 +200,22 @@ export default function ProfilePage() {
       >
         <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white max-w-xl w-full rounded-xl p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-            <ProfileForm />
-            <div className="text-right mt-4">
+          <div className="bg-white max-w-xl w-full rounded-xl shadow-xl max-h-[90vh] overflow-y-auto relative">
+            {/* Title + Close Button */}
+            <div className="flex justify-between items-center border-b px-6 py-4">
+              <h2 className="text-2xl font-bold text-gray-800">Edit Profile</h2>
               <button
                 onClick={() => setEditOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="text-gray-500 hover:text-gray-700 border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center transition"
+                aria-label="Close"
               >
-                Close
+                <X className="w-4 h-4" />
               </button>
+            </div>
+
+            {/* Form Content */}
+            <div className="px-6 pt-4 pb-6">
+              <ProfileForm />
             </div>
           </div>
         </div>
