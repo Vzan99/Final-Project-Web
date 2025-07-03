@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import API from "@/lib/axios";
 
 type Question = {
@@ -9,11 +9,28 @@ type Question = {
   answer: number;
 };
 
-type AssessmentFormProps = {
-  onCreated?: () => void;
+type Assessment = {
+  id: string;
+  name: string;
+  description?: string;
+  passingScore?: number;
+  timeLimit?: number;
+  questions: Question[];
 };
 
-export default function AssessmentForm({ onCreated }: AssessmentFormProps) {
+type AssessmentFormProps = {
+  onCreated?: () => void;
+  editData?: Assessment | null;
+  onFinishEdit?: () => void;
+};
+
+export default function AssessmentForm({
+  onCreated,
+  editData,
+  onFinishEdit,
+}: AssessmentFormProps) {
+  const isEdit = !!editData;
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [passingScore, setPassingScore] = useState(75);
@@ -21,6 +38,17 @@ export default function AssessmentForm({ onCreated }: AssessmentFormProps) {
   const [questions, setQuestions] = useState<Question[]>([
     { question: "", options: ["", "", "", ""], answer: 0 },
   ]);
+
+  // Load data saat edit
+  useEffect(() => {
+    if (editData) {
+      setName(editData.name || "");
+      setDescription(editData.description || "");
+      setPassingScore(editData.passingScore || 75);
+      setTimeLimit(editData.timeLimit || 30);
+      setQuestions(editData.questions || []);
+    }
+  }, [editData]);
 
   const handleAddQuestion = () => {
     setQuestions([
@@ -57,17 +85,24 @@ export default function AssessmentForm({ onCreated }: AssessmentFormProps) {
       return alert("All answer options must be filled.");
     }
 
-    try {
-      await API.post("/assessments", {
-        name,
-        description,
-        passingScore,
-        timeLimit,
-        questions,
-      });
+    const payload = {
+      name,
+      description,
+      passingScore,
+      timeLimit,
+      questions,
+    };
 
-      alert("Assessment created!");
-      onCreated?.(); // Notify parent
+    try {
+      if (isEdit && editData) {
+        await API.patch(`/assessments/${editData.id}`, payload);
+        alert("Assessment updated!");
+        onFinishEdit?.();
+      } else {
+        await API.post("/assessments", payload);
+        alert("Assessment created!");
+        onCreated?.();
+      }
 
       // Reset form
       setName("");
@@ -77,13 +112,15 @@ export default function AssessmentForm({ onCreated }: AssessmentFormProps) {
       setQuestions([{ question: "", options: ["", "", "", ""], answer: 0 }]);
     } catch (err) {
       console.error(err);
-      alert("Failed to create assessment.");
+      alert("Failed to submit assessment.");
     }
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Create Assessment</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {isEdit ? "Edit Assessment" : "Create Assessment"}
+      </h1>
 
       <div className="space-y-4">
         <input
@@ -170,8 +207,16 @@ export default function AssessmentForm({ onCreated }: AssessmentFormProps) {
             onClick={handleSubmit}
             className="bg-blue-600 text-white px-4 py-2 rounded"
           >
-            Submit Assessment
+            {isEdit ? "Update Assessment" : "Submit Assessment"}
           </button>
+          {isEdit && (
+            <button
+              onClick={onFinishEdit}
+              className="bg-gray-300 text-black px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
     </div>
