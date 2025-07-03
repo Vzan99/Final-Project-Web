@@ -3,18 +3,33 @@
 import { useEffect, useState } from "react";
 import AssessmentForm from "@/components/assessment/AssessmentForm";
 import API from "@/lib/axios";
+import clsx from "clsx";
 
 export default function DeveloperAssessmentPage() {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewing, setViewing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<any | null>(null);
 
   const fetchAssessments = async () => {
     try {
       const res = await API.get("/assessments/developer/all");
       setAssessments(res.data);
     } catch (err) {
+      console.error("Failed to fetch assessments", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this assessment?")) return;
+
+    try {
+      await API.delete(`/assessments/${id}`);
+      fetchAssessments();
+    } catch (err) {
+      alert("Failed to delete assessment");
     }
   };
 
@@ -24,7 +39,11 @@ export default function DeveloperAssessmentPage() {
 
   return (
     <main className="p-6 max-w-5xl mx-auto space-y-12">
-      <AssessmentForm onCreated={fetchAssessments} />
+      <AssessmentForm
+        onCreated={fetchAssessments}
+        editData={editing}
+        onFinishEdit={() => setEditing(null)}
+      />
 
       <section>
         <h2 className="text-xl font-semibold mb-4">Existing Assessments</h2>
@@ -45,11 +64,72 @@ export default function DeveloperAssessmentPage() {
                   Time limit: {a.timeLimit} minutes | Passing score:{" "}
                   {a.passingScore ?? 75}
                 </p>
+
+                <div className="mt-2 flex gap-2 text-sm">
+                  <button
+                    onClick={() => setViewing(a)}
+                    className="text-blue-600 hover:underline"
+                  >
+                    View
+                  </button>
+                  <button
+                    onClick={() => setEditing(a)}
+                    className="text-yellow-600 hover:underline"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(a.id)}
+                    className="text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {/* View Modal */}
+      {viewing && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white max-w-xl w-full rounded-xl p-6 relative">
+            <button
+              onClick={() => setViewing(null)}
+              className="absolute top-2 right-4 text-gray-500 hover:text-black text-xl"
+            >
+              &times;
+            </button>
+            <h2 className="text-xl font-bold mb-2">{viewing.name}</h2>
+            <p className="mb-2 text-gray-700">{viewing.description}</p>
+            <p className="text-sm text-gray-600 mb-4">
+              Time Limit: {viewing.timeLimit} mins | Passing Score:{" "}
+              {viewing.passingScore}
+            </p>
+
+            <ol className="space-y-3 list-decimal ml-5">
+              {(viewing.questions || []).map((q: any, i: number) => (
+                <li key={i}>
+                  <p className="font-medium">{q.question}</p>
+                  <ul className="list-disc ml-5 text-sm text-gray-700">
+                    {q.choices?.map((choice: string, j: number) => (
+                      <li
+                        key={j}
+                        className={clsx({
+                          "font-semibold text-green-700": j === q.answer,
+                        })}
+                      >
+                        {choice}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
