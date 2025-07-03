@@ -113,7 +113,7 @@ export default function Navbar() {
                     {user.role === "USER" && (
                       <>
                         <Link
-                          href="/profile"
+                          href="/profile/user"
                           className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                           onClick={() => setProfileOpen(false)}
                         >
@@ -145,7 +145,7 @@ export default function Navbar() {
                     {user.role === "ADMIN" && (
                       <>
                         <Link
-                          href="/profile"
+                          href="/profile/admin"
                           className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                           onClick={() => setProfileOpen(false)}
                         >
