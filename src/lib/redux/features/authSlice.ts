@@ -16,6 +16,7 @@ interface UserProfile {
     photoUrl: string | null;
     resumeUrl: string | null;
     skills: string[];
+    about: string | null;
   } | null;
   certificates: {
     id: string;
