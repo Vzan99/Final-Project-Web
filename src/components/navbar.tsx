@@ -375,7 +375,7 @@ export default function Navbar() {
                   )}
                   {user.role === "DEVELOPER" && (
                     <Link
-                      href="/developer/dashboard"
+                      href="/developer"
                       className="block text-sm hover:text-[#497187]"
                       onClick={() => {
                         setProfileOpen(false);
