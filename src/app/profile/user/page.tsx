@@ -44,6 +44,7 @@ export default function UserProfilePage() {
 
   const fileImageRef = useRef<HTMLInputElement>(null);
   const fileResumeRef = useRef<HTMLInputElement>(null);
+  const fileBannerRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     dispatch(fetchUser());
@@ -52,21 +53,10 @@ export default function UserProfilePage() {
   const profileImageUrl =
     getCloudinaryImageUrl(profile?.profile?.photoUrl) ||
     "/placeholder_user.png";
-
+  const bannerImageUrl =
+    getCloudinaryImageUrl(profile?.profile?.bannerUrl) ||
+    "/placeholder_banner.png";
   const resumeFilename = profile?.profile?.resumeUrl || null;
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const resumeDownloadUrl = resumeFilename
-    ? `https://res.cloudinary.com/${cloudName}/raw/upload/${resumeFilename}`
-    : null;
-
-  const closeAllModals = () => {
-    setEditOpen(false);
-    setContactEditOpen(false);
-    setBasicInfoEditOpen(false);
-    setEducationEditOpen(false);
-    setSkillsEditOpen(false);
-    setExperienceEditOpen(false);
-  };
 
   const handleSuccess = (
     dialogSetter: React.Dispatch<React.SetStateAction<boolean>>
@@ -125,6 +115,30 @@ export default function UserProfilePage() {
     }
   };
 
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    setUploadLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("banner", file);
+
+      await API.put("/profile/edit/banner", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      await dispatch(fetchUser());
+    } catch (err) {
+      console.error("Banner upload failed:", err);
+      setUploadError("Failed to upload banner. Please try again.");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
   if (loading || !profile) {
     return (
       <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black max-w-5xl mx-auto px-4 md:px-0">
@@ -160,31 +174,51 @@ export default function UserProfilePage() {
   return (
     <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black">
       <div className="max-w-5xl mx-auto px-4 md:px-0">
-        <div
-          className="relative bg-white rounded-t-xl h-48"
-          style={{
-            backgroundImage: "url('/placeholder_banner.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
+        {/* Banner */}
+        <div className="relative bg-white rounded-t-xl h-48 group overflow-hidden">
+          <button
+            type="button"
+            onClick={() => fileBannerRef.current?.click()}
+            className="absolute inset-0 w-full h-full z-10"
+            disabled={uploadLoading}
+            aria-label="Change Banner Image"
+          />
+          <div
+            className={`w-full h-full bg-cover bg-center transition-opacity duration-300 ${
+              uploadLoading ? "opacity-50 animate-pulse" : ""
+            }`}
+            style={{
+              backgroundImage: `url('${bannerImageUrl}')`,
+            }}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileBannerRef}
+            onChange={handleBannerUpload}
+            hidden
+          />
+        </div>
 
+        {/* Profile Card */}
         <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
-          <div className="absolute -top-16 left-8">
-            <div className="relative w-32 h-32">
-              <img
-                src={profileImageUrl}
-                alt="Profile"
-                className="rounded-full object-cover w-full h-full border-6 border-white"
-              />
+          <div className="absolute -top-16 left-0 right-0 md:left-8 md:right-auto">
+            <div className="relative w-32 h-32 mx-auto md:mx-0 cursor-pointer">
               <button
                 type="button"
-                className="absolute bottom-0 right-0 bg-[#89A8B2] text-white rounded-full p-1 hover:bg-[#7a98a1]"
                 onClick={() => fileImageRef.current?.click()}
-                title="Change Profile Picture"
                 disabled={uploadLoading}
+                className={`rounded-full overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer ${
+                  uploadLoading ? "animate-pulse" : ""
+                }`}
+                aria-label="Change Profile Picture"
               >
-                <Pencil size={16} />
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="object-cover w-full h-full"
+                  draggable={false}
+                />
               </button>
               <input
                 type="file"
@@ -194,11 +228,11 @@ export default function UserProfilePage() {
                 hidden
               />
             </div>
-            {uploadLoading && (
-              <p className="text-sm text-blue-600 mt-2">Uploading photo...</p>
-            )}
+
             {uploadError && (
-              <p className="text-sm text-red-600 mt-2">{uploadError}</p>
+              <p className="text-sm text-red-600 mt-2 text-center md:text-left">
+                {uploadError}
+              </p>
             )}
           </div>
 
@@ -229,6 +263,7 @@ export default function UserProfilePage() {
           </div>
         </div>
 
+        {/* Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-6">
             <SectionCard
@@ -252,12 +287,11 @@ export default function UserProfilePage() {
               </p>
             </SectionCard>
 
-            {/* Resume Upload/Download */}
+            {/* Resume */}
             <div className="bg-white rounded-xl shadow p-6 text-center">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Resume
               </h2>
-
               <input
                 type="file"
                 accept=".pdf,.doc,.docx"
@@ -265,14 +299,19 @@ export default function UserProfilePage() {
                 onChange={handleResumeUpload}
                 hidden
               />
-
-              <button
-                onClick={() => fileResumeRef.current?.click()}
-                className="bg-[#89A8B2] text-white px-4 py-2 rounded hover:bg-[#7a98a1] mb-2"
-              >
-                {resumeFilename ? "Change Resume" : "Upload Resume"}
-              </button>
-
+              {uploadLoading ? (
+                <div className="h-10 w-40 bg-gray-300 rounded mx-auto animate-pulse mb-2 flex items-center justify-center text-gray-700 font-medium">
+                  Uploading...
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileResumeRef.current?.click()}
+                  className="bg-[#89A8B2] text-white px-4 py-2 rounded mb-2 hover:bg-[#7a98a1]"
+                  disabled={uploadLoading}
+                >
+                  {resumeFilename ? "Change Resume" : "Upload Resume"}
+                </button>
+              )}
               {resumeFilename && (
                 <>
                   <p className="text-sm text-[#89A8B2] mb-2">
@@ -378,6 +417,7 @@ export default function UserProfilePage() {
         onClose={() => setExperienceEditOpen(false)}
         title="Edit Experience"
       >
+        {" "}
         <ExperienceForm
           initialData={profile}
           onSuccess={handleSuccess(setExperienceEditOpen)}

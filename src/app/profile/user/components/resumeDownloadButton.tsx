@@ -3,7 +3,7 @@
 import React from "react";
 
 type Props = {
-  resumeUrl: string | null | undefined; // e.g. "meitlorywraf0eovr4rc.docx"
+  resumeUrl: string | null | undefined;
 };
 
 export default function ResumeDownloadButton({ resumeUrl }: Props) {
@@ -11,27 +11,21 @@ export default function ResumeDownloadButton({ resumeUrl }: Props) {
     if (!resumeUrl) return alert("No resume available to download");
 
     try {
-      // Separate public ID and extension
-      const publicId = resumeUrl.split(".")[0]; // e.g. "meitlorywraf0eovr4rc"
-      const ext = resumeUrl.split(".")[1] || "pdf"; // fallback to pdf if missing
+      const publicId = resumeUrl.split(".")[0];
+      const ext = resumeUrl.split(".")[1] || "pdf";
 
-      // Cloudinary URL without extension
       const url = `https://res.cloudinary.com/ddunl3ta7/raw/upload/${publicId}`;
-
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to download file");
-
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
 
-      // Create a temporary <a> element to trigger download with extension
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `resume.${ext}`; // Set download filename with extension
+      link.download = `resume.${ext}`;
       document.body.appendChild(link);
       link.click();
 
-      // Clean up
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {

@@ -146,11 +146,11 @@ export default function Navbar() {
                         Applied Jobs
                       </Link>
                       <Link
-                        href="/subscriptions"
+                        href="/subscription"
                         className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
                         onClick={() => setProfileOpen(false)}
                       >
-                        Subscriptions
+                        Subscription
                       </Link>
                       <Link
                         href="/settings"

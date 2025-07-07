@@ -1,6 +1,19 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import API from "@/lib/axios";
 
+interface Company {
+  id: string;
+  name: string;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  industry?: string | null;
+  description?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 interface UserProfile {
   id: string;
   name: string;
@@ -14,10 +27,12 @@ interface UserProfile {
     education: string | null;
     address: string | null;
     photoUrl: string | null;
+    bannerUrl?: string | null;
     resumeUrl: string | null;
     skills: string[];
     about: string | null;
   } | null;
+  company?: Company | null;
   certificates: {
     id: string;
     certificateUrl: string;
