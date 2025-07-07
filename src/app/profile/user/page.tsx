@@ -1,101 +1,224 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Dialog } from "@headlessui/react";
-import { Pencil } from "lucide-react";
-import ProfileForm from "./profileForm";
+import { useEffect, useState, useRef } from "react";
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks";
+import { fetchUser } from "@/lib/redux/features/authSlice";
 import API from "@/lib/axios";
-import { X } from "lucide-react";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
-type UserProfileData = {
-  id: string;
-  name: string;
-  email: string;
-  profile?: {
-    birthDate: string;
-    gender: string;
-    education: string;
-    address: string;
-    photoUrl?: string;
-    resumeUrl?: string;
-    skills: string[];
-  };
-  certificates?: any[];
-};
+import ProfileForm from "./components/forms/profileForm";
+import ContactForm from "./components/forms/contactForm";
+import BasicInfoForm from "./components/forms/basicInfoForm";
+import EducationForm from "./components/forms/educationForm";
+import SkillsForm from "./components/forms/skillsForm";
+import ExperienceForm from "./components/forms/experienceForm";
+
+import SectionCard from "./components/sectionCard";
+import EditDialog from "./components/editDialog";
+import { Pencil } from "lucide-react";
+import ResumeDownloadButton from "./components/resumeDownloadButton";
+
+function SkeletonBlock({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`animate-pulse bg-gray-300 rounded ${className}`}
+      aria-hidden="true"
+    />
+  );
+}
 
 export default function UserProfilePage() {
+  const dispatch = useAppDispatch();
+  const profile = useAppSelector((state) => state.auth.user);
+  const loading = useAppSelector((state) => state.auth.loading);
+
   const [isEditOpen, setEditOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [resumeFilename, setResumeFilename] = useState<string | null>(null);
-  const [profile, setProfile] = useState<UserProfileData | null>(null);
+  const [isContactEditOpen, setContactEditOpen] = useState(false);
+  const [isBasicInfoEditOpen, setBasicInfoEditOpen] = useState(false);
+  const [isEducationEditOpen, setEducationEditOpen] = useState(false);
+  const [isSkillsEditOpen, setSkillsEditOpen] = useState(false);
+  const [isExperienceEditOpen, setExperienceEditOpen] = useState(false);
+
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fileImageRef = useRef<HTMLInputElement>(null);
   const fileResumeRef = useRef<HTMLInputElement>(null);
+  const fileBannerRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await API.get("/profile");
-        const data = res.data.data;
-        setProfile(data);
+    dispatch(fetchUser());
+  }, [dispatch]);
 
-        if (data.profile?.photoUrl) {
-          setProfileImage(data.profile.photoUrl);
-        }
+  const profileImageUrl =
+    getCloudinaryImageUrl(profile?.profile?.photoUrl) ||
+    "/placeholder_user.png";
+  const bannerImageUrl =
+    getCloudinaryImageUrl(profile?.profile?.bannerUrl) ||
+    "/placeholder_banner.png";
+  const resumeFilename = profile?.profile?.resumeUrl || null;
 
-        if (data.profile?.resumeUrl) {
-          const filename = data.profile.resumeUrl.split("/").pop() || null;
-          setResumeFilename(filename);
-        }
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-      }
+  const handleSuccess = (
+    dialogSetter: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    return () => {
+      dispatch(fetchUser());
+      dialogSetter(false);
     };
-    fetchProfile();
-  }, []);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setProfileImage(URL.createObjectURL(file));
   };
 
-  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setResumeFilename(file.name);
+    if (!file) return;
+
+    setUploadError(null);
+    setUploadLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+
+      await API.put("/profile/edit/resume", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      await dispatch(fetchUser());
+    } catch (err) {
+      console.error("Resume upload failed:", err);
+      setUploadError("Failed to upload resume. Please try again.");
+    } finally {
+      setUploadLoading(false);
+    }
   };
 
-  const userName = profile?.name || "";
-  const userLocation = profile?.profile?.address || "";
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    setUploadLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      await API.put("/profile/edit/photo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      await dispatch(fetchUser());
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setUploadError("Failed to upload photo. Please try again.");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    setUploadLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("banner", file);
+
+      await API.put("/profile/edit/banner", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      await dispatch(fetchUser());
+    } catch (err) {
+      console.error("Banner upload failed:", err);
+      setUploadError("Failed to upload banner. Please try again.");
+    } finally {
+      setUploadLoading(false);
+    }
+  };
+
+  if (loading || !profile) {
+    return (
+      <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black max-w-5xl mx-auto px-4 md:px-0">
+        <SkeletonBlock className="rounded-t-xl h-48 mb-10" />
+        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
+          <div className="absolute -top-16 left-8">
+            <SkeletonBlock className="w-32 h-32 rounded-full border-6 border-white" />
+          </div>
+          <SkeletonBlock className="h-10 w-40 ml-auto mb-4 rounded-full" />
+          <SkeletonBlock className="h-8 w-60 mb-2 rounded" />
+          <SkeletonBlock className="h-4 w-40 rounded" />
+          <div className="mt-4">
+            <SkeletonBlock className="h-6 w-32 mb-1 rounded" />
+            <SkeletonBlock className="h-12 w-full rounded" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonBlock key={i} className="h-32 rounded-xl" />
+            ))}
+          </div>
+          <div className="md:col-span-2 space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <SkeletonBlock key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black">
       <div className="max-w-5xl mx-auto px-4 md:px-0">
-        {/* Top Section: Banner + Profile Image */}
-        <div
-          className="relative bg-white rounded-t-xl h-48"
-          style={{
-            backgroundImage: "url('/placeholder_banner.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        ></div>
+        {/* Banner */}
+        <div className="relative bg-white rounded-t-xl h-48 group overflow-hidden">
+          <button
+            type="button"
+            onClick={() => fileBannerRef.current?.click()}
+            className="absolute inset-0 w-full h-full z-10"
+            disabled={uploadLoading}
+            aria-label="Change Banner Image"
+          />
+          <div
+            className={`w-full h-full bg-cover bg-center transition-opacity duration-300 ${
+              uploadLoading ? "opacity-50 animate-pulse" : ""
+            }`}
+            style={{
+              backgroundImage: `url('${bannerImageUrl}')`,
+            }}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileBannerRef}
+            onChange={handleBannerUpload}
+            hidden
+          />
+        </div>
 
-        {/* Name + Location + Edit Button */}
+        {/* Profile Card */}
         <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
-          {/* Profile Image Overlapping */}
-          <div className="absolute -top-16 left-8">
-            <div className="relative w-32 h-32">
-              <img
-                src={profileImage || "/placeholder_user.png"}
-                alt="Profile"
-                className="rounded-full object-cover w-full h-full border-6 border-white"
-              />
+          <div className="absolute -top-16 left-0 right-0 md:left-8 md:right-auto">
+            <div className="relative w-32 h-32 mx-auto md:mx-0 cursor-pointer">
               <button
                 type="button"
-                className="absolute bottom-0 right-0 bg-[#89A8B2] text-white rounded-full p-1 hover:bg-[#7a98a1]"
                 onClick={() => fileImageRef.current?.click()}
+                disabled={uploadLoading}
+                className={`rounded-full overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer ${
+                  uploadLoading ? "animate-pulse" : ""
+                }`}
+                aria-label="Change Profile Picture"
               >
-                <Pencil size={16} />
+                <img
+                  src={profileImageUrl}
+                  alt="Profile"
+                  className="object-cover w-full h-full"
+                  draggable={false}
+                />
               </button>
               <input
                 type="file"
@@ -105,32 +228,66 @@ export default function UserProfilePage() {
                 hidden
               />
             </div>
+
+            {uploadError && (
+              <p className="text-sm text-red-600 mt-2 text-center md:text-left">
+                {uploadError}
+              </p>
+            )}
           </div>
 
-          {/* Name + Location (with margin for the photo) */}
-
-          {/* Edit Button far right */}
           <button
             onClick={() => setEditOpen(true)}
             className="ml-auto bg-[#89A8B2] text-white rounded-full p-2 hover:bg-[#7a98a1] transition self-start"
             aria-label="Edit Profile"
-            title="Edit Profile"
           >
             <Pencil size={18} />
           </button>
+
           <div className="flex flex-col justify-center mt-4">
-            <h1 className="text-2xl font-bold text-gray-800">{userName}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              {profile.name || "Unnamed User"}
+            </h1>
             <p className="text-sm text-gray-600">
-              {userLocation || "Location not provided"}
+              {profile.profile?.address || "Location not provided"}
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <h2 className="text-lg font-semibold text-gray-700 mb-1">
+              About Me
+            </h2>
+            <p className="text-gray-600">
+              {profile.profile?.about || "No description provided."}
             </p>
           </div>
         </div>
 
-        {/* Grid Section */}
+        {/* Sections */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left Sidebar */}
           <div className="space-y-6">
-            {/* Resume Upload */}
+            <SectionCard
+              title="Contact Info"
+              onEdit={() => setContactEditOpen(true)}
+            >
+              <p>Email: {profile.email}</p>
+              <p>Phone: {profile.phone || "Not provided"}</p>
+            </SectionCard>
+
+            <SectionCard
+              title="Basic Info"
+              onEdit={() => setBasicInfoEditOpen(true)}
+            >
+              <p>Gender: {profile.profile?.gender || "Not specified"}</p>
+              <p>
+                Birth Date:{" "}
+                {profile.profile?.birthDate
+                  ? new Date(profile.profile.birthDate).toLocaleDateString()
+                  : "Not specified"}
+              </p>
+            </SectionCard>
+
+            {/* Resume */}
             <div className="bg-white rounded-xl shadow p-6 text-center">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Resume
@@ -142,84 +299,131 @@ export default function UserProfilePage() {
                 onChange={handleResumeUpload}
                 hidden
               />
-              <button
-                onClick={() => fileResumeRef.current?.click()}
-                className="bg-[#89A8B2] text-white px-4 py-2 rounded hover:bg-[#7a98a1]"
-              >
-                {resumeFilename ? "Change Resume" : "Upload Resume"}
-              </button>
-              {resumeFilename && (
-                <p className="text-sm mt-2 text-[#89A8B2]">{resumeFilename}</p>
+              {uploadLoading ? (
+                <div className="h-10 w-40 bg-gray-300 rounded mx-auto animate-pulse mb-2 flex items-center justify-center text-gray-700 font-medium">
+                  Uploading...
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileResumeRef.current?.click()}
+                  className="bg-[#89A8B2] text-white px-4 py-2 rounded mb-2 hover:bg-[#7a98a1]"
+                  disabled={uploadLoading}
+                >
+                  {resumeFilename ? "Change Resume" : "Upload Resume"}
+                </button>
               )}
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Contact Info
-              </h2>
-              <p className="text-sm text-gray-600">Edit your contact details</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                Activity
-              </h2>
-              <p className="text-sm text-gray-600">You haven't posted yet</p>
+              {resumeFilename && (
+                <>
+                  <p className="text-sm text-[#89A8B2] mb-2">
+                    {resumeFilename}
+                  </p>
+                  <ResumeDownloadButton
+                    resumeUrl={profile?.profile?.resumeUrl}
+                  />
+                </>
+              )}
             </div>
           </div>
 
-          {/* Right Main Section */}
           <div className="md:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Experience
-              </h2>
-              <p className="text-gray-600 text-sm">No experience added yet.</p>
-            </div>
+            <SectionCard
+              title="Experience"
+              onEdit={() => setExperienceEditOpen(true)}
+            >
+              <p>No experience added yet.</p>
+            </SectionCard>
 
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Skills</h2>
-              <p className="text-gray-600 text-sm">Add your key skills here.</p>
-            </div>
+            <SectionCard title="Skills" onEdit={() => setSkillsEditOpen(true)}>
+              <p>
+                {profile.profile?.skills?.length
+                  ? profile.profile.skills.join(", ")
+                  : "Add your key skills here."}
+              </p>
+            </SectionCard>
 
-            <div className="bg-white rounded-xl shadow p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Education
-              </h2>
-              <p className="text-gray-600 text-sm">No education added yet.</p>
-            </div>
+            <SectionCard
+              title="Education"
+              onEdit={() => setEducationEditOpen(true)}
+            >
+              <p>{profile.profile?.education || "No education added yet."}</p>
+            </SectionCard>
           </div>
         </div>
       </div>
 
-      {/* Profile Form Dialog */}
-      <Dialog
+      {/* Modals */}
+      <EditDialog
         open={isEditOpen}
         onClose={() => setEditOpen(false)}
-        className="relative z-50"
+        title="Edit Profile"
       >
-        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white max-w-xl w-full rounded-xl shadow-xl max-h-[90vh] overflow-y-auto relative">
-            {/* Title + Close Button */}
-            <div className="flex justify-between items-center border-b px-6 py-4">
-              <h2 className="text-2xl font-bold text-gray-800">Edit Profile</h2>
-              <button
-                onClick={() => setEditOpen(false)}
-                className="text-gray-500 hover:text-gray-700 border border-gray-300 rounded-full w-8 h-8 flex items-center justify-center transition"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+        <ProfileForm
+          initialData={profile}
+          onSuccess={handleSuccess(setEditOpen)}
+          onCancel={() => setEditOpen(false)}
+        />
+      </EditDialog>
 
-            {/* Form Content */}
-            <div className="px-6 pt-4 pb-6">
-              <ProfileForm />
-            </div>
-          </div>
-        </div>
-      </Dialog>
+      <EditDialog
+        open={isContactEditOpen}
+        onClose={() => setContactEditOpen(false)}
+        title="Edit Contact Info"
+      >
+        <ContactForm
+          initialData={profile}
+          onSuccess={handleSuccess(setContactEditOpen)}
+          onCancel={() => setContactEditOpen(false)}
+        />
+      </EditDialog>
+
+      <EditDialog
+        open={isBasicInfoEditOpen}
+        onClose={() => setBasicInfoEditOpen(false)}
+        title="Edit Basic Info"
+      >
+        <BasicInfoForm
+          initialData={profile}
+          onSuccess={handleSuccess(setBasicInfoEditOpen)}
+          onCancel={() => setBasicInfoEditOpen(false)}
+        />
+      </EditDialog>
+
+      <EditDialog
+        open={isEducationEditOpen}
+        onClose={() => setEducationEditOpen(false)}
+        title="Edit Education"
+      >
+        <EducationForm
+          initialData={profile}
+          onSuccess={handleSuccess(setEducationEditOpen)}
+          onCancel={() => setEducationEditOpen(false)}
+        />
+      </EditDialog>
+
+      <EditDialog
+        open={isSkillsEditOpen}
+        onClose={() => setSkillsEditOpen(false)}
+        title="Edit Skills"
+      >
+        <SkillsForm
+          initialData={profile}
+          onSuccess={handleSuccess(setSkillsEditOpen)}
+          onCancel={() => setSkillsEditOpen(false)}
+        />
+      </EditDialog>
+
+      <EditDialog
+        open={isExperienceEditOpen}
+        onClose={() => setExperienceEditOpen(false)}
+        title="Edit Experience"
+      >
+        {" "}
+        <ExperienceForm
+          initialData={profile}
+          onSuccess={handleSuccess(setExperienceEditOpen)}
+          onCancel={() => setExperienceEditOpen(false)}
+        />
+      </EditDialog>
     </main>
   );
 }

@@ -27,12 +27,10 @@ export default function VerifyEmailPage() {
         if (res.status === 200) {
           setMessage("Email verified successfully! Redirecting to login...");
 
-          // Call async thunk that logs out user from backend & resets redux state
           await dispatch(logoutUser()).unwrap();
 
           setVerified(true);
 
-          // Redirect after a short delay
           setTimeout(() => {
             router.push("/auth/login");
           }, 2000);

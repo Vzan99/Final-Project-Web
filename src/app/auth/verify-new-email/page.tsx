@@ -26,12 +26,10 @@ export default function VerifyNewEmailPage() {
         if (res.status === 200) {
           setMessage("New email verified successfully! Please log in again.");
 
-          // Log out user and clear redux auth state
           await dispatch(logoutUser()).unwrap();
 
           setVerified(true);
 
-          // Redirect after delay
           setTimeout(() => {
             router.push("/auth/login");
           }, 2000);
