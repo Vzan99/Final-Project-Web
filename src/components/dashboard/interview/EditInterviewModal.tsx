@@ -40,16 +40,16 @@ export default function EditInterviewModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow p-6 w-full max-w-lg relative">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-lg"
         >
           ✕
         </button>
 
-        <h2 className="text-xl font-bold mb-4">Edit Interview</h2>
+        <h2 className="text-2xl font-bold mb-6">Edit Interview</h2>
 
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>
@@ -61,7 +61,7 @@ export default function EditInterviewModal({
               name="dateTime"
               value={formik.values.dateTime}
               onChange={formik.handleChange}
-              className="w-full border px-3 py-2 rounded"
+              className="w-full border px-3 py-2 rounded focus:ring-[#6096B4] focus:border-[#6096B4]"
             />
           </div>
 
@@ -74,7 +74,7 @@ export default function EditInterviewModal({
               name="location"
               value={formik.values.location}
               onChange={formik.handleChange}
-              className="w-full border px-3 py-2 rounded"
+              className="w-full border px-3 py-2 rounded focus:ring-[#6096B4] focus:border-[#6096B4]"
             />
           </div>
 
@@ -86,22 +86,22 @@ export default function EditInterviewModal({
               name="notes"
               value={formik.values.notes}
               onChange={formik.handleChange}
-              className="w-full border px-3 py-2 rounded"
+              className="w-full border px-3 py-2 rounded focus:ring-[#6096B4] focus:border-[#6096B4]"
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded"
+              className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
             >
               {loading ? "Menyimpan..." : "Simpan Perubahan"}
             </button>

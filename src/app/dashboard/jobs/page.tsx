@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "react-toastify";
 import API from "@/lib/axios";
 import { useAppSelector } from "@/lib/redux/hooks";
 import JobCard from "@/components/dashboard/jobs/JobCard";
-import Link from "next/link";
-import { toast } from "react-toastify";
 
 interface Job {
   id: string;
@@ -17,18 +17,20 @@ interface Job {
   deadline: string;
   experienceLevel: string;
   jobType: string;
+  bannerUrl?: string;
   category: {
     name: string;
   };
 }
 
 export default function JobManagementPage() {
-  const { user, loading } = useAppSelector((state) => state.auth);
   const router = useRouter();
+  const { user, loading } = useAppSelector((state) => state.auth);
 
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
-  const [query, setQuery] = useState({
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [filters, setFilters] = useState({
     title: "",
     status: "",
     page: 1,
@@ -40,32 +42,6 @@ export default function JobManagementPage() {
     lastPage: 1,
   });
 
-  const fetchJobs = async () => {
-    setLoadingJobs(true);
-    try {
-      const res = await API.get("/jobs/", { params: query });
-
-      const jobList = res.data?.jobs;
-      const total = res.data?.total;
-      const lastPage = res.data?.lastPage;
-
-      if (Array.isArray(jobList)) {
-        setJobs(jobList);
-        setPagination({ total, lastPage });
-      } else {
-        console.warn("Unexpected jobs response:", res.data);
-        setJobs([]);
-        setPagination({ total: 0, lastPage: 1 });
-      }
-    } catch (err) {
-      console.error("Error fetching jobs:", err);
-      setJobs([]);
-      setPagination({ total: 0, lastPage: 1 });
-    } finally {
-      setLoadingJobs(false);
-    }
-  };
-
   useEffect(() => {
     if (!loading && user?.role !== "ADMIN") {
       router.push("/login");
@@ -73,18 +49,33 @@ export default function JobManagementPage() {
   }, [user, loading]);
 
   useEffect(() => {
-    if (user?.role === "ADMIN") {
-      fetchJobs();
+    if (user?.role === "ADMIN") fetchJobs();
+  }, [user, filters]);
+
+  const fetchJobs = async () => {
+    setIsLoading(true);
+    try {
+      const res = await API.get("/jobs", { params: filters });
+      const { jobs: data, total, lastPage } = res.data;
+
+      setJobs(Array.isArray(data) ? data : []);
+      setPagination({ total, lastPage });
+    } catch (error) {
+      console.error("Failed to fetch jobs:", error);
+      setJobs([]);
+      setPagination({ total: 0, lastPage: 1 });
+    } finally {
+      setIsLoading(false);
     }
-  }, [user, query]);
+  };
 
   const handlePublish = async (id: string) => {
     try {
-      await API.patch(`/jobs/${id}/publish`, { status: "PUBLISHED" });
+      await API.patch(`/jobs/${id}/publish`);
       toast.success("Job published successfully");
       fetchJobs();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to publish job");
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to publish job");
     }
   };
 
@@ -102,46 +93,45 @@ export default function JobManagementPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setQuery((prev) => ({ ...prev, [name]: value, page: 1 }));
+    setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
   };
 
-  const handlePageChange = (direction: "next" | "prev") => {
-    setQuery((prev) => ({
+  const changePage = (direction: "next" | "prev") => {
+    setFilters((prev) => ({
       ...prev,
       page: direction === "next" ? prev.page + 1 : Math.max(1, prev.page - 1),
     }));
   };
 
-  if (loading || loadingJobs) return <p>Loading...</p>;
+  if (loading || isLoading) return <p>Loading jobs...</p>;
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl font-bold">Job Management</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen">
+      <header className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
+        <h1 className="text-3xl font-bold text-[#6096B4]">Job Management</h1>
         <Link
           href="/dashboard/jobs/create"
-          className="bg-[#6096B4] text-white px-4 py-2 rounded text-sm"
+          className="bg-[#6096B4] text-white px-5 py-2 rounded-lg text-sm hover:bg-[#4d7a96] transition font-medium"
         >
           + Create Job
         </Link>
-      </div>
+      </header>
 
-      {/* Filters */}
+      {/* Filter Controls */}
       <div className="flex flex-wrap gap-3 mb-6">
         <input
           type="text"
           name="title"
-          value={query.title}
+          value={filters.title}
           onChange={handleFilterChange}
           placeholder="Search by title"
-          className="border px-3 py-1 rounded text-sm"
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full sm:w-auto"
         />
-
         <select
           name="status"
-          value={query.status}
+          value={filters.status}
           onChange={handleFilterChange}
-          className="border px-2 py-1 rounded text-sm"
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full sm:w-auto"
         >
           <option value="">All Status</option>
           <option value="DRAFT">Draft</option>
@@ -153,12 +143,12 @@ export default function JobManagementPage() {
 
       {/* Pagination Info */}
       <p className="text-sm text-gray-600 mb-4">
-        Showing page {query.page} of {pagination.lastPage} — Total{" "}
+        Showing page {filters.page} of {pagination.lastPage} — Total{" "}
         {pagination.total} jobs
       </p>
 
       {/* Job List */}
-      <div className="grid gap-4">
+      <section className="grid gap-4">
         {jobs.length === 0 ? (
           <p>No jobs found.</p>
         ) : (
@@ -172,30 +162,30 @@ export default function JobManagementPage() {
             />
           ))
         )}
-      </div>
+      </section>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center mt-6 gap-2">
+      <nav className="flex justify-center mt-6 gap-2">
         <button
-          onClick={() => handlePageChange("prev")}
-          disabled={query.page === 1}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          onClick={() => changePage("prev")}
+          disabled={filters.page === 1}
+          className="px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-100 disabled:opacity-50"
         >
           Prev
         </button>
 
-        <span className="px-3 py-1 border rounded bg-gray-100 text-sm">
-          Page {query.page} of {pagination.lastPage}
+        <span className="px-4 py-2 border rounded bg-[#EEE0C9] text-sm text-[#1a1a1a] font-medium">
+          Page {filters.page} of {pagination.lastPage}
         </span>
 
         <button
-          onClick={() => handlePageChange("next")}
-          disabled={query.page >= pagination.lastPage}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          onClick={() => changePage("next")}
+          disabled={filters.page >= pagination.lastPage}
+          className="px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-100 disabled:opacity-50"
         >
           Next
         </button>
-      </div>
+      </nav>
     </div>
   );
 }

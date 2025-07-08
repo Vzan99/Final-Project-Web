@@ -32,32 +32,35 @@ export default function ApplicantInterestsPage() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-10">
-      <h1 className="text-2xl font-bold">Applicant Interests</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+      <h1 className="text-3xl font-bold text-[#6096B4]">Applicant Interests</h1>
 
-      {/* Table */}
-      <div className="overflow-x-auto border rounded">
+      {/* Tabel */}
+      <div className="bg-white border rounded-lg shadow p-6 overflow-x-auto">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+          Tabel Minat Pelamar
+        </h2>
         <table className="min-w-full table-auto">
-          <thead className="bg-gray-100 text-left">
+          <thead className="bg-[#6096B4] text-white text-left">
             <tr>
-              <th className="px-4 py-2">Category</th>
-              <th className="px-4 py-2">Total Applications</th>
+              <th className="px-4 py-3">Kategori</th>
+              <th className="px-4 py-3">Total Aplikasi</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, i) => (
-              <tr key={i} className="border-t">
-                <td className="px-4 py-2">{item.category}</td>
-                <td className="px-4 py-2">{item.totalApplications}</td>
+              <tr key={i} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-3">{item.category}</td>
+                <td className="px-4 py-3">{item.totalApplications}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Bar Chart */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">
+      {/* Chart */}
+      <div className="bg-white border rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
           Visualisasi Minat Pelamar
         </h2>
         <ResponsiveContainer width="100%" height={400}>

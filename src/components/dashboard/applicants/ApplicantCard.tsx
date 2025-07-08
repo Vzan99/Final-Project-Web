@@ -52,25 +52,25 @@ export default function ApplicantCard({
           <button
             onClick={() => handleStatusChange("REVIEWED")}
             disabled={loading}
-            className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm transition"
           >
             Mark as Reviewed
           </button>
         );
       case "REVIEWED":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleStatusChange("INTERVIEW")}
               disabled={loading}
-              className="bg-blue-600 text-white px-3 py-1 rounded text-sm"
+              className="bg-[#6096B4] hover:bg-[#4d7a96] text-white px-4 py-1.5 rounded-md text-sm transition"
             >
               Invite to Interview
             </button>
             <button
               onClick={() => handleStatusChange("REJECTED")}
               disabled={loading}
-              className="bg-red-600 text-white px-3 py-1 rounded text-sm"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition"
             >
               Reject
             </button>
@@ -78,18 +78,18 @@ export default function ApplicantCard({
         );
       case "INTERVIEW":
         return (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => handleStatusChange("ACCEPTED")}
               disabled={loading}
-              className="bg-green-600 text-white px-3 py-1 rounded text-sm"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-md text-sm transition"
             >
               Accept
             </button>
             <button
               onClick={() => handleStatusChange("REJECTED")}
               disabled={loading}
-              className="bg-red-600 text-white px-3 py-1 rounded text-sm"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition"
             >
               Reject
             </button>
@@ -112,7 +112,7 @@ export default function ApplicantCard({
           )}
         </h2>
         <span
-          className={`text-sm font-medium px-2 py-1 rounded ${
+          className={`text-sm font-medium px-2 py-1 rounded-full ${
             applicant.status === "PENDING"
               ? "bg-yellow-100 text-yellow-800"
               : applicant.status === "REVIEWED"
@@ -150,7 +150,7 @@ export default function ApplicantCard({
       <Link
         href={applicant.cvFile}
         target="_blank"
-        className="text-blue-600 text-sm hover:underline"
+        className="text-sm text-[#6096B4] font-medium hover:underline"
       >
         View CV
       </Link>
@@ -159,7 +159,7 @@ export default function ApplicantCard({
         {renderActions()}
         <button
           onClick={() => router.push(`/dashboard/applications/${applicant.id}`)}
-          className="text-sm bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
+          className="text-sm bg-gray-500 hover:bg-gray-600 text-white px-4 py-1.5 rounded-md transition"
         >
           View Detail
         </button>

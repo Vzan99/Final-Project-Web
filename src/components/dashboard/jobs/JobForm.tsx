@@ -16,13 +16,13 @@ interface JobFormValues {
   jobType: "Full-time" | "Part-time" | "Contract";
   isRemote: boolean;
   tags: string[];
-  bannerUrl?: string;
+  banner?: File; // ✅ ganti dari bannerUrl menjadi banner (File)
   hasTest: boolean;
 }
 
 interface JobFormProps {
   initialValues?: Partial<JobFormValues>;
-  onSubmit: (values: JobFormValues) => Promise<void>;
+  onSubmit: (values: FormData) => Promise<void>;
   isEdit?: boolean;
 }
 
@@ -37,7 +37,7 @@ const defaultValues: JobFormValues = {
   jobType: "Full-time",
   isRemote: false,
   tags: [],
-  bannerUrl: "",
+  banner: undefined,
   hasTest: false,
 };
 
@@ -48,7 +48,6 @@ const textFields = [
   ["category", "Category Name (e.g., UI/UX, Backend, etc)"],
   ["deadline", "Deadline (YYYY-MM-DD)"],
   ["salary", "Salary (optional)"],
-  ["bannerUrl", "Banner URL (optional)"],
 ] as const;
 
 export default function JobForm({
@@ -62,10 +61,29 @@ export default function JobForm({
     initialValues: { ...defaultValues, ...initialValues },
     validationSchema: jobSchema,
     enableReinitialize: true,
+    validateOnChange: false,
     onSubmit: async (values) => {
       setLoading(true);
       try {
-        await onSubmit(values);
+        const formData = new FormData();
+
+        Object.entries(values).forEach(([key, val]) => {
+          if (key === "tags") {
+            (val as string[]).forEach((tag: string) =>
+              formData.append("tags", tag)
+            );
+          } else if (key === "banner" && val instanceof File) {
+            formData.append("banner", val);
+          } else if (
+            typeof val === "boolean" ||
+            typeof val === "number" ||
+            typeof val === "string"
+          ) {
+            formData.append(key, String(val));
+          }
+        });
+
+        await onSubmit(formData);
         toast.success(isEdit ? "Job updated!" : "Job created!");
       } catch (err: any) {
         toast.error(err.response?.data?.message || "Failed to submit job");
@@ -79,14 +97,19 @@ export default function JobForm({
     "w-full border px-3 py-2 rounded mt-1 focus:ring-[#6096B4] focus:border-[#6096B4]";
 
   return (
-    <form onSubmit={formik.handleSubmit} className="space-y-4 max-w-xl">
+    <form
+      onSubmit={formik.handleSubmit}
+      className="space-y-6 max-w-xl bg-white p-6 rounded-xl shadow-md"
+    >
       {textFields.map(([key, label]) => {
         type FieldKey = keyof JobFormValues;
         const fieldKey = key as FieldKey;
 
         return (
           <div key={key}>
-            <label className="block font-semibold">{label}</label>
+            <label className="block font-semibold text-[#1a1a1a]">
+              {label}
+            </label>
             <input
               type={fieldKey === "salary" ? "number" : "text"}
               name={fieldKey}
@@ -99,14 +122,41 @@ export default function JobForm({
               className={inputClass}
             />
             {formik.touched[fieldKey] && formik.errors[fieldKey] && (
-              <p className="text-red-500 text-sm">{formik.errors[fieldKey]}</p>
+              <p className="text-red-500 text-sm">
+                {formik.errors[fieldKey] as string}
+              </p>
             )}
           </div>
         );
       })}
 
+      {/* Upload Banner */}
       <div>
-        <label className="block font-semibold">Experience Level</label>
+        <label className="block font-semibold text-[#1a1a1a]">
+          Upload Banner
+        </label>
+        <input
+          type="file"
+          name="banner"
+          accept="image/*"
+          onChange={(e) => {
+            const file = e.currentTarget.files?.[0];
+            formik.setFieldValue("banner", file);
+          }}
+          className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 text-sm file:bg-[#6096B4] file:text-white file:border-none file:px-4 file:py-2 file:rounded file:cursor-pointer"
+        />
+        {formik.errors.banner && (
+          <p className="text-red-500 text-sm">
+            {formik.errors.banner as string}
+          </p>
+        )}
+      </div>
+
+      {/* Experience Level */}
+      <div>
+        <label className="block font-semibold text-[#1a1a1a]">
+          Experience Level
+        </label>
         <select
           name="experienceLevel"
           value={formik.values.experienceLevel}
@@ -119,8 +169,9 @@ export default function JobForm({
         </select>
       </div>
 
+      {/* Job Type */}
       <div>
-        <label className="block font-semibold">Job Type</label>
+        <label className="block font-semibold text-[#1a1a1a]">Job Type</label>
         <select
           name="jobType"
           value={formik.values.jobType}
@@ -133,30 +184,36 @@ export default function JobForm({
         </select>
       </div>
 
+      {/* Remote and Test */}
       <div className="flex items-center gap-3">
-        <label className="font-semibold">Is Remote?</label>
         <input
           type="checkbox"
           name="isRemote"
           checked={formik.values.isRemote}
           onChange={formik.handleChange}
+          className="accent-[#6096B4]"
         />
+        <label className="font-semibold text-[#1a1a1a]">Is Remote?</label>
       </div>
 
       <div className="flex items-center gap-3">
-        <label className="font-semibold">Include Pre-Selection Test?</label>
         <input
           type="checkbox"
           name="hasTest"
           checked={formik.values.hasTest}
           onChange={formik.handleChange}
+          className="accent-[#6096B4]"
         />
+        <label className="font-semibold text-[#1a1a1a]">
+          Include Pre-Selection Test?
+        </label>
       </div>
 
+      {/* Submit Button */}
       <button
         type="submit"
         disabled={loading}
-        className="bg-[#6096B4] text-white px-4 py-2 rounded hover:bg-[#4d7a96]"
+        className="bg-[#6096B4] text-white px-5 py-2 rounded-md hover:bg-[#4d7a96] transition font-medium"
       >
         {loading
           ? isEdit

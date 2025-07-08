@@ -27,7 +27,8 @@ interface JobDetail {
 }
 
 export default function JobDetailPage() {
-  const { id } = useParams();
+  const rawId = useParams().id as string;
+  const id = rawId.slice(0, 36);
   const router = useRouter();
 
   const [job, setJob] = useState<JobDetail | null>(null);
@@ -50,27 +51,27 @@ export default function JobDetailPage() {
   if (!job) return <p>Job not found.</p>;
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <h1 className="text-3xl font-bold">{job.title}</h1>
+    <div className="max-w-3xl space-y-6 bg-white p-6 rounded-xl shadow text-[#1a1a1a]">
+      <h1 className="text-3xl font-bold text-[#274472]">{job.title}</h1>
 
-      <div className="flex flex-wrap gap-2 text-sm text-gray-600">
-        <span className="bg-gray-100 px-2 py-1 rounded">
-          Category: {job.category.name}
+      <div className="flex flex-wrap gap-2 text-sm">
+        <span className="bg-[#EEE9DA] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
+          {job.category.name}
         </span>
-        <span className="bg-gray-100 px-2 py-1 rounded">
-          Level: {job.experienceLevel}
+        <span className="bg-[#EEE9DA] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
+          {job.experienceLevel}
         </span>
-        <span className="bg-gray-100 px-2 py-1 rounded">
-          Type: {job.jobType}
+        <span className="bg-[#EEE9DA] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
+          {job.jobType}
         </span>
-        <span className="bg-gray-100 px-2 py-1 rounded">
+        <span className="bg-[#EEE9DA] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
           {job.isRemote ? "Remote" : "On-site"}
         </span>
-        <span className="bg-gray-100 px-2 py-1 rounded">
+        <span className="bg-[#EEE9DA] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
           Applicants: {job._count.applications}
         </span>
         <span
-          className={`px-2 py-1 rounded text-white ${
+          className={`px-3 py-1 rounded-xl text-white font-medium ${
             job.status === "PUBLISHED"
               ? "bg-green-600"
               : job.status === "DRAFT"
@@ -82,52 +83,54 @@ export default function JobDetailPage() {
         </span>
       </div>
 
-      <p className="text-gray-800 whitespace-pre-line">{job.description}</p>
+      <p className="text-gray-800 whitespace-pre-line leading-relaxed">
+        {job.description}
+      </p>
 
       <div className="text-sm text-gray-700 space-y-1">
         <p>
-          <strong>Location:</strong> {job.location}
+          <strong>📍 Location:</strong> {job.location}
         </p>
         <p>
-          <strong>Salary:</strong>{" "}
+          <strong>💰 Salary:</strong>{" "}
           {job.salary ? `Rp${job.salary.toLocaleString()}` : "Not set"}
         </p>
         <p>
-          <strong>Deadline:</strong> {job.deadline.slice(0, 10)}
+          <strong>📅 Deadline:</strong> {job.deadline.slice(0, 10)}
         </p>
         <p>
-          <strong>Pre-Selection Test:</strong> {job.hasTest ? "Yes" : "No"}
+          <strong>🧪 Pre-Selection Test:</strong> {job.hasTest ? "Yes" : "No"}
         </p>
       </div>
 
-      <div className="flex gap-3 pt-4 flex-wrap">
+      <div className="flex flex-wrap gap-3 pt-4">
         <button
           onClick={() => router.push(`/dashboard/jobs/${job.id}/edit`)}
-          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
         >
-          Edit Job
+          ✏️ Edit Job
         </button>
 
         <button
           onClick={() => router.push(`/dashboard/jobs/${job.id}/applicants`)}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="px-4 py-2 bg-[#6096B4] text-white rounded hover:bg-[#4d7a96] transition"
         >
-          View Applicants
+          👥 View Applicants
         </button>
 
         <button
           onClick={() => router.push(`/dashboard/jobs/${job.id}/interviews`)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
         >
-          Lihat Interview
+          📅 View Interviews
         </button>
 
         {job.hasTest && (
           <button
             onClick={() => setShowTestForm((prev) => !prev)}
-            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
           >
-            {showTestForm ? "Tutup Pre-Test Form" : "Tambah Pre-Test"}
+            {showTestForm ? "❌ Close Pre-Test Form" : "🧪 Add Pre-Test"}
           </button>
         )}
       </div>

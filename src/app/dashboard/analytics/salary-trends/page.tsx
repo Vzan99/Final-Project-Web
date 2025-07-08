@@ -40,38 +40,41 @@ export default function SalaryTrendsPage() {
   }));
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-10">
-      <h1 className="text-2xl font-bold">Salary Trends</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+      <h1 className="text-3xl font-bold text-[#6096B4]">Salary Trends</h1>
 
-      {/* Table */}
-      <div className="overflow-x-auto border rounded">
+      {/* Tabel Salary */}
+      <div className="bg-white border rounded-lg shadow p-6 overflow-x-auto">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+          Tabel Rata-rata Gaji
+        </h2>
         <table className="min-w-full table-auto">
-          <thead className="bg-gray-100 text-left">
+          <thead className="bg-[#6096B4] text-white text-left">
             <tr>
-              <th className="px-4 py-2">Job Title</th>
-              <th className="px-4 py-2">Location</th>
-              <th className="px-4 py-2">Average Salary</th>
-              <th className="px-4 py-2">Applicants</th>
+              <th className="px-4 py-3">Job Title</th>
+              <th className="px-4 py-3">Location</th>
+              <th className="px-4 py-3">Average Salary</th>
+              <th className="px-4 py-3">Applicants</th>
             </tr>
           </thead>
           <tbody>
             {trends.map((item, i) => (
-              <tr key={i} className="border-t">
-                <td className="px-4 py-2">{item.title}</td>
-                <td className="px-4 py-2">{item.location}</td>
-                <td className="px-4 py-2">
+              <tr key={i} className="border-t hover:bg-gray-50">
+                <td className="px-4 py-3">{item.title}</td>
+                <td className="px-4 py-3">{item.location}</td>
+                <td className="px-4 py-3">
                   Rp{item.averageSalary.toLocaleString()}
                 </td>
-                <td className="px-4 py-2">{item.count}</td>
+                <td className="px-4 py-3">{item.count}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Chart */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">
+      {/* Chart Salary */}
+      <div className="bg-white border rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
           Visualisasi Rata-rata Salary
         </h2>
         <ResponsiveContainer width="100%" height={400}>
