@@ -6,17 +6,17 @@ import { fetchUser } from "@/lib/redux/features/authSlice";
 import API from "@/lib/axios";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
-import ProfileForm from "./components/forms/profileForm";
-import ContactForm from "./components/forms/contactForm";
-import BasicInfoForm from "./components/forms/basicInfoForm";
-import EducationForm from "./components/forms/educationForm";
-import SkillsForm from "./components/forms/skillsForm";
-import ExperienceForm from "./components/forms/experienceForm";
+import ProfileForm from "@/components/userprofile/forms/profileForm";
+import ContactForm from "@/components/userprofile/forms/contactForm";
+import BasicInfoForm from "@/components/userprofile/forms/basicInfoForm";
+import EducationForm from "@/components/userprofile/forms/educationForm";
+import SkillsForm from "@/components/userprofile/forms/skillsForm";
+import ExperienceForm from "@/components/userprofile/forms/experienceForm";
 
-import SectionCard from "./components/sectionCard";
-import EditDialog from "./components/editDialog";
+import SectionCard from "@/components/userprofile/sectionCard";
+import EditDialog from "@/components/userprofile/editDialog";
 import { Pencil } from "lucide-react";
-import ResumeDownloadButton from "./components/resumeDownloadButton";
+import ResumeDownloadButton from "@/components/userprofile/resumeDownloadButton";
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
@@ -260,6 +260,40 @@ export default function UserProfilePage() {
             <p className="text-gray-600">
               {profile.profile?.about || "No description provided."}
             </p>
+            {/* Badge Section */}
+            {(profile.subscription || profile.assessments?.length) && (
+              <div className="mt-4">
+                <h2 className="text-lg font-semibold text-gray-700 mb-1">
+                  Badges
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {/* Subscription Badge */}
+                  {profile.subscription?.status === "ACTIVE" && (
+                    <span className="inline-block bg-yellow-200 text-yellow-800 text-sm px-3 py-1 rounded-full font-medium">
+                      {profile.subscription.type === "PROFESSIONAL"
+                        ? "PRO"
+                        : "STANDARD"}
+                    </span>
+                  )}
+
+                  {/* Assessment Badges */}
+                  {profile.assessments?.map(
+                    (a: {
+                      id: string;
+                      badge: string;
+                      assessment: { name: string };
+                    }) => (
+                      <span
+                        key={a.id}
+                        className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium"
+                      >
+                        {a.badge} - {a.assessment.name}
+                      </span>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -321,6 +355,33 @@ export default function UserProfilePage() {
                     resumeUrl={profile?.profile?.resumeUrl}
                   />
                 </>
+              )}
+              {profile.subscription?.status !== "ACTIVE" && (
+                <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-900">
+                  <h3 className="font-semibold mb-2">
+                    Upgrade to Create Stunning CVs!
+                  </h3>
+                  <p className="mb-3">
+                    Unlock our CV Generator to create professional,
+                    ready-to-download resumes. Customize, preview, and export
+                    with ease — exclusive for subscribed users.
+                  </p>
+                  <a
+                    href="/subscription/upgrade"
+                    className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded font-medium"
+                  >
+                    Upgrade to Access CV Generator
+                  </a>
+                </div>
+              )}
+
+              {profile.subscription?.status === "ACTIVE" && (
+                <a
+                  href="/cv"
+                  className="inline-block mt-3 text-sm text-blue-600 hover:underline font-medium"
+                >
+                  Open CV Generator
+                </a>
               )}
             </div>
           </div>

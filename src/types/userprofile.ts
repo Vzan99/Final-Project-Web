@@ -31,18 +31,40 @@ export type UserProfileData = {
   id: string;
   name: string;
   email: string;
-  phone?: string | null;
+  phone?: string;
+  role: "USER" | "ADMIN" | "DEVELOPER";
+  isVerified: boolean;
+  subscription?: {
+    status: "ACTIVE" | "INACTIVE" | "PENDING";
+    type: "STANDARD" | "PROFESSIONAL";
+    startDate: string;
+    endDate: string;
+  };
   profile?: {
-    birthDate: string | null;
-    gender: string | null;
-    education: string | null;
-    address: string | null;
     photoUrl?: string | null;
     bannerUrl?: string | null;
+    skills?: string[];
+    education?: string | null;
+    about?: string | null;
+    address?: string | null;
     resumeUrl?: string | null;
-    skills: string[];
-    about: string | null;
-    experiences?: Experience[];
+    gender?: string | null;
+    birthDate?: string | null;
+    experiences?: Experience[] | null;
   } | null;
-  certificates?: any[];
+  company?: any;
+  certificates?: {
+    id: string;
+    certificateUrl: string;
+    verificationCode: string;
+    issuedAt: string;
+    expiresAt?: string;
+  }[];
+  assessments?: {
+    id: string;
+    badge: string;
+    assessment: {
+      name: string;
+    };
+  }[];
 };

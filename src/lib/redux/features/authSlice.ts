@@ -45,7 +45,14 @@ interface UserProfile {
     type: "STANDARD" | "PROFESSIONAL";
     startDate: string;
     endDate: string;
-  } | null;
+  };
+  assessments?: {
+    id: string;
+    badge: string;
+    assessment: {
+      name: string;
+    };
+  }[];
 }
 
 interface AuthState {

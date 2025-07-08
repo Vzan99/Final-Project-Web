@@ -3,27 +3,32 @@
 import React, { useState, useEffect } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
-import { UserProfileData } from "../../types";
+import { UserProfileData } from "../../../../../types/userprofile";
 
-type ContactFormProps = {
+type ProfileFormProps = {
   initialData: UserProfileData | null;
   onSuccess: () => void;
   onCancel: () => void;
 };
 
-export default function ContactForm({
+export default function ProfileForm({
   initialData,
   onSuccess,
   onCancel,
-}: ContactFormProps) {
-  const [phone, setPhone] = useState("");
+}: ProfileFormProps) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [about, setAbout] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!initialData) return;
-    setPhone(initialData.phone || "");
+
+    setName(initialData.name || "");
     setEmail(initialData.email || "");
+    setAddress(initialData.profile?.address || "");
+    setAbout(initialData.profile?.about || "");
   }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,16 +38,18 @@ export default function ContactForm({
     try {
       const payload = {
         userId: initialData?.id,
-        phone,
+        name,
+        address,
+        about,
       };
 
       await API.put("/profile/edit/user", payload);
 
-      toast.success("Contact info updated successfully!");
+      toast.success("Profile updated successfully!");
       onSuccess();
     } catch (error: any) {
       toast.error(
-        "Failed to update contact info: " +
+        "Failed to update profile: " +
           (error?.response?.data?.message || error.message)
       );
     } finally {
@@ -52,32 +59,47 @@ export default function ContactForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Email (non-editable) */}
+      {/* Name */}
       <div>
-        <label htmlFor="email" className="block font-medium text-gray-700">
-          Email (cannot be changed here)
+        <label htmlFor="name" className="block font-medium text-gray-700">
+          Name
         </label>
         <input
-          id="email"
-          type="email"
-          value={email}
-          disabled
-          className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+          id="name"
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-1 block w-full border rounded px-3 py-2"
         />
       </div>
 
-      {/* Phone */}
+      {/* Address */}
       <div>
-        <label htmlFor="phone" className="block font-medium text-gray-700">
-          Phone
+        <label htmlFor="address" className="block font-medium text-gray-700">
+          Address
         </label>
         <input
-          id="phone"
+          id="address"
           type="text"
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          value={address || ""}
+          onChange={(e) => setAddress(e.target.value)}
           className="mt-1 block w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      {/* About */}
+      <div>
+        <label htmlFor="about" className="block font-medium text-gray-700">
+          About Me
+        </label>
+        <textarea
+          id="about"
+          value={about || ""}
+          onChange={(e) => setAbout(e.target.value)}
+          rows={4}
+          className="mt-1 block w-full border rounded px-3 py-2"
+          placeholder="Write a short bio about yourself"
         />
       </div>
 

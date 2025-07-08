@@ -3,27 +3,27 @@
 import React, { useState, useEffect } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
-import { UserProfileData } from "../../types";
+import { UserProfileData } from "../../../../../types/userprofile";
 
-type BasicInfoFormProps = {
+type ContactFormProps = {
   initialData: UserProfileData | null;
   onSuccess: () => void;
   onCancel: () => void;
 };
 
-export default function BasicInfoForm({
+export default function ContactForm({
   initialData,
   onSuccess,
   onCancel,
-}: BasicInfoFormProps) {
-  const [gender, setGender] = useState("");
-  const [birthDate, setBirthDate] = useState("");
+}: ContactFormProps) {
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!initialData) return;
-    setGender(initialData.profile?.gender || "");
-    setBirthDate(initialData.profile?.birthDate || "");
+    setPhone(initialData.phone || "");
+    setEmail(initialData.email || "");
   }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,17 +33,16 @@ export default function BasicInfoForm({
     try {
       const payload = {
         userId: initialData?.id,
-        gender,
-        birthDate,
+        phone,
       };
 
       await API.put("/profile/edit/user", payload);
 
-      toast.success("Basic info updated successfully!");
+      toast.success("Contact info updated successfully!");
       onSuccess();
     } catch (error: any) {
       toast.error(
-        "Failed to update basic info: " +
+        "Failed to update contact info: " +
           (error?.response?.data?.message || error.message)
       );
     } finally {
@@ -53,34 +52,31 @@ export default function BasicInfoForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Gender */}
+      {/* Email (non-editable) */}
       <div>
-        <label htmlFor="gender" className="block font-medium text-gray-700">
-          Gender
-        </label>
-        <select
-          id="gender"
-          value={gender}
-          onChange={(e) => setGender(e.target.value)}
-          className="mt-1 block w-full border rounded px-3 py-2"
-        >
-          <option value="">Select gender</option>
-          <option value="MALE">Male</option>
-          <option value="FEMALE">Female</option>
-          <option value="OTHER">Other</option>
-        </select>
-      </div>
-
-      {/* Birth Date */}
-      <div>
-        <label htmlFor="birthDate" className="block font-medium text-gray-700">
-          Birth Date
+        <label htmlFor="email" className="block font-medium text-gray-700">
+          Email (cannot be changed here)
         </label>
         <input
-          id="birthDate"
-          type="date"
-          value={birthDate ? birthDate.slice(0, 10) : ""}
-          onChange={(e) => setBirthDate(e.target.value)}
+          id="email"
+          type="email"
+          value={email}
+          disabled
+          className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+        />
+      </div>
+
+      {/* Phone */}
+      <div>
+        <label htmlFor="phone" className="block font-medium text-gray-700">
+          Phone
+        </label>
+        <input
+          id="phone"
+          type="text"
+          required
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
           className="mt-1 block w-full border rounded px-3 py-2"
         />
       </div>

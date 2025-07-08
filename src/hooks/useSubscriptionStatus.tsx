@@ -10,7 +10,7 @@ export function useSubscriptionStatus() {
 
   useEffect(() => {
     axios
-      .get("/me/subscription")
+      .get("/subscriptions/user/me")
       .then((res) => setSubscription(res.data))
       .catch(() => setSubscription(null))
       .finally(() => setLoading(false));

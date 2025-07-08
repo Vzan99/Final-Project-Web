@@ -3,32 +3,27 @@
 import React, { useState, useEffect } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
-import { UserProfileData } from "../../types";
+import { UserProfileData } from "../../../../../types/userprofile";
 
-type ProfileFormProps = {
+type BasicInfoFormProps = {
   initialData: UserProfileData | null;
   onSuccess: () => void;
   onCancel: () => void;
 };
 
-export default function ProfileForm({
+export default function BasicInfoForm({
   initialData,
   onSuccess,
   onCancel,
-}: ProfileFormProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [about, setAbout] = useState("");
+}: BasicInfoFormProps) {
+  const [gender, setGender] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!initialData) return;
-
-    setName(initialData.name || "");
-    setEmail(initialData.email || "");
-    setAddress(initialData.profile?.address || "");
-    setAbout(initialData.profile?.about || "");
+    setGender(initialData.profile?.gender || "");
+    setBirthDate(initialData.profile?.birthDate || "");
   }, [initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,18 +33,17 @@ export default function ProfileForm({
     try {
       const payload = {
         userId: initialData?.id,
-        name,
-        address,
-        about,
+        gender,
+        birthDate,
       };
 
       await API.put("/profile/edit/user", payload);
 
-      toast.success("Profile updated successfully!");
+      toast.success("Basic info updated successfully!");
       onSuccess();
     } catch (error: any) {
       toast.error(
-        "Failed to update profile: " +
+        "Failed to update basic info: " +
           (error?.response?.data?.message || error.message)
       );
     } finally {
@@ -59,47 +53,35 @@ export default function ProfileForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
+      {/* Gender */}
       <div>
-        <label htmlFor="name" className="block font-medium text-gray-700">
-          Name
+        <label htmlFor="gender" className="block font-medium text-gray-700">
+          Gender
         </label>
-        <input
-          id="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+        <select
+          id="gender"
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
           className="mt-1 block w-full border rounded px-3 py-2"
-        />
+        >
+          <option value="">Select gender</option>
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
+        </select>
       </div>
 
-      {/* Address */}
+      {/* Birth Date */}
       <div>
-        <label htmlFor="address" className="block font-medium text-gray-700">
-          Address
+        <label htmlFor="birthDate" className="block font-medium text-gray-700">
+          Birth Date
         </label>
         <input
-          id="address"
-          type="text"
-          value={address || ""}
-          onChange={(e) => setAddress(e.target.value)}
+          id="birthDate"
+          type="date"
+          value={birthDate ? birthDate.slice(0, 10) : ""}
+          onChange={(e) => setBirthDate(e.target.value)}
           className="mt-1 block w-full border rounded px-3 py-2"
-        />
-      </div>
-
-      {/* About */}
-      <div>
-        <label htmlFor="about" className="block font-medium text-gray-700">
-          About Me
-        </label>
-        <textarea
-          id="about"
-          value={about || ""}
-          onChange={(e) => setAbout(e.target.value)}
-          rows={4}
-          className="mt-1 block w-full border rounded px-3 py-2"
-          placeholder="Write a short bio about yourself"
         />
       </div>
 

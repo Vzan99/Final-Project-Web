@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
-import { EmploymentType, LocationType } from "../../types";
-import { UserProfileData } from "../../types";
+import { EmploymentType, LocationType } from "@/types/userprofile";
+import { UserProfileData } from "@/types/userprofile";
 
 type ExperienceFormProps = {
   initialData: UserProfileData | null;
@@ -46,8 +46,9 @@ export default function ExperienceForm({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (initialData?.profile?.experiences) {
-      const formatted = initialData.profile.experiences.map((exp) => ({
+    const experienceList = initialData?.profile?.experiences;
+    if (experienceList && Array.isArray(experienceList)) {
+      const formatted = experienceList.map((exp) => ({
         ...exp,
         startDate: exp.startDate?.slice(0, 10),
         endDate: exp.endDate?.slice(0, 10),

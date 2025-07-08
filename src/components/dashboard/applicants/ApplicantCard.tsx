@@ -16,6 +16,7 @@ interface Applicant {
   user: {
     name: string;
     email: string;
+    subscriptionType?: string;
   };
 }
 
@@ -95,14 +96,21 @@ export default function ApplicantCard({
           </div>
         );
       default:
-        return null; // accepted / rejected
+        return null;
     }
   };
 
   return (
     <div className="border p-4 rounded shadow bg-white space-y-2">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">{applicant.user.name}</h2>
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          {applicant.user.name}
+          {applicant.user.subscriptionType === "PROFESSIONAL" && (
+            <span className="px-2 py-0.5 bg-yellow-500 text-white text-xs rounded-full">
+              PRO
+            </span>
+          )}
+        </h2>
         <span
           className={`text-sm font-medium px-2 py-1 rounded ${
             applicant.status === "PENDING"

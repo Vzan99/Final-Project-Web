@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import axios from "@/lib/axios";
+import API from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { SubscriptionType } from "@/types/subscription";
@@ -32,7 +32,7 @@ export default function SubscriptionUpgradeForm() {
     formData.append("paymentProof", proof);
 
     try {
-      await axios.post("/subscription/user/subscribe", formData, {
+      await API.post("/subscriptions/user/subscribe", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Subscription submitted! Awaiting approval.");
@@ -43,58 +43,74 @@ export default function SubscriptionUpgradeForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-md rounded-2xl p-6 max-w-md w-full mx-auto mt-10 space-y-4"
-    >
-      <h2 className="text-xl font-semibold">Upgrade Subscription</h2>
-
-      <div>
-        <label className="block font-medium mb-1">Plan</label>
-        <select
-          className="w-full border rounded-xl p-2"
-          value={type}
-          onChange={(e) => setType(e.target.value as SubscriptionType)}
-        >
-          {plans.map((p) => (
-            <option key={p.type} value={p.type}>
-              {p.type} – Rp{p.price.toLocaleString("id-ID")}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Payment Method</label>
-        <select
-          className="w-full border rounded-xl p-2"
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-        >
-          {methods.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block font-medium mb-1">Payment Proof</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setProof(e.target.files?.[0] || null)}
-          className="w-full border rounded-xl p-2"
-        />
-      </div>
-
-      <button
-        type="submit"
-        className="bg-blue-600 text-white w-full py-2 rounded-xl hover:bg-blue-700 transition"
+    <main className="min-h-screen bg-gray-50 py-12 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-2xl p-6 max-w-md w-full mx-auto space-y-6"
       >
-        Submit
-      </button>
-    </form>
+        <h2 className="text-2xl font-semibold text-center">
+          Upgrade Subscription
+        </h2>
+
+        <div>
+          <label className="block font-medium mb-1">Plan</label>
+          <select
+            className="w-full border rounded-xl p-2"
+            value={type}
+            onChange={(e) => setType(e.target.value as SubscriptionType)}
+          >
+            {plans.map((p) => (
+              <option key={p.type} value={p.type}>
+                {p.type} – Rp{p.price.toLocaleString("id-ID")}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Payment Method</label>
+          <select
+            className="w-full border rounded-xl p-2"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+          >
+            {methods.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block font-medium mb-1">Payment Proof</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setProof(e.target.files?.[0] || null)}
+            className="w-full border rounded-xl p-2"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white w-full py-2 rounded-xl hover:bg-blue-700 transition"
+        >
+          Submit
+        </button>
+
+        <div className="mt-6 text-sm text-gray-600">
+          <p className="font-medium">Transfer to:</p>
+          <ul className="mt-1 space-y-1">
+            <li>BCA - 1234567890 a.n. PT Presisi Indonesia</li>
+            <li>GoPay / OVO - 0812 3456 7890 (Precise Payment)</li>
+          </ul>
+          <p className="mt-2 italic">
+            After payment, upload the proof above. Your subscription will be
+            activated after approval.
+          </p>
+        </div>
+      </form>
+    </main>
   );
 }
