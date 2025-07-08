@@ -13,6 +13,7 @@ interface Applicant {
   cvFile: string;
   coverLetter?: string;
   testScore?: number;
+  subscriptionType?: "STANDARD" | "PROFESSIONAL" | null;
   user: {
     name: string;
     email: string;

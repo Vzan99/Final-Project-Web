@@ -20,10 +20,10 @@ export default function CVPreview({
   return (
     <div
       ref={pdfRef}
-      className="p-6 border rounded-xl bg-white shadow-md text-sm"
+      className="p-6 border border-[#ccc] rounded-xl bg-white text-black text-sm font-sans shadow-none"
     >
-      <h2 className="text-xl font-bold">{form.name}</h2>
-      <p className="text-gray-600">
+      <h2 className="text-xl font-bold text-[#111]">{form.name}</h2>
+      <p className="text-[#555]">
         {form.email} | {form.phone}
       </p>
 
@@ -38,8 +38,8 @@ export default function CVPreview({
 function Section({ title, content }: { title: string; content: string }) {
   return content ? (
     <div className="mt-4">
-      <h3 className="font-semibold text-gray-800 mb-1">{title}</h3>
-      <p className="text-gray-700 whitespace-pre-line">{content}</p>
+      <h3 className="font-semibold text-[#222] mb-1">{title}</h3>
+      <p className="text-[#444] whitespace-pre-line">{content}</p>
     </div>
   ) : null;
 }

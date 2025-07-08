@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import axios from "@/lib/axios";
+import API from "@/lib/axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -19,14 +19,14 @@ export function useCVForm() {
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    axios.get("/cv-form").then((res) => {
+    API.get("/user/cv-form").then((res) => {
       setForm((prev) => ({ ...prev, ...res.data }));
     });
   }, []);
 
   const handleDownload = async () => {
     if (!pdfRef.current) return;
-    const canvas = await html2canvas(pdfRef.current);
+    const canvas = await html2canvas(pdfRef.current!);
     const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF("p", "mm", "a4");
     const width = pdf.internal.pageSize.getWidth();
@@ -42,7 +42,7 @@ export function useCVForm() {
         extraSkills: form.skills.split(",").map((s) => s.trim()),
         projects: [],
       };
-      const res = await axios.post("/generate-cv", payload, {
+      const res = await API.post("/user/generate-cv", payload, {
         responseType: "blob",
       });
       const url = URL.createObjectURL(
