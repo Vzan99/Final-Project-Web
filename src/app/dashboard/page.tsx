@@ -38,25 +38,43 @@ export default function DashboardOverviewPage() {
   if (loading || loadingData) return <p className="p-4">Loading...</p>;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen">
+      <h1 className="text-3xl font-bold text-[#6096B4] mb-8">
+        Admin Dashboard
+      </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-white shadow rounded p-4 border">
-          <h3 className="font-semibold">Total Active Jobs</h3>
-          <p className="text-xl">{data?.totalActiveJobs}</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+          <h3 className="text-[#4B5563] font-semibold mb-1">
+            Total Active Jobs
+          </h3>
+          <p className="text-2xl font-bold text-[#1a1a1a]">
+            {data?.totalActiveJobs}
+          </p>
         </div>
-        <div className="bg-white shadow rounded p-4 border">
-          <h3 className="font-semibold">Total Applications</h3>
-          <p className="text-xl">{data?.totalApplications}</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+          <h3 className="text-[#4B5563] font-semibold mb-1">
+            Total Applications
+          </h3>
+          <p className="text-2xl font-bold text-[#1a1a1a]">
+            {data?.totalApplications}
+          </p>
         </div>
-        <div className="bg-white shadow rounded p-4 border">
-          <h3 className="font-semibold">Avg Pre-Test Score</h3>
-          <p className="text-xl">{data?.preSelectionAvgScore}</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+          <h3 className="text-[#4B5563] font-semibold mb-1">
+            Avg Pre-Test Score
+          </h3>
+          <p className="text-2xl font-bold text-[#1a1a1a]">
+            {data?.preSelectionAvgScore}
+          </p>
         </div>
-        <div className="bg-white shadow rounded p-4 border">
-          <h3 className="font-semibold">Avg Assessment Score</h3>
-          <p className="text-xl">{data?.skillAssessmentAvgScore}</p>
+        <div className="bg-white shadow-md rounded-xl p-6 border border-gray-200 hover:shadow-lg transition">
+          <h3 className="text-[#4B5563] font-semibold mb-1">
+            Avg Assessment Score
+          </h3>
+          <p className="text-2xl font-bold text-[#1a1a1a]">
+            {data?.skillAssessmentAvgScore}
+          </p>
         </div>
       </div>
     </div>

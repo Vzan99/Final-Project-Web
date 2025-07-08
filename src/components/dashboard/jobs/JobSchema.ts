@@ -12,7 +12,18 @@ export const jobSchema = Yup.object({
     .oneOf(["Full-time", "Part-time", "Contract"])
     .required(),
   isRemote: Yup.boolean().required(),
-  tags: Yup.array().of(Yup.string().trim()),
-  bannerUrl: Yup.string().url("Invalid URL").nullable(),
+  tags: Yup.array()
+    .of(
+      Yup.string().transform((val) =>
+        typeof val === "string" ? val.trim() : ""
+      )
+    )
+    .nullable(),
   hasTest: Yup.boolean().required(),
+  banner: Yup.mixed<File>()
+    .nullable()
+    .test("fileType", "Unsupported format", (value) => {
+      if (!value) return true;
+      return ["image/png", "image/jpeg", "image/webp"].includes(value.type);
+    }),
 });

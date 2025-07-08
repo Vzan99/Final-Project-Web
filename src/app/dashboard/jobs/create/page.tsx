@@ -11,9 +11,17 @@ export default function CreateJobPage() {
     <div>
       <h1 className="text-2xl font-bold mb-4">Create New Job</h1>
       <JobForm
-        onSubmit={async (values) => {
-          await API.post("/jobs", values);
-          router.push("/dashboard/jobs");
+        onSubmit={async (formData) => {
+          try {
+            await API.post("/jobs", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+            router.push("/dashboard/jobs");
+          } catch (err) {
+            console.error("Create job error", err);
+          }
         }}
       />
     </div>

@@ -77,39 +77,40 @@ export default function CreateInterviewForm({ onCreated }: Props) {
     }
   }, [formik.values.jobId]);
 
+  const inputClass =
+    "w-full border border-gray-300 px-3 py-2 rounded-md mt-1 focus:ring-[#6096B4] focus:border-[#6096B4] focus:outline-none";
+
   return (
-    <form
-      onSubmit={formik.handleSubmit}
-      className="space-y-4 border p-4 rounded-md mb-8"
-    >
-      <h2 className="text-lg font-bold mb-2">Buat Jadwal Interview</h2>
+    <form onSubmit={formik.handleSubmit} className="space-y-5 max-w-2xl">
+      <h2 className="text-xl font-bold text-[#6096B4]">
+        Buat Jadwal Interview
+      </h2>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Job</label>
+        <label className="block font-semibold">Pilih Job</label>
         <select
           name="jobId"
           value={formik.values.jobId}
           onChange={formik.handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className={inputClass}
         >
           <option value="">Pilih job</option>
-          {Array.isArray(jobs) &&
-            jobs.map((job) => (
-              <option key={job.id} value={job.id}>
-                {job.title}
-              </option>
-            ))}
+          {jobs.map((job) => (
+            <option key={job.id} value={job.id}>
+              {job.title}
+            </option>
+          ))}
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Pelamar</label>
+        <label className="block font-semibold">Pilih Pelamar</label>
         <select
           name="userId"
           value={formik.values.userId}
           onChange={formik.handleChange}
-          className="w-full border px-3 py-2 rounded"
           disabled={!formik.values.jobId}
+          className={inputClass}
         >
           <option value="">Pilih pelamar</option>
           {applicants.map((user) => (
@@ -121,47 +122,41 @@ export default function CreateInterviewForm({ onCreated }: Props) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Tanggal & Waktu
-        </label>
+        <label className="block font-semibold">Tanggal & Waktu</label>
         <input
           type="datetime-local"
           name="dateTime"
           value={formik.values.dateTime}
           onChange={formik.handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className={inputClass}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Lokasi (opsional)
-        </label>
+        <label className="block font-semibold">Lokasi (Opsional)</label>
         <input
           type="text"
           name="location"
           value={formik.values.location}
           onChange={formik.handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className={inputClass}
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">
-          Catatan (opsional)
-        </label>
+        <label className="block font-semibold">Catatan (Opsional)</label>
         <textarea
           name="notes"
           value={formik.values.notes}
           onChange={formik.handleChange}
-          className="w-full border px-3 py-2 rounded"
+          className={inputClass}
         />
       </div>
 
       <button
         type="submit"
         disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="bg-[#6096B4] text-white px-5 py-2 rounded-lg text-sm hover:bg-[#4d7a96] transition font-medium disabled:opacity-50"
       >
         {loading ? "Menyimpan..." : "Buat Interview"}
       </button>

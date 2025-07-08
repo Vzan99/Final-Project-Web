@@ -49,12 +49,14 @@ export default function UserDemographicsPage() {
   }));
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-10">
-      <h1 className="text-2xl font-bold">User Demographics</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+      <h1 className="text-3xl font-bold text-[#6096B4]">User Demographics</h1>
 
       {/* Age Chart */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Kelompok Usia</h2>
+      <div className="bg-white border rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+          Kelompok Usia
+        </h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={ageData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -67,8 +69,8 @@ export default function UserDemographicsPage() {
       </div>
 
       {/* Gender Chart */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Gender</h2>
+      <div className="bg-white border rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">Gender</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -91,12 +93,20 @@ export default function UserDemographicsPage() {
       </div>
 
       {/* Location Chart */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Lokasi Pengguna</h2>
+      <div className="bg-white border rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
+          Lokasi Pengguna
+        </h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={locationData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" angle={-30} textAnchor="end" interval={0} />
+            <XAxis
+              dataKey="name"
+              angle={-30}
+              textAnchor="end"
+              interval={0}
+              height={80}
+            />
             <YAxis allowDecimals={false} />
             <Tooltip />
             <Bar dataKey="value" fill="#82ca9d" />

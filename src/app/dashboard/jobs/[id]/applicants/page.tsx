@@ -48,21 +48,23 @@ export default function ApplicantListPage() {
   if (loading) return <p>Loading applicants...</p>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Applicants</h1>
+    <div className="bg-white p-6 rounded-xl shadow space-y-6 text-[#1a1a1a]">
+      <h1 className="text-3xl font-bold text-[#274472]">Applicants</h1>
 
       {applicants.length === 0 ? (
-        <p>No applicants found for this job.</p>
+        <p className="text-gray-600">No applicants found for this job.</p>
       ) : (
-        applicants.map((app) => (
-          <ApplicantCard
-            key={app.id}
-            applicant={app}
-            onStatusUpdate={(newStatus) =>
-              handleStatusUpdate(app.id, newStatus)
-            }
-          />
-        ))
+        <div className="space-y-4">
+          {applicants.map((app) => (
+            <ApplicantCard
+              key={app.id}
+              applicant={app}
+              onStatusUpdate={(newStatus) =>
+                handleStatusUpdate(app.id, newStatus)
+              }
+            />
+          ))}
+        </div>
       )}
     </div>
   );

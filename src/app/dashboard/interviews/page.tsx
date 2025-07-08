@@ -43,14 +43,22 @@ export default function InterviewSchedulePage() {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">Interview Schedule</h1>
+    <div className="p-6 bg-[#EEE9DA] min-h-screen">
+      <header className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
+        <h1 className="text-3xl font-bold text-[#6096B4]">
+          Interview Schedule
+        </h1>
+      </header>
 
-      {/* ✅ Tambahkan form pembuatan interview di sini */}
-      <CreateInterviewForm onCreated={fetchInterviews} />
+      {/* ✅ Form untuk menambah interview baru */}
+      <div className="bg-white border rounded-lg shadow p-6 mb-6">
+        <CreateInterviewForm onCreated={fetchInterviews} />
+      </div>
 
-      {/* ✅ Tampilkan daftar interview di bawah form */}
-      <InterviewListTable data={interviews} onUpdated={fetchInterviews} />
+      {/* ✅ Tabel daftar interview */}
+      <div className="bg-white border rounded-lg shadow p-6">
+        <InterviewListTable data={interviews} onUpdated={fetchInterviews} />
+      </div>
     </div>
   );
 }
