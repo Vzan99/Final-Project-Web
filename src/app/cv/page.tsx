@@ -1,6 +1,6 @@
 "use client";
 
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useAppSelector } from "@/lib/redux/hooks";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import CVForm from "@/components/cv/CVForm";
@@ -8,8 +8,10 @@ import CVPreview from "@/components/cv/CVPreview";
 import { useCVForm } from "@/components/cv/useCVForm";
 
 export default function CVGeneratorPage() {
-  const { subscription, loading } = useSubscriptionStatus();
+  const subscription = useAppSelector((state) => state.auth.user?.subscription);
+  const loading = useAppSelector((state) => state.auth.loading);
   const router = useRouter();
+
   const { form, setForm, pdfRef, handleDownload, handleDownloadFromServer } =
     useCVForm();
 
