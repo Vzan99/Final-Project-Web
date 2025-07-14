@@ -55,7 +55,7 @@ export default function ExperienceForm({
       }));
       setExperiences(formatted);
     } else {
-      setExperiences([emptyExperience]);
+      setExperiences([{ ...emptyExperience }]);
     }
   }, [initialData]);
 
@@ -69,7 +69,8 @@ export default function ExperienceForm({
     setExperiences(updated);
   };
 
-  const addExperience = () => setExperiences([...experiences, emptyExperience]);
+  const addExperience = () =>
+    setExperiences([...experiences, { ...emptyExperience }]);
 
   const removeExperience = (index: number) => {
     const updated = [...experiences];
@@ -97,7 +98,10 @@ export default function ExperienceForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {experiences.map((exp, index) => (
-        <div key={index} className="border p-4 rounded-md relative bg-gray-50">
+        <div
+          key={exp.id || index}
+          className="border p-4 rounded-md relative bg-gray-50"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">
@@ -199,10 +203,15 @@ export default function ExperienceForm({
               <input
                 type="checkbox"
                 checked={exp.currentlyWorking}
-                onChange={(e) =>
-                  updateExperience(index, "currentlyWorking", e.target.checked)
-                }
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  updateExperience(index, "currentlyWorking", isChecked);
+                  if (isChecked) {
+                    updateExperience(index, "endDate", "");
+                  }
+                }}
               />
+
               <label className="text-sm text-gray-700">
                 Currently working here
               </label>

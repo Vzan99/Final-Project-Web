@@ -17,6 +17,7 @@ import SectionCard from "@/components/userprofile/sectionCard";
 import EditDialog from "@/components/userprofile/editDialog";
 import { Pencil } from "lucide-react";
 import ResumeDownloadButton from "@/components/userprofile/resumeDownloadButton";
+import { toast } from "react-toastify";
 
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
@@ -38,6 +39,7 @@ export default function UserProfilePage() {
   const [isEducationEditOpen, setEducationEditOpen] = useState(false);
   const [isSkillsEditOpen, setSkillsEditOpen] = useState(false);
   const [isExperienceEditOpen, setExperienceEditOpen] = useState(false);
+  const [loadingVerify, setLoadingVerify] = useState(false);
 
   const [uploadLoading, setUploadLoading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -49,6 +51,20 @@ export default function UserProfilePage() {
   useEffect(() => {
     dispatch(fetchUser());
   }, [dispatch]);
+
+  const handleResendVerification = async () => {
+    setLoadingVerify(true);
+    try {
+      await API.post("/auth/resend-verification");
+      toast.success("Verification email sent!");
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.message || "Failed to resend verification email."
+      );
+    } finally {
+      setLoadingVerify(false);
+    }
+  };
 
   const profileImageUrl =
     getCloudinaryImageUrl(profile?.profile?.photoUrl) ||
@@ -179,12 +195,12 @@ export default function UserProfilePage() {
           <button
             type="button"
             onClick={() => fileBannerRef.current?.click()}
-            className="absolute inset-0 w-full h-full z-10"
+            className="absolute inset-0 w-full h-full z-10 cursor-pointer"
             disabled={uploadLoading}
             aria-label="Change Banner Image"
           />
           <div
-            className={`w-full h-full bg-cover bg-center transition-opacity duration-300 ${
+            className={`w-full h-full bg-cover bg-center transition-opacity duration-300 pointer-events-none ${
               uploadLoading ? "opacity-50 animate-pulse" : ""
             }`}
             style={{
@@ -201,8 +217,9 @@ export default function UserProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
-          <div className="absolute -top-16 left-0 right-0 md:left-8 md:right-auto">
+        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start z-20">
+          {/* Profile image container */}
+          <div className="absolute -top-16 left-0 right-0 md:left-8 md:right-auto z-30">
             <div className="relative w-32 h-32 mx-auto md:mx-0 cursor-pointer">
               <button
                 type="button"
@@ -245,9 +262,43 @@ export default function UserProfilePage() {
           </button>
 
           <div className="flex flex-col justify-center mt-4">
-            <h1 className="text-2xl font-bold text-gray-800">
-              {profile.name || "Unnamed User"}
-            </h1>
+            <div className="flex items-center space-x-2 mt-1">
+              <h1 className="text-2xl font-bold text-gray-800">
+                {profile.name || "Unnamed User"}
+              </h1>
+
+              {profile.isVerified ? (
+                <div className="relative group">
+                  <img
+                    src="/verified_true.png"
+                    alt="Verified User"
+                    className="w-6 h-6"
+                  />
+                  <span className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+                    Verified User
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <img
+                    src="/verified_false.png"
+                    alt="Unverified User"
+                    className="w-6 h-6"
+                  />
+                  <button
+                    onClick={handleResendVerification}
+                    disabled={loadingVerify}
+                    className={`text-sm text-[#89A8B2] border border-dashed border-[#89A8B2] rounded-4xl px-3 py-1 hover:bg-[#7a98a1] hover:text-white transition flex items-center justify-center ${
+                      loadingVerify ? "animate-pulse" : ""
+                    }`}
+                    aria-label="Get Verified Now"
+                  >
+                    {loadingVerify ? "Sending..." : "Get verified now"}
+                  </button>
+                </div>
+              )}
+            </div>
+
             <p className="text-sm text-gray-600">
               {profile.profile?.address || "Location not provided"}
             </p>
@@ -391,7 +442,26 @@ export default function UserProfilePage() {
               title="Experience"
               onEdit={() => setExperienceEditOpen(true)}
             >
-              <p>No experience added yet.</p>
+              {profile?.profile?.experiences &&
+              profile.profile.experiences.length > 0 ? (
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  {profile.profile.experiences.map((exp, i) => (
+                    <li key={exp.id || i}>
+                      <span className="font-semibold">{exp.title}</span> at{" "}
+                      <span className="italic">{exp.companyName}</span> (
+                      {new Date(exp.startDate).toLocaleDateString()} -{" "}
+                      {exp.currentlyWorking
+                        ? "Present"
+                        : exp.endDate
+                        ? new Date(exp.endDate).toLocaleDateString()
+                        : "N/A"}
+                      )
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No experience added yet.</p>
+              )}
             </SectionCard>
 
             <SectionCard title="Skills" onEdit={() => setSkillsEditOpen(true)}>

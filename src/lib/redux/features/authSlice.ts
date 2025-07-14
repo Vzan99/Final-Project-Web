@@ -1,17 +1,17 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import API from "@/lib/axios";
+import { Experience } from "@/types/userprofile";
 
 interface Company {
   id: string;
-  name: string;
-  address?: string | null;
-  phone?: string | null;
-  email?: string | null;
+  description: string;
+  location: string;
+  logo?: string | null;
+  bannerUrl?: string | null;
   website?: string | null;
   industry?: string | null;
-  description?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  foundedYear?: number | null;
+  adminId?: string;
 }
 
 interface UserProfile {
@@ -31,6 +31,7 @@ interface UserProfile {
     resumeUrl: string | null;
     skills: string[];
     about: string | null;
+    experiences?: Experience[] | null;
   } | null;
   company?: Company | null;
   certificates: {
@@ -70,20 +71,23 @@ const initialState: AuthState = {
 };
 
 export const fetchUser = createAsyncThunk<
-  UserProfile,
+  UserProfile | null,
   void,
   { rejectValue: string }
 >("auth/fetchUser", async (_, thunkAPI) => {
   try {
     const res = await API.get("/profile", { withCredentials: true });
     return res.data.data as UserProfile;
-  } catch (err) {
-    return thunkAPI.rejectWithValue("Not authenticated");
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      return null;
+    }
+    return thunkAPI.rejectWithValue("Failed to fetch user");
   }
 });
 
 export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
-  await API.post("/auth/logout");
+  await API.post("/auth/logout", {}, { withCredentials: true });
 });
 
 const authSlice = createSlice({
@@ -106,8 +110,8 @@ const authSlice = createSlice({
       })
       .addCase(
         fetchUser.fulfilled,
-        (state, action: PayloadAction<UserProfile>) => {
-          state.user = action.payload;
+        (state, action: PayloadAction<UserProfile | null>) => {
+          state.user = action.payload ?? null;
           state.loading = false;
           state.error = null;
           state.isHydrated = true;
@@ -116,7 +120,7 @@ const authSlice = createSlice({
       .addCase(fetchUser.rejected, (state, action) => {
         state.user = null;
         state.loading = false;
-        state.error = action.payload ?? "Failed to fetch user";
+        state.error = action.payload ?? "Unknown error";
         state.isHydrated = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {

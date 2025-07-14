@@ -1,6 +1,7 @@
-export default function ReviewList({ reviews }: { reviews: any[] }) {
-  if (!reviews.length)
+export default function ReviewList({ reviews }: { reviews?: any[] }) {
+  if (!Array.isArray(reviews) || reviews.length === 0) {
     return <p className="text-gray-500">Belum ada review.</p>;
+  }
 
   return (
     <div className="space-y-4 mt-6">
