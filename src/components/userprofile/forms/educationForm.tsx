@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
-import { UserProfileData } from "../../../../../types/userprofile";
+import { UserProfileData } from "@/types/userprofile";
 
 type EducationFormProps = {
   initialData: UserProfileData | null;

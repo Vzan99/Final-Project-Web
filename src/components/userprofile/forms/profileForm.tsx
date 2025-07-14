@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
-import { UserProfileData } from "../../../../../types/userprofile";
+import { UserProfileData } from "@/types/userprofile";
 
 type ProfileFormProps = {
   initialData: UserProfileData | null;

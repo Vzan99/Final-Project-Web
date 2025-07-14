@@ -35,3 +35,32 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.ProseMirror:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+  padding-left: 1rem;
+}
+.ProseMirror li {
+  margin-bottom: 0.25rem;
+}
+
+.company-description ul {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+  padding-left: 1rem;
+}
+.company-description li {
+  margin-bottom: 0.25rem;
+}
+
+.company-description * {
+  max-width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
