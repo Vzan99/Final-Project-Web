@@ -31,7 +31,6 @@ export default function AssessmentDetailPage() {
         setAnswers(new Array(data.questions.length).fill(""));
         setTimeLeft((data.timeLimit || 30) * 60); // fallback 30 menit
       } catch (err) {
-        console.error(err);
         alert("Gagal memuat data assessment");
         router.push("/assessments");
       }
@@ -96,18 +95,18 @@ export default function AssessmentDetailPage() {
             {i + 1}. {q.question}
           </p>
           <div className="space-y-1">
-            {q.choices.map((choice: string, j: number) => (
+            {q.options.map((opt: string, j: number) => (
               <label key={j} className="block">
                 <input
                   type="radio"
                   name={`q-${i}`}
-                  value={choice}
-                  checked={answers[i] === choice}
-                  onChange={() => handleChange(i, choice)}
+                  value={opt}
+                  checked={answers[i] === opt}
+                  onChange={() => handleChange(i, opt)}
                   disabled={submitting}
                   className="mr-2"
                 />
-                {choice}
+                {opt}
               </label>
             ))}
           </div>
