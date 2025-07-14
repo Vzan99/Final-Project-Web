@@ -50,6 +50,18 @@ export default function AssessmentForm({
     }
   }, [editData]);
 
+  // Reset saat keluar dari mode edit
+  useEffect(() => {
+    if (!editData) {
+      setName("");
+      setDescription("");
+      setPassingScore(75);
+      setTimeLimit(30);
+      setQuestions([{ question: "", options: ["", "", "", ""], answer: 0 }]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [editData]);
+
   const handleAddQuestion = () => {
     setQuestions([
       ...questions,
@@ -95,7 +107,7 @@ export default function AssessmentForm({
 
     try {
       if (isEdit && editData) {
-        await API.patch(`/assessments/${editData.id}`, payload);
+        await API.put(`/assessments/${editData.id}`, payload);
         alert("Assessment updated!");
         onFinishEdit?.();
       } else {
@@ -103,15 +115,7 @@ export default function AssessmentForm({
         alert("Assessment created!");
         onCreated?.();
       }
-
-      // Reset form
-      setName("");
-      setDescription("");
-      setPassingScore(75);
-      setTimeLimit(30);
-      setQuestions([{ question: "", options: ["", "", "", ""], answer: 0 }]);
     } catch (err) {
-      console.error(err);
       alert("Failed to submit assessment.");
     }
   };
