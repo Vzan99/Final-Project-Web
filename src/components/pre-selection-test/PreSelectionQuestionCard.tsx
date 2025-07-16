@@ -27,6 +27,7 @@ export default function PreSelectionQuestionCard({
               value={i}
               checked={value === i}
               onChange={() => onChange(i)}
+              required
             />
             <span>{opt}</span>
           </label>

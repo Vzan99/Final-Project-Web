@@ -11,7 +11,7 @@ import PreSelectionQuestionCard from "./PreSelectionQuestionCard";
 interface Question {
   question: string;
   options: string[];
-  correctIndex: number; // not shown to user
+  correctIndex: number;
 }
 
 export default function PreSelectionAnswerForm() {
@@ -25,12 +25,13 @@ export default function PreSelectionAnswerForm() {
     validationSchema: preSelectionAnswerSchema,
     onSubmit: async (values) => {
       try {
+        console.log("Submit values:", values);
         await API.post(
           `/pre-selection-tests/jobs/${id}/pre-selection-test/submit`,
           values
         );
         toast.success("Tes berhasil dikirim!");
-        router.push(`/jobs/${id}`);
+        router.push(`/jobs`);
       } catch (err: any) {
         toast.error(err?.response?.data?.message || "Gagal submit tes.");
       }
