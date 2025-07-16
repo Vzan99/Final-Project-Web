@@ -36,12 +36,18 @@ export default function CreateInterviewForm({ onCreated }: Props) {
     onSubmit: async (values, { resetForm }) => {
       try {
         setLoading(true);
+        console.log("Submit interview values:", values);
         await API.post("/interviews", values);
         toast.success("Interview berhasil dibuat!");
         resetForm();
         onCreated();
-      } catch (err) {
-        toast.error("Gagal membuat interview.");
+      } catch (err: any) {
+        console.error("Interview creation error:", err);
+        const message =
+          err.response?.data?.error ||
+          err.message ||
+          "Gagal membuat interview.";
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -63,6 +69,7 @@ export default function CreateInterviewForm({ onCreated }: Props) {
           const filtered = res.data.data.filter(
             (a: any) => a.status === "INTERVIEW"
           );
+          console.log("Applicants from BE:", res.data.data);
           setApplicants(
             filtered.map((a: any) => ({
               userId: a.userId,
@@ -113,8 +120,8 @@ export default function CreateInterviewForm({ onCreated }: Props) {
           className={inputClass}
         >
           <option value="">Pilih pelamar</option>
-          {applicants.map((user) => (
-            <option key={user.userId} value={user.userId}>
+          {applicants.map((user, idx) => (
+            <option key={user.userId || idx} value={user.userId}>
               {user.name} ({user.email})
             </option>
           ))}
