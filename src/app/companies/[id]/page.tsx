@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 import ReviewForm from "@/components/review/ReviewForm";
 import ReviewList from "@/components/review/ReviewList";
+import { Pagination } from "@/components/pagination";
 
 type Company = {
   id: string;
@@ -41,12 +42,15 @@ export default function CompanyDetailsPage() {
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobPage, setJobPage] = useState(1);
+  const [jobTotalPages, setJobTotalPages] = useState(1);
+  const jobPageSize = 5;
 
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewTotal, setReviewTotal] = useState(0);
-  const pageSize = 3;
-  const totalReviewPages = Math.ceil(reviewTotal / pageSize);
+  const reviewPageSize = 3;
+  const totalReviewPages = Math.ceil(reviewTotal / reviewPageSize);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -67,8 +71,14 @@ export default function CompanyDetailsPage() {
       const fetchJobs = async () => {
         setJobsLoading(true);
         try {
-          const res = await API.get(`/companies/${companyId}/jobs`);
+          const res = await API.get(`/companies/${companyId}/jobs`, {
+            params: {
+              page: jobPage,
+              pageSize: jobPageSize,
+            },
+          });
           setJobs(res.data.jobs || []);
+          setJobTotalPages(res.data.totalPages || 1);
         } catch (err) {
           console.error("Error loading jobs", err);
           setJobs([]);
@@ -78,14 +88,14 @@ export default function CompanyDetailsPage() {
       };
       fetchJobs();
     }
-  }, [activeTab, companyId]);
+  }, [activeTab, companyId, jobPage]);
 
   useEffect(() => {
     if (activeTab === "Reviews") {
       const fetchReviews = async () => {
         try {
           const res = await API.get(`/reviews/company/${companyId}`, {
-            params: { page: reviewPage, pageSize },
+            params: { page: reviewPage, pageSize: reviewPageSize },
           });
           setReviews(res.data.reviews);
           setReviewTotal(res.data.total);
@@ -219,30 +229,37 @@ export default function CompanyDetailsPage() {
                   <p>Loading jobs...</p>
                 ) : jobs.length === 0 ? (
                   <p className="text-gray-600">
-                    No jobs posted by this company yet.
+                    No published jobs from this company yet.
                   </p>
                 ) : (
-                  <ul className="space-y-4">
-                    {jobs.map((job) => (
-                      <li
-                        key={job.id}
-                        className="border rounded p-4 hover:shadow-md transition cursor-pointer"
-                      >
-                        <a href={`/job/${job.id}`} className="block">
-                          <h3 className="text-lg font-semibold text-[#6096B4]">
-                            {job.title}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {job.location}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            Posted:{" "}
-                            {new Date(job.createdAt).toLocaleDateString()}
-                          </p>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="space-y-4">
+                      {jobs.map((job) => (
+                        <li
+                          key={job.id}
+                          className="border rounded p-4 hover:shadow-md transition cursor-pointer"
+                        >
+                          <a href={`/job/${job.id}`} className="block">
+                            <h3 className="text-lg font-semibold text-[#6096B4]">
+                              {job.title}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {job.location}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Posted:{" "}
+                              {new Date(job.createdAt).toLocaleDateString()}
+                            </p>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    <Pagination
+                      page={jobPage}
+                      totalPages={jobTotalPages}
+                      onPageChange={(newPage: number) => setJobPage(newPage)}
+                    />
+                  </>
                 )}
               </div>
             )}
