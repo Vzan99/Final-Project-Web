@@ -23,7 +23,7 @@ export type Job = {
   status: string;
   createdAt: string;
   updatedAt: string;
-
+  hasTest: boolean;
   companyId: string;
   company?: {
     id: string;

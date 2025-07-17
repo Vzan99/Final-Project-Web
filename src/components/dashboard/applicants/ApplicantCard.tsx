@@ -8,16 +8,18 @@ import { useRouter } from "next/navigation";
 
 interface Applicant {
   id: string;
+  name: string;
+  email: string;
   expectedSalary: number;
   status: string;
   cvFile: string;
   coverLetter?: string;
   testScore?: number;
-  user: {
-    name: string;
-    email: string;
-    subscriptionType?: string;
-  };
+  passed?: boolean;
+  submittedAt?: string;
+  photoUrl?: string;
+  education?: string;
+  subscriptionType?: string;
 }
 
 export default function ApplicantCard({
@@ -104,8 +106,8 @@ export default function ApplicantCard({
     <div className="border p-4 rounded shadow bg-white space-y-2">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          {applicant.user.name}
-          {applicant.user.subscriptionType === "PROFESSIONAL" && (
+          {applicant.name}
+          {applicant.subscriptionType === "PROFESSIONAL" && (
             <span className="px-2 py-0.5 bg-yellow-500 text-white text-xs rounded-full">
               PRO
             </span>
@@ -128,7 +130,7 @@ export default function ApplicantCard({
         </span>
       </div>
 
-      <p className="text-sm text-gray-600">{applicant.user.email}</p>
+      <p className="text-sm text-gray-600">{applicant.email}</p>
 
       <div className="text-sm space-y-1">
         <p>
@@ -137,7 +139,8 @@ export default function ApplicantCard({
         </p>
         {applicant.testScore !== undefined && (
           <p>
-            <strong>Test Score:</strong> {applicant.testScore} / 100
+            <strong>Test Score:</strong>{" "}
+            {Math.round((applicant.testScore / 25) * 100)} / 100
           </p>
         )}
         {applicant.coverLetter && (

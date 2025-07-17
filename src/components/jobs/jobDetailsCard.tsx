@@ -6,8 +6,9 @@ import { Job } from "@/types/jobs";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { JobDetailsSkeleton } from "../loadingSkeleton/jobDetailsSkeleton";
-import EditDialog from "../userprofile/editDialog";
-import ApplyJobForm from "./applyJobForms";
+
+import ApplyJobModal from "../jobs/ApplyJobModal";
+
 
 type JobDetailsCardProps = {
   job: Job | null;
@@ -18,7 +19,15 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   const [saving, setSaving] = useState(false);
   const [suggestedJobs, setSuggestedJobs] = useState<Job[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [showApplyDialog, setShowApplyDialog] = useState(false);
+
+  const [testStatus, setTestStatus] = useState<{
+    submitted: boolean;
+    score?: number;
+    passed?: boolean;
+  } | null>(null);
+
+  const [showApplyForm, setShowApplyForm] = useState(false);
+
 
   useEffect(() => {
     if (!job) return;
@@ -59,6 +68,26 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
     };
 
     fetchSuggestions();
+  }, [job]);
+
+  useEffect(() => {
+    if (!job?.id || !job.hasTest) return;
+
+    const fetchTestStatus = async () => {
+      try {
+        const res = await API.get(
+          `/pre-selection-tests/${job.id}/pre-selection-submitted`,
+          {
+            withCredentials: true,
+          }
+        );
+        setTestStatus(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch test status", err);
+      }
+    };
+
+    fetchTestStatus();
   }, [job]);
 
   const handleSave = async () => {
@@ -201,12 +230,38 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         </div>
       </div>
 
-      <button
-        onClick={handleApply}
-        className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
-      >
-        <Send size={16} /> Apply Now
-      </button>
+      {job.hasTest ? (
+        testStatus === null ? (
+          <p className="text-sm text-gray-500 italic">
+            Checking test status...
+          </p>
+        ) : !testStatus.submitted ? (
+          <button
+            onClick={() =>
+              window.location.assign(`/jobs/${job.id}/pre-selection-test`)
+            }
+            className="mt-2 flex items-center gap-2 bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition"
+          >
+            Take Pre-Test
+          </button>
+        ) : testStatus.passed ? (
+          <button
+            onClick={() => setShowApplyForm(true)}
+            className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
+          >
+            <Send size={16} /> Apply Now
+          </button>
+        ) : (
+          <p className="text-sm text-red-500">You did not pass the pre-test</p>
+        )
+      ) : (
+        <button
+          onClick={() => setShowApplyForm(true)}
+          className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
+        >
+          <Send size={16} /> Apply Now
+        </button>
+      )}
 
       <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line pt-4">
         {job.description}
@@ -238,6 +293,11 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           </div>
         </div>
       )}
+      <ApplyJobModal
+        jobId={job.id}
+        open={showApplyForm}
+        onClose={() => setShowApplyForm(false)}
+      />
     </div>
   );
 }
