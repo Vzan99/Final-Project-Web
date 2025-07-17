@@ -6,6 +6,8 @@ import { Job } from "@/types/jobs";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { JobDetailsSkeleton } from "../loadingSkeleton/jobDetailsSkeleton";
+import EditDialog from "../userprofile/editDialog";
+import ApplyJobForm from "./applyJobForms";
 
 type JobDetailsCardProps = {
   job: Job | null;
@@ -16,6 +18,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   const [saving, setSaving] = useState(false);
   const [suggestedJobs, setSuggestedJobs] = useState<Job[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
 
   useEffect(() => {
     if (!job) return;
@@ -120,7 +123,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   };
 
   const handleApply = () => {
-    alert(`Applying for job: ${job.title}`);
+    setShowApplyDialog(true);
   };
 
   return (
@@ -131,6 +134,19 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           alt={`${companyName} banner`}
           className="w-full h-48 object-cover rounded-lg mb-4"
         />
+      )}
+      {showApplyDialog && job && (
+        <EditDialog
+          open={showApplyDialog}
+          onClose={() => setShowApplyDialog(false)}
+          title={`Apply for ${job.title}`}
+        >
+          <ApplyJobForm
+            jobId={job.id}
+            onSuccess={() => setShowApplyDialog(false)}
+            onCancel={() => setShowApplyDialog(false)}
+          />
+        </EditDialog>
       )}
 
       <div className="absolute top-0 right-0 flex gap-2 p-2 z-10">
