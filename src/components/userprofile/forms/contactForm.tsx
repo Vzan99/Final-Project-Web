@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { UserProfileData } from "@/types/userprofile";
+import { contactSchema } from "@/schemas/profile/user/contactSchema";
 
 type ContactFormProps = {
   initialData: UserProfileData | null;
@@ -16,24 +18,21 @@ export default function ContactForm({
   onSuccess,
   onCancel,
 }: ContactFormProps) {
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const initialValues = {
+    phone: initialData?.phone || "",
+    email: initialData?.email || "",
+  };
 
-  useEffect(() => {
-    if (!initialData) return;
-    setPhone(initialData.phone || "");
-    setEmail(initialData.email || "");
-  }, [initialData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    setSubmitting(true);
 
     try {
       const payload = {
         userId: initialData?.id,
-        phone,
+        phone: values.phone,
       };
 
       await API.put("/profile/edit/user", payload);
@@ -46,59 +45,74 @@ export default function ContactForm({
           (error?.response?.data?.message || error.message)
       );
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Email (non-editable) */}
-      <div>
-        <label htmlFor="email" className="block font-medium text-gray-700">
-          Email (cannot be changed here)
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          disabled
-          className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
-        />
-      </div>
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      validationSchema={contactSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ isSubmitting }) => (
+        <Form className="space-y-6">
+          {/* Email (non-editable) */}
+          <div>
+            <label htmlFor="email" className="block font-medium text-gray-700">
+              Email (cannot be changed here)
+            </label>
+            <Field
+              id="email"
+              name="email"
+              type="email"
+              disabled
+              className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+              aria-disabled="true"
+            />
+          </div>
 
-      {/* Phone */}
-      <div>
-        <label htmlFor="phone" className="block font-medium text-gray-700">
-          Phone
-        </label>
-        <input
-          id="phone"
-          type="text"
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="mt-1 block w-full border rounded px-3 py-2"
-        />
-      </div>
+          {/* Phone */}
+          <div>
+            <label htmlFor="phone" className="block font-medium text-gray-700">
+              Phone
+            </label>
+            <Field
+              id="phone"
+              name="phone"
+              type="text"
+              placeholder="Enter phone number"
+              className="mt-1 block w-full border rounded px-3 py-2"
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              name="phone"
+              component="div"
+              className="text-red-600 text-sm mt-1"
+            />
+          </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 rounded border border-gray-400 text-gray-700 hover:bg-gray-100"
-          disabled={loading}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1]"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-      </div>
-    </form>
+          {/* Buttons */}
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 rounded border border-gray-400 text-gray-700 hover:bg-gray-100"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1]"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </Form>
+      )}
+    </Formik>
   );
 }

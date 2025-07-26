@@ -59,14 +59,14 @@ export default function CompanySearchBar({ onSearch }: CompanySearchBarProps) {
           placeholder="Search company name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="flex-1 px-4 py-3 border border-[#BDCDD6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6096B4] h-12"
+          className="flex-1 px-4 py-3 border border-[#BDCDD6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6096B4] h-12 w-full"
         />
         <input
           type="text"
           placeholder="Search location"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          className="flex-1 px-4 py-3 border border-[#BDCDD6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6096B4] h-12"
+          className="flex-1 px-4 py-3 border border-[#BDCDD6] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6096B4] h-12 w-full"
         />
 
         {/* Sort dropdown */}
@@ -89,7 +89,6 @@ export default function CompanySearchBar({ onSearch }: CompanySearchBarProps) {
                 onClick={() => {
                   setSortOrder("asc");
                   setDropdownOpen(false);
-                  // no need to triggerSearch here because of useEffect above
                 }}
               >
                 A to Z
@@ -103,7 +102,6 @@ export default function CompanySearchBar({ onSearch }: CompanySearchBarProps) {
                 onClick={() => {
                   setSortOrder("desc");
                   setDropdownOpen(false);
-                  // no need to triggerSearch here because of useEffect above
                 }}
               >
                 Z to A

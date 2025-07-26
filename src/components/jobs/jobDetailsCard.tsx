@@ -1,99 +1,147 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Bookmark, BookmarkCheck, Share2, Send } from "lucide-react";
+import { Bookmark, BookmarkCheck, Send } from "lucide-react";
 import { Job } from "@/types/jobs";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { JobDetailsSkeleton } from "../loadingSkeleton/jobDetailsSkeleton";
-
 import ApplyJobModal from "../jobs/ApplyJobModal";
+import Link from "next/link";
+import ProtectedButton from "@/components/protectedButton";
+import SocialShare from "@/components/socialShare";
+import { useSelector } from "react-redux";
+import { RootState } from "@/lib/redux/store";
 
+function isProfileComplete(user: RootState["auth"]["user"] | null) {
+  if (!user || !user.profile) return false;
+
+  const { birthDate, gender, education, address } = user.profile;
+
+  return (
+    birthDate &&
+    birthDate.trim() !== "" &&
+    gender &&
+    gender.trim() !== "" &&
+    education &&
+    education.trim() !== "" &&
+    address &&
+    address.trim() !== ""
+  );
+}
 
 type JobDetailsCardProps = {
   job: Job | null;
 };
 
 export function JobDetailsCard({ job }: JobDetailsCardProps) {
+  const user = useSelector((state: RootState) => state.auth.user);
+
   const [isSaved, setIsSaved] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
   const [suggestedJobs, setSuggestedJobs] = useState<Job[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-
   const [testStatus, setTestStatus] = useState<{
     submitted: boolean;
     score?: number;
     passed?: boolean;
   } | null>(null);
-
+  const [hasApplied, setHasApplied] = useState<boolean | null>(null);
   const [showApplyForm, setShowApplyForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const [showProfileIncompleteBanner, setShowProfileIncompleteBanner] =
+    useState(false);
+
+  const profileComplete = isProfileComplete(user);
+
+  const isUserVerifiedAndAllowed =
+    user && user.isVerified && user.role === "USER";
 
   useEffect(() => {
     if (!job) return;
 
-    const fetchSaved = async () => {
+    if (!isUserVerifiedAndAllowed) {
+      setIsSaved(false);
+      setHasApplied(false);
+      setTestStatus(null);
+      setSuggestedJobs([]);
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchAllData = async () => {
       try {
-        const res = await API.get("/jobs/saved", { withCredentials: true });
-        const savedJobs = Array.isArray(res.data) ? res.data : [];
-        setIsSaved(savedJobs.some((savedJob) => savedJob.id === job.id));
-      } catch (err) {
-        console.error("Failed to fetch saved jobs:", err);
-        setIsSaved(false);
-      }
-    };
+        const savedPromise = API.get("/jobs/saved", { withCredentials: true })
+          .then((res) => {
+            const savedJobs = Array.isArray(res.data) ? res.data : [];
+            if (isMounted) setIsSaved(savedJobs.some((j) => j.id === job.id));
+          })
+          .catch((err) => {
+            console.error("Fetch saved jobs error:", err);
+            if (isMounted) setIsSaved(false);
+          });
 
-    fetchSaved();
-  }, [job]);
-
-  useEffect(() => {
-    if (!job?.company?.id) return;
-
-    const fetchSuggestions = async () => {
-      setLoadingSuggestions(true);
-      try {
-        const res = await API.get(
+        const suggestedPromise = API.get(
           `/jobs/company/${job.company?.id}/suggestions`,
           {
             params: { excludeJobId: job.id },
             withCredentials: false,
           }
-        );
-        setSuggestedJobs(res.data);
-      } catch (err) {
-        console.error("Failed to fetch suggested jobs", err);
+        )
+          .then((res) => {
+            if (isMounted) setSuggestedJobs(res.data);
+          })
+          .catch((err) => {
+            console.error("Fetch suggested jobs error:", err);
+          });
+
+        const testPromise = job.hasTest
+          ? API.get(`/pre-selection-tests/${job.id}/pre-selection-submitted`, {
+              withCredentials: true,
+            })
+              .then((res) => {
+                if (isMounted) setTestStatus(res.data.data);
+              })
+              .catch((err) => {
+                console.error("Fetch test status error:", err);
+              })
+          : Promise.resolve();
+
+        const appliedPromise = API.get(`/applications/${job.id}/status`, {
+          withCredentials: true,
+        })
+          .then((res) => {
+            if (isMounted) setHasApplied(res.data.applied);
+          })
+          .catch((err) => {
+            console.error("Fetch application status error:", err);
+            if (isMounted) setHasApplied(false);
+          });
+
+        await Promise.all([
+          savedPromise,
+          suggestedPromise,
+          testPromise,
+          appliedPromise,
+        ]);
       } finally {
-        setLoadingSuggestions(false);
+        if (isMounted) setIsLoading(false);
       }
     };
 
-    fetchSuggestions();
-  }, [job]);
+    fetchAllData();
 
-  useEffect(() => {
-    if (!job?.id || !job.hasTest) return;
-
-    const fetchTestStatus = async () => {
-      try {
-        const res = await API.get(
-          `/pre-selection-tests/${job.id}/pre-selection-submitted`,
-          {
-            withCredentials: true,
-          }
-        );
-        setTestStatus(res.data.data);
-      } catch (err) {
-        console.error("Failed to fetch test status", err);
-      }
+    return () => {
+      isMounted = false;
     };
-
-    fetchTestStatus();
-  }, [job]);
+  }, [job, user, isUserVerifiedAndAllowed]);
 
   const handleSave = async () => {
     if (!job || isSaved === null) return;
-    setSaving(true);
 
+    setSaving(true);
     try {
       if (isSaved) {
         await API.delete(`/jobs/${job.id}/save`, { withCredentials: true });
@@ -112,20 +160,27 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
     }
   };
 
-  const handleShare = async () => {
-    if (!job) return;
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/jobs/${job.id}`
-      );
-      toast.success("Link copied to clipboard!");
-    } catch (err) {
-      toast.error("Failed to copy job link.");
-      console.error(err);
+  const handleApplyClick = () => {
+    setShowProfileIncompleteBanner(false);
+    if (!profileComplete) {
+      setShowProfileIncompleteBanner(true);
+      return;
     }
+    setShowApplyForm(true);
   };
 
-  if (!job) return <JobDetailsSkeleton />;
+  const handleTakePreTestClick = () => {
+    setShowProfileIncompleteBanner(false);
+    if (!profileComplete) {
+      setShowProfileIncompleteBanner(true);
+      return;
+    }
+    window.location.assign(`/jobs/${job?.id}/pre-selection-test`);
+  };
+
+  if (!job || isLoading) {
+    return <JobDetailsSkeleton />;
+  }
 
   const companyName = job.company?.admin?.name ?? "Unknown Company";
   const logoUrl = job.company?.logo || "/precise_logo.jpeg";
@@ -135,24 +190,121 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
     if (isSaved === null) {
       return <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse" />;
     }
+
     return (
-      <button
+      <ProtectedButton
+        allowedRoles={["USER"]}
+        requireVerified={true}
         onClick={handleSave}
         disabled={saving}
         className={`p-2 rounded-full transition ${
           isSaved ? "bg-[#6096B4]/20 text-[#6096B4]" : "hover:bg-gray-100"
         }`}
         title={isSaved ? "Unsave Job" : "Save Job"}
-        aria-pressed={isSaved}
-        aria-label={isSaved ? "Unsave Job" : "Save Job"}
       >
         {isSaved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
-      </button>
+      </ProtectedButton>
     );
   };
 
-  const handleApply = () => {
-    setShowApplyDialog(true);
+  const renderApplyButton = () => {
+    if (hasApplied) {
+      return (
+        <>
+          <button
+            disabled
+            className="mt-2 flex items-center gap-2 bg-gray-300 text-gray-600 px-6 py-2 rounded-lg cursor-not-allowed"
+          >
+            Already Applied
+          </button>
+        </>
+      );
+    }
+
+    if (job.hasTest) {
+      if (!user || testStatus === null || !testStatus.submitted) {
+        return (
+          <>
+            <ProtectedButton
+              allowedRoles={["USER"]}
+              requireVerified={true}
+              onClick={handleTakePreTestClick}
+              className="mt-2 flex items-center gap-2 bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition"
+            >
+              Take Pre-Test
+            </ProtectedButton>
+            {showProfileIncompleteBanner && (
+              <div className="mt-2 p-3 rounded bg-yellow-100 border border-yellow-300 text-yellow-900 font-semibold text-center">
+                Please complete your profile (birth date, gender, education, and
+                current address) before taking the pre-test.{" "}
+                <Link
+                  href="/profile/user"
+                  className="underline hover:text-yellow-700"
+                >
+                  Go to Profile
+                </Link>
+              </div>
+            )}
+          </>
+        );
+      }
+
+      if (testStatus.passed) {
+        return (
+          <>
+            <ProtectedButton
+              allowedRoles={["USER"]}
+              requireVerified={true}
+              onClick={handleApplyClick}
+              className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
+            >
+              <Send size={16} /> Apply Now
+            </ProtectedButton>
+            {showProfileIncompleteBanner && (
+              <div className="mt-2 p-3 rounded bg-yellow-100 border border-yellow-300 text-yellow-900 font-semibold text-center">
+                Please complete your profile (birth date, gender, education, and
+                current address) before applying.{" "}
+                <Link
+                  href="/profile/user"
+                  className="underline hover:text-yellow-700"
+                >
+                  Go to Profile
+                </Link>
+              </div>
+            )}
+          </>
+        );
+      }
+
+      return (
+        <p className="text-sm text-red-500">You did not pass the pre-test</p>
+      );
+    }
+
+    return (
+      <>
+        <ProtectedButton
+          allowedRoles={["USER"]}
+          requireVerified={true}
+          onClick={handleApplyClick}
+          className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
+        >
+          <Send size={16} /> Apply Now
+        </ProtectedButton>
+        {showProfileIncompleteBanner && (
+          <div className="mt-2 p-3 rounded bg-yellow-100 border border-yellow-300 text-yellow-900 font-semibold text-center">
+            Please complete your profile (birth date, gender, education, and
+            current address) before applying.{" "}
+            <Link
+              href="/profile/user"
+              className="underline hover:text-yellow-700"
+            >
+              Go to Profile
+            </Link>
+          </div>
+        )}
+      </>
+    );
   };
 
   return (
@@ -164,29 +316,14 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           className="w-full h-48 object-cover rounded-lg mb-4"
         />
       )}
-      {showApplyDialog && job && (
-        <EditDialog
-          open={showApplyDialog}
-          onClose={() => setShowApplyDialog(false)}
-          title={`Apply for ${job.title}`}
-        >
-          <ApplyJobForm
-            jobId={job.id}
-            onSuccess={() => setShowApplyDialog(false)}
-            onCancel={() => setShowApplyDialog(false)}
-          />
-        </EditDialog>
-      )}
 
       <div className="absolute top-0 right-0 flex gap-2 p-2 z-10">
         {renderSaveButton()}
-        <button
-          onClick={handleShare}
-          className="p-2 rounded-full hover:bg-gray-100 transition"
-          title="Share Job"
-        >
-          <Share2 size={18} />
-        </button>
+
+        <SocialShare
+          url={typeof window !== "undefined" ? window.location.href : ""}
+          title={`Check out this job: ${job.title} at ${companyName}`}
+        />
       </div>
 
       <div className="flex items-center gap-4">
@@ -196,8 +333,20 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           className="w-16 h-16 object-contain rounded"
         />
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">{job.title}</h2>
-          <p className="text-gray-600">{companyName}</p>
+          <h2 className="text-2xl font-bold text-gray-800 hover:underline cursor-pointer">
+            <Link href={`/jobs/${job.id}`}>{job.title}</Link>
+          </h2>
+          {job.company?.id ? (
+            <Link
+              href={`/companies/${job.company.id}`}
+              className="text-gray-600 hover:underline"
+            >
+              {companyName}
+            </Link>
+          ) : (
+            <p className="text-gray-600">{companyName}</p>
+          )}
+
           <p className="text-sm text-gray-500">{job.location}</p>
           <p className="text-xs text-gray-400">
             Posted on {new Date(job.createdAt).toLocaleDateString()}
@@ -230,44 +379,12 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         </div>
       </div>
 
-      {job.hasTest ? (
-        testStatus === null ? (
-          <p className="text-sm text-gray-500 italic">
-            Checking test status...
-          </p>
-        ) : !testStatus.submitted ? (
-          <button
-            onClick={() =>
-              window.location.assign(`/jobs/${job.id}/pre-selection-test`)
-            }
-            className="mt-2 flex items-center gap-2 bg-yellow-500 text-white px-6 py-2 rounded-lg hover:bg-yellow-600 transition"
-          >
-            Take Pre-Test
-          </button>
-        ) : testStatus.passed ? (
-          <button
-            onClick={() => setShowApplyForm(true)}
-            className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
-          >
-            <Send size={16} /> Apply Now
-          </button>
-        ) : (
-          <p className="text-sm text-red-500">You did not pass the pre-test</p>
-        )
-      ) : (
-        <button
-          onClick={() => setShowApplyForm(true)}
-          className="mt-2 flex items-center gap-2 bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#517d98] transition"
-        >
-          <Send size={16} /> Apply Now
-        </button>
-      )}
+      {renderApplyButton()}
 
       <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line pt-4">
         {job.description}
       </div>
 
-      {/* Suggested Jobs Section */}
       {suggestedJobs.length > 0 && (
         <div className="pt-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
@@ -275,9 +392,10 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {suggestedJobs.map((suggestedJob) => (
-              <div
+              <Link
                 key={suggestedJob.id}
-                className="border p-3 rounded shadow-sm"
+                href={`/jobs/${suggestedJob.id}`}
+                className="block border p-3 rounded shadow-sm hover:shadow-md hover:bg-gray-50 transition"
               >
                 <p className="font-semibold text-gray-800 text-sm truncate">
                   {suggestedJob.title}
@@ -288,15 +406,17 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
                 <p className="text-xs text-gray-400">
                   ${suggestedJob.salary?.toLocaleString()}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       )}
+
       <ApplyJobModal
         jobId={job.id}
         open={showApplyForm}
         onClose={() => setShowApplyForm(false)}
+        setHasApplied={setHasApplied}
       />
     </div>
   );
