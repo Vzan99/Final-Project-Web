@@ -9,7 +9,6 @@ export default function CreateJobPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Create New Job</h1>
       <JobForm
         onSubmit={async (formData) => {
           try {

@@ -4,6 +4,7 @@ import { useAppSelector } from "@/lib/redux/hooks";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/lib/axios";
+import DashboardOverviewSkeleton from "@/components/dashboard/DashboardOverviewSkeleton";
 
 interface OverviewData {
   userByRole: { role: string; total: number }[];
@@ -35,7 +36,15 @@ export default function DashboardOverviewPage() {
     }
   }, [user]);
 
-  if (loading || loadingData) return <p className="p-4">Loading...</p>;
+  if (loading || loadingData)
+    return (
+      <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+        <h1 className="text-3xl font-bold text-[#6096B4] mb-8">
+          Admin Dashboard
+        </h1>
+        <DashboardOverviewSkeleton />
+      </div>
+    );
 
   return (
     <div className="p-6 bg-[#EEE9DA] min-h-screen">

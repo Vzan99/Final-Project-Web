@@ -15,6 +15,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from "recharts";
+import { DemographicsSkeleton } from "@/components/dashboard/analytics/DemographicsSkeleton";
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a28cf5"];
 
@@ -31,7 +32,16 @@ export default function UserDemographicsPage() {
       .catch(() => toast.error("Gagal memuat data demografi"));
   }, []);
 
-  if (!data) return <p>Loading...</p>;
+  if (!data) {
+    return (
+      <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+        <h1 className="text-3xl font-bold text-[#6096B4]">User Demographics</h1>
+        <DemographicsSkeleton />
+        <DemographicsSkeleton />
+        <DemographicsSkeleton />
+      </div>
+    );
+  }
 
   const ageData = Object.entries(data.ageGroups).map(([age, value]) => ({
     name: age,
