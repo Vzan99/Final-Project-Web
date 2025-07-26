@@ -7,6 +7,8 @@ import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 import ReviewForm from "@/components/review/ReviewForm";
 import ReviewList from "@/components/review/ReviewList";
 import { Pagination } from "@/components/pagination";
+import CompanyDetailsSkeleton from "@/components/loadingSkeleton/companyDetailSkeleton";
+import JobsListSkeleton from "@/components/loadingSkeleton/jobsListSkeleton";
 
 type Company = {
   id: string;
@@ -108,11 +110,7 @@ export default function CompanyDetailsPage() {
   }, [activeTab, companyId, reviewPage]);
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-[#f3f2ef] pt-8 text-black max-w-5xl mx-auto px-4 md:px-0">
-        <p>Loading company...</p>
-      </main>
-    );
+    return <CompanyDetailsSkeleton />;
   }
 
   if (!company) {
@@ -206,14 +204,19 @@ export default function CompanyDetailsPage() {
           <div className="w-full">
             {activeTab === "About" && (
               <div className="text-gray-700 space-y-4">
-                {company.description && (
+                {company.description ? (
                   <div
                     className="prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{
                       __html: company.description,
                     }}
                   />
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No company description provided.
+                  </p>
                 )}
+
                 {company.foundedYear && (
                   <p className="text-sm">Founded Year: {company.foundedYear}</p>
                 )}
@@ -226,7 +229,7 @@ export default function CompanyDetailsPage() {
             {activeTab === "Jobs" && (
               <div>
                 {jobsLoading ? (
-                  <p>Loading jobs...</p>
+                  <JobsListSkeleton />
                 ) : jobs.length === 0 ? (
                   <p className="text-gray-600">
                     No published jobs from this company yet.
@@ -239,7 +242,7 @@ export default function CompanyDetailsPage() {
                           key={job.id}
                           className="border rounded p-4 hover:shadow-md transition cursor-pointer"
                         >
-                          <a href={`/job/${job.id}`} className="block">
+                          <a href={`/jobs/${job.id}`} className="block">
                             <h3 className="text-lg font-semibold text-[#6096B4]">
                               {job.title}
                             </h3>

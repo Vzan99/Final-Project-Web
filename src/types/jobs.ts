@@ -29,6 +29,7 @@ export type Job = {
     id: string;
     logo?: string;
     bannerUrl?: string;
+    description?: string;
     admin?: {
       name: string;
     };

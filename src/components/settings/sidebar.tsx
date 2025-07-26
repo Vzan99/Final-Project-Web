@@ -1,6 +1,6 @@
 "use client";
 
-import { Section } from "../page";
+import { Section } from "../../app/settings/page";
 
 type SidebarProps = {
   activeSection: Section;
@@ -14,7 +14,6 @@ export default function Sidebar({
   const tabs = [
     { label: "Account", key: "account-preferences" },
     { label: "Security", key: "sign-in-security" },
-    { label: "Payments", key: "subscriptions" },
   ] as const;
 
   return (
@@ -32,7 +31,9 @@ export default function Sidebar({
                   : "bg-white border-gray-300 text-[#497187] hover:bg-gray-100"
               }`}
             >
-              {label}
+              {label === "Account"
+                ? "Account Preferences"
+                : "Sign in & Security"}
             </button>
           ))}
         </div>
@@ -50,11 +51,7 @@ export default function Sidebar({
                 : "bg-white text-[#6096B4] hover:bg-gray-50"
             }`}
           >
-            {label === "Account"
-              ? "Account Preferences"
-              : label === "Security"
-              ? "Sign in & Security"
-              : "Subscriptions & Payments"}
+            {label === "Account" ? "Account Preferences" : "Sign in & Security"}
           </button>
         ))}
       </aside>

@@ -12,7 +12,9 @@ export default function AuthProvider({
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchUser());
+    dispatch(fetchUser())
+      .unwrap()
+      .catch(() => {});
   }, [dispatch]);
 
   return <>{children}</>;

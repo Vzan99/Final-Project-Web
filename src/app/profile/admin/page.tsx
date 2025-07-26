@@ -10,6 +10,8 @@ import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 import CompanyForm from "@/components/companyprofile/companyForm";
 import EditDialog from "@/components/userprofile/editDialog";
+import CompanyProfileSkeleton from "@/components/loadingSkeleton/companyProfileSkeleton";
+import ProtectedRoute from "@/components/protectedRoute";
 
 export default function CompanyProfilePage() {
   const dispatch = useAppDispatch();
@@ -93,12 +95,11 @@ export default function CompanyProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: typeof formData) => {
     try {
       await API.put("/profile/edit/company", {
-        ...formData,
-        foundedYear: parseInt(formData.foundedYear) || null,
+        ...values,
+        foundedYear: parseInt(values.foundedYear) || null,
       });
 
       toast.success("Company profile updated.");
@@ -109,172 +110,159 @@ export default function CompanyProfilePage() {
     }
   };
 
-  if (loading || !user)
-    return (
-      <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black max-w-5xl mx-auto px-4 md:px-0">
-        <div className="animate-pulse bg-gray-300 rounded-t-xl h-48 mb-10" />
-        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start">
-          <div className="absolute -top-20 left-0 right-0 md:left-8 md:right-auto z-30">
-            <div className="w-32 h-32 bg-gray-300 border-6 border-white mx-auto md:mx-0 rounded-md" />
+  return (
+    <ProtectedRoute
+      allowedRoles={["ADMIN"]}
+      fallback={<CompanyProfileSkeleton />}
+    >
+      <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black">
+        <div className="max-w-5xl mx-auto px-4 md:px-0">
+          {/* Banner */}
+          <div className="relative bg-white rounded-t-xl h-48 group overflow-hidden">
+            <button
+              type="button"
+              onClick={() => fileBannerRef.current?.click()}
+              className="absolute inset-0 w-full h-full z-10 cursor-pointer"
+              disabled={uploadLoading}
+              aria-label="Change Banner Image"
+            />
+            <div
+              className={`w-full h-full bg-cover bg-center transition-opacity duration-300 pointer-events-none ${
+                uploadLoading ? "opacity-50 animate-pulse" : ""
+              }`}
+              style={{
+                backgroundImage: `url('${
+                  getCloudinaryImageUrl(company?.bannerUrl, {
+                    width: 1200,
+                    height: 300,
+                    crop: "fill",
+                  }) || "/placeholder_banner.png"
+                }')`,
+              }}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileBannerRef}
+              onChange={handleBannerUpload}
+              hidden
+            />
           </div>
-          <div className="h-10 w-40 ml-auto mb-4 rounded-full bg-gray-300" />
-          <div className="h-8 w-60 mb-2 rounded bg-gray-300" />
-          <div className="mt-4 space-y-2 w-full max-w-lg">
-            <div className="h-6 w-32 rounded bg-gray-300" />
-            <div className="h-12 w-full rounded bg-gray-300" />
+
+          {/* Company Card */}
+          <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start z-20">
+            {/* Logo container */}
+            <div className="absolute -top-20 left-0 right-0 md:left-8 md:right-auto z-30 pointer-events-none">
+              <div className="relative w-32 h-32 mx-auto md:mx-0 cursor-pointer">
+                <button
+                  type="button"
+                  onClick={() => fileLogoRef.current?.click()}
+                  disabled={uploadLoading}
+                  className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto${
+                    uploadLoading ? "animate-pulse" : ""
+                  }`}
+                  aria-label="Change Company Logo"
+                >
+                  <img
+                    src={
+                      getCloudinaryImageUrl(company?.logo, {
+                        width: 200,
+                        height: 200,
+                        crop: "fill",
+                      }) || "/placeholder_user.png"
+                    }
+                    alt="Company Logo"
+                    className="object-cover w-full h-full"
+                    draggable={false}
+                  />
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  ref={fileLogoRef}
+                  hidden
+                />
+              </div>
+            </div>
+
+            {/* Edit button */}
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="ml-auto bg-[#89A8B2] text-white rounded-full p-2 hover:bg-[#7a98a1] transition self-start"
+              aria-label="Edit Company Profile"
+            >
+              <Pencil size={18} />
+            </button>
+
+            {/* Company info */}
+            <div className="flex flex-col justify-center mt-4 w-full space-y-1">
+              <h1 className="text-2xl font-bold text-gray-800">{user?.name}</h1>
+
+              {/* Location */}
+              <p className="text-sm text-gray-600">
+                {company?.location || "Location not provided"}
+              </p>
+
+              {/* Website directly below location */}
+              {company?.website && (
+                <p className="text-sm text-gray-600">
+                  <a
+                    href={
+                      company.website.startsWith("http")
+                        ? company.website
+                        : `https://${company.website}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    {company.website}
+                  </a>
+                </p>
+              )}
+
+              {/* Description */}
+              <div className="company-description text-gray-700 text-justify break-words">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: company?.description || "<p>No description</p>",
+                  }}
+                />
+              </div>
+
+              {/* Founded Year */}
+              {company?.foundedYear && (
+                <p className="text-sm text-gray-600">
+                  Founded Year: {company.foundedYear}
+                </p>
+              )}
+
+              {/* Industry */}
+              {company?.industry && (
+                <p className="text-sm text-gray-600">
+                  Industry: {company.industry}
+                </p>
+              )}
+            </div>
           </div>
+
+          {/* Edit Dialog Modal */}
+          <EditDialog
+            open={isEditOpen}
+            onClose={() => setIsEditOpen(false)}
+            title="Edit Company Info"
+          >
+            <CompanyForm
+              formData={formData}
+              onChange={handleChange}
+              onCancel={() => setIsEditOpen(false)}
+              onSubmit={handleSubmit}
+              loading={uploadLoading}
+            />
+          </EditDialog>
         </div>
       </main>
-    );
-
-  return (
-    <main className="min-h-screen bg-[#f3f2ef] pb-16 pt-8 text-black">
-      <div className="max-w-5xl mx-auto px-4 md:px-0">
-        {/* Banner */}
-        <div className="relative bg-white rounded-t-xl h-48 group overflow-hidden">
-          <button
-            type="button"
-            onClick={() => fileBannerRef.current?.click()}
-            className="absolute inset-0 w-full h-full z-10 cursor-pointer"
-            disabled={uploadLoading}
-            aria-label="Change Banner Image"
-          />
-          <div
-            className={`w-full h-full bg-cover bg-center transition-opacity duration-300 pointer-events-none ${
-              uploadLoading ? "opacity-50 animate-pulse" : ""
-            }`}
-            style={{
-              backgroundImage: `url('${
-                getCloudinaryImageUrl(company?.bannerUrl, {
-                  width: 1200,
-                  height: 300,
-                  crop: "fill",
-                }) || "/placeholder_banner.png"
-              }')`,
-            }}
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileBannerRef}
-            onChange={handleBannerUpload}
-            hidden
-          />
-        </div>
-
-        {/* Company Card */}
-        <div className="relative bg-white rounded-b-xl shadow p-6 mb-10 px-4 md:px-8 flex flex-col items-start z-20">
-          {/* Logo container */}
-          <div className="absolute -top-20 left-0 right-0 md:left-8 md:right-auto z-30">
-            <div className="relative w-32 h-32 mx-auto md:mx-0 cursor-pointer">
-              <button
-                type="button"
-                onClick={() => fileLogoRef.current?.click()}
-                disabled={uploadLoading}
-                className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer ${
-                  uploadLoading ? "animate-pulse" : ""
-                }`}
-                aria-label="Change Company Logo"
-              >
-                <img
-                  src={
-                    getCloudinaryImageUrl(company?.logo, {
-                      width: 200,
-                      height: 200,
-                      crop: "fill",
-                    }) || "/placeholder_user.png"
-                  }
-                  alt="Company Logo"
-                  className="object-cover w-full h-full"
-                  draggable={false}
-                />
-              </button>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                ref={fileLogoRef}
-                hidden
-              />
-            </div>
-          </div>
-
-          {/* Edit button */}
-          <button
-            onClick={() => setIsEditOpen(true)}
-            className="ml-auto bg-[#89A8B2] text-white rounded-full p-2 hover:bg-[#7a98a1] transition self-start"
-            aria-label="Edit Company Profile"
-          >
-            <Pencil size={18} />
-          </button>
-
-          {/* Company info */}
-          <div className="flex flex-col justify-center mt-4 max-w-lg w-full space-y-1">
-            <h1 className="text-2xl font-bold text-gray-800">{user?.name}</h1>
-
-            {/* Location */}
-            <p className="text-sm text-gray-600">
-              {company?.location || "Location not provided"}
-            </p>
-
-            {/* Website directly below location */}
-            {company?.website && (
-              <p className="text-sm text-gray-600">
-                <a
-                  href={
-                    company.website.startsWith("http")
-                      ? company.website
-                      : `https://${company.website}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
-                >
-                  {company.website}
-                </a>
-              </p>
-            )}
-
-            {/* Description */}
-            <div className="company-description text-gray-700 text-justify break-words">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: company?.description || "<p>No description</p>",
-                }}
-              />
-            </div>
-
-            {/* Founded Year */}
-            {company?.foundedYear && (
-              <p className="text-sm text-gray-600">
-                Founded Year: {company.foundedYear}
-              </p>
-            )}
-
-            {/* Industry */}
-            {company?.industry && (
-              <p className="text-sm text-gray-600">
-                Industry: {company.industry}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Edit Dialog Modal */}
-        <EditDialog
-          open={isEditOpen}
-          onClose={() => setIsEditOpen(false)}
-          title="Edit Company Info"
-        >
-          <CompanyForm
-            formData={formData}
-            onChange={handleChange}
-            onCancel={() => setIsEditOpen(false)}
-            onSubmit={handleSubmit}
-            loading={uploadLoading}
-          />
-        </EditDialog>
-      </div>
-    </main>
+    </ProtectedRoute>
   );
 }

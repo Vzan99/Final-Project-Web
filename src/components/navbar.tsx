@@ -75,6 +75,21 @@ export default function Navbar() {
     if (!showNavbar && profileOpen) setProfileOpen(false);
   }, [showNavbar, profileOpen]);
 
+  const handleProtectedNavigation = (url: string) => {
+    if (!user) {
+      localStorage.setItem(
+        "lastVisited",
+        window.location.pathname + window.location.search
+      );
+      router.push("/auth/login");
+    } else {
+      router.push(url);
+    }
+    // Close menus
+    setIsOpen(false);
+    setProfileOpen(false);
+  };
+
   return (
     <nav
       className={`bg-white shadow fixed top-0 left-0 w-full z-50 transition-transform duration-300 ${
@@ -124,76 +139,75 @@ export default function Navbar() {
                 >
                   {user.role === "USER" && (
                     <>
-                      <Link
-                        href="/profile/user"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/profile/user")
+                        }
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         My Profile
-                      </Link>
-                      <Link
-                        href="/jobs/saved"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/jobs/saved")}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Saved Jobs
-                      </Link>
-                      <Link
-                        href="/jobs/applied"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/jobs/applied")
+                        }
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Applied Jobs
-                      </Link>
-                      <Link
-                        href="/subscription"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/subscription")
+                        }
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Subscription
-                      </Link>
-                      <Link
-                        href="/settings"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/settings")}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Settings
-                      </Link>
+                      </button>
                     </>
                   )}
                   {user.role === "ADMIN" && (
                     <>
-                      <Link
-                        href="/profile/admin"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/profile/admin")
+                        }
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         My Profile
-                      </Link>
-                      <Link
-                        href="/dashboard"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/dashboard")}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Dashboard
-                      </Link>
-                      <Link
-                        href="/settings"
-                        className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                        onClick={() => setProfileOpen(false)}
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/settings")}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >
                         Settings
-                      </Link>
+                      </button>
                     </>
                   )}
                   {user.role === "DEVELOPER" && (
-                    <Link
-                      href="/developer"
-                      className="block px-4 py-2 text-sm hover:bg-gray-100 rounded"
-                      onClick={() => setProfileOpen(false)}
+                    <button
+                      onClick={() => handleProtectedNavigation("/developer")}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                     >
                       Dashboard
-                    </Link>
+                    </button>
                   )}
                   <button
                     onClick={handleLogout}
@@ -205,18 +219,27 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="ml-4 space-x-2">
-                <Link
-                  href="/auth/login"
+                <button
+                  onClick={() => {
+                    localStorage.setItem(
+                      "lastVisited",
+                      window.location.pathname + window.location.search
+                    );
+                    router.push("/auth/login");
+                  }}
                   className="px-4 py-2 border border-[#6096B4] rounded text-[#6096B4] hover:bg-blue-100 transition"
                 >
                   Login
-                </Link>
-                <Link
-                  href="/auth/register"
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    router.push("/auth/register");
+                  }}
                   className="px-4 py-2 bg-[#6096B4] text-white rounded hover:bg-[#497187] transition"
                 >
                   Register
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -233,7 +256,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu */}
       {isOpen && (
         <div
           ref={menuRef}
@@ -287,108 +310,78 @@ export default function Navbar() {
                 >
                   {user.role === "USER" && (
                     <>
-                      <Link
-                        href="/profile/user"
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/profile/user")
+                        }
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         My Profile
-                      </Link>
-                      <Link
-                        href="/jobs/saved"
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/jobs/saved")}
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Saved Jobs
-                      </Link>
-                      <Link
-                        href="/jobs/applied"
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/jobs/applied")
+                        }
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Applied Jobs
-                      </Link>
-                      <Link
-                        href="/subscriptions"
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/subscriptions")
+                        }
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Subscriptions
-                      </Link>
-                      <Link
-                        href="/settings"
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/settings")}
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Settings
-                      </Link>
+                      </button>
                     </>
                   )}
                   {user.role === "ADMIN" && (
                     <>
-                      <Link
-                        href="/profile/admin"
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/profile/admin")
+                        }
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         My Profile
-                      </Link>
-                      <Link
-                        href="/dashboard"
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/dashboard")}
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Dashboard
-                      </Link>
-                      <Link
-                        href="/settings"
+                      </button>
+                      <button
+                        onClick={() => handleProtectedNavigation("/settings")}
                         className="block text-sm hover:text-[#497187]"
-                        onClick={() => {
-                          setProfileOpen(false);
-                          setIsOpen(false);
-                        }}
                       >
                         Settings
-                      </Link>
+                      </button>
                     </>
                   )}
                   {user.role === "DEVELOPER" && (
-                    <Link
-                      href="/developer"
+                    <button
+                      onClick={() => handleProtectedNavigation("/developer")}
                       className="block text-sm hover:text-[#497187]"
-                      onClick={() => {
-                        setProfileOpen(false);
-                        setIsOpen(false);
-                      }}
                     >
                       Dashboard
-                    </Link>
+                    </button>
                   )}
                   <button
-                    onClick={() => {
-                      handleLogout();
-                    }}
+                    onClick={handleLogout}
                     className="block text-left text-sm text-red-600 hover:text-red-700 w-full"
                   >
                     Sign Out
@@ -398,20 +391,29 @@ export default function Navbar() {
             </>
           ) : (
             <div className="space-y-2">
-              <Link
-                href="/auth/login"
-                className="block px-4 py-2 border border-[#6096B4] rounded text-[#6096B4] hover:bg-blue-100 transition"
-                onClick={() => setIsOpen(false)}
+              <button
+                onClick={() => {
+                  localStorage.setItem(
+                    "lastVisited",
+                    window.location.pathname + window.location.search
+                  );
+                  setIsOpen(false);
+                  router.push("/auth/login");
+                }}
+                className="block w-full px-4 py-2 border border-[#6096B4] rounded text-[#6096B4] hover:bg-blue-100 transition text-left"
               >
                 Login
-              </Link>
-              <Link
-                href="/auth/register"
-                className="block px-4 py-2 bg-[#6096B4] text-white rounded hover:bg-[#497187] transition"
-                onClick={() => setIsOpen(false)}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push("/auth/register");
+                }}
+                className="block w-full px-4 py-2 bg-[#6096B4] text-white rounded hover:bg-[#497187] transition text-left"
               >
                 Register
-              </Link>
+              </button>
             </div>
           )}
         </div>

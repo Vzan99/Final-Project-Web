@@ -58,7 +58,14 @@ export default function LoginPage() {
               await API.post("/auth/login", values);
               toast.success("Login successful!");
               await dispatch(fetchUser());
-              router.push("/home");
+
+              const lastVisited = localStorage.getItem("lastVisited");
+              if (lastVisited && lastVisited !== "/auth/login") {
+                localStorage.removeItem("lastVisited");
+                router.push(lastVisited);
+              } else {
+                router.push("/home");
+              }
             } catch (err: any) {
               toast.error(err?.response?.data?.message || "Login failed");
             } finally {

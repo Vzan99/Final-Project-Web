@@ -3,8 +3,6 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import BulletList from "@tiptap/extension-bullet-list";
-import ListItem from "@tiptap/extension-list-item";
 import {
   Bold,
   Italic,
@@ -23,9 +21,10 @@ export default function RichTextEditor({
   onChange,
 }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit, Underline, BulletList, ListItem],
+    extensions: [StarterKit, Underline], // Removed BulletList & ListItem to avoid duplication
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    immediatelyRender: false, // Fix SSR hydration warning
   });
 
   if (!editor) return null;
@@ -93,13 +92,9 @@ export default function RichTextEditor({
         </button>
       </div>
 
-      {/* Outer container styled like input */}
+      {/* Editor content container */}
       <div className="mt-1 block w-full border rounded px-3 py-2 focus-within:ring-1 focus-within:ring-gray-800 focus-within:border-gray-800">
-        {/* Inner content without border/background */}
-        <EditorContent
-          editor={editor}
-          className="prose max-w-none outline-none focus:outline-none bg-transparent border-none p-0"
-        />
+        <EditorContent editor={editor} />
       </div>
     </div>
   );

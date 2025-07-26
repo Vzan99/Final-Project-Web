@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import API from "@/lib/axios";
 import { JobCard } from "@/components/jobs/jobCard";
 import { JobCardSkeleton } from "@/components/loadingSkeleton/jobCardSkeleton";
@@ -42,6 +43,32 @@ export default function JobListingsPage() {
     sortOrder: "desc",
   });
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const updateSearchParams = (
+    updatedFilters: typeof filters,
+    pageNumber: number = 1
+  ) => {
+    const query = new URLSearchParams();
+    Object.entries(updatedFilters).forEach(([key, value]) => {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== "" &&
+        !(Array.isArray(value) && value.length === 0)
+      ) {
+        if (Array.isArray(value)) {
+          query.set(key, value.join(","));
+        } else {
+          query.set(key, value.toString());
+        }
+      }
+    });
+    query.set("page", pageNumber.toString());
+    router.push("/jobs?" + query.toString());
+  };
+
   const fetchJobs = useCallback(
     async (filtersParams = filters, pageNumber = page) => {
       setLoading(true);
@@ -57,14 +84,15 @@ export default function JobListingsPage() {
         }
 
         if (filtersParams.listingTime && filtersParams.listingTime !== "any") {
-          const days = {
+          const daysMap: Record<string, number> = {
             today: 1,
             "3days": 3,
             "7days": 7,
             "14days": 14,
             "30days": 30,
             older: -1,
-          }[filtersParams.listingTime];
+          };
+          const days = daysMap[filtersParams.listingTime];
 
           if (days !== undefined) {
             if (days > 0) {
@@ -92,10 +120,6 @@ export default function JobListingsPage() {
           ).toISOString();
         }
 
-        // Sorting params
-        params.sortBy = filtersParams.sortBy;
-        params.sortOrder = filtersParams.sortOrder;
-
         const res = await API.get("/jobs/public", {
           params,
           withCredentials: false,
@@ -119,22 +143,40 @@ export default function JobListingsPage() {
   );
 
   useEffect(() => {
-    fetchJobs(filters, 1);
-  }, [fetchJobs, filters]);
+    const queryFilters = {
+      title: searchParams.get("title") || "",
+      location: searchParams.get("location") || "",
+      jobType: searchParams.get("jobType") || "",
+      isRemote: searchParams.get("isRemote")
+        ? searchParams.get("isRemote") === "true"
+        : null,
+      classifications: searchParams.get("classifications")
+        ? searchParams.get("classifications")!.split(",")
+        : [],
+      listingTime: searchParams.get("listingTime") || "any",
+      customStartDate: searchParams.get("customStartDate") || undefined,
+      customEndDate: searchParams.get("customEndDate") || undefined,
+      sortBy: (searchParams.get("sortBy") || "createdAt") as
+        | "createdAt"
+        | "salary"
+        | "relevance",
+      sortOrder: (searchParams.get("sortOrder") || "desc") as "asc" | "desc",
+    };
+    const pageQuery = parseInt(searchParams.get("page") || "1", 10);
+    setFilters(queryFilters);
+    fetchJobs(queryFilters, pageQuery);
+  }, [searchParams]);
 
-  const handleSearch = useCallback(
-    (newFilters: typeof filters) => {
-      setFilters(newFilters);
-      fetchJobs(newFilters, 1);
-    },
-    [fetchJobs]
-  );
+  const handleSearch = useCallback((newFilters: typeof filters) => {
+    setFilters(newFilters);
+    updateSearchParams(newFilters, 1);
+  }, []);
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      fetchJobs(filters, newPage);
+      updateSearchParams(filters, newPage);
     },
-    [fetchJobs, filters]
+    [filters]
   );
 
   const totalPages = Math.ceil(totalJobs / PAGE_SIZE);
@@ -142,62 +184,120 @@ export default function JobListingsPage() {
   const handleJobClick = (job: Job) => {
     setLoadingJobDetails(true);
     setSelectedJob(null);
-
     setTimeout(() => {
       setSelectedJob(job);
       setLoadingJobDetails(false);
     }, 300);
   };
 
+  function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+      const checkMobile = () => setIsMobile(window.innerWidth < 768);
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+    return isMobile;
+  }
+
+  const isMobile = useIsMobile();
+
   return (
     <div className="flex flex-col px-4 lg:px-12 py-6 gap-6 max-w-7xl mx-auto">
-      <JobSearchBar onSearch={handleSearch} />
+      <h1 className="text-2xl font-bold text-[#6096B4]">Search Jobs </h1>
 
-      <div className="flex gap-6">
-        {/* Left: Job List */}
-        <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200">
-          {loading ? (
-            Array.from({ length: PAGE_SIZE }).map((_, i) => (
-              <JobCardSkeleton key={i} />
-            ))
-          ) : jobs.length > 0 ? (
-            jobs.map((job) => (
-              <div
-                key={job.id}
-                onClick={() => handleJobClick(job)}
-                className={`cursor-pointer mb-4 ${
-                  selectedJob?.id === job.id && !loadingJobDetails
-                    ? "bg-[#f0f4f8]"
-                    : ""
-                }`}
-              >
-                <JobCard job={job} />
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center">No jobs found.</p>
-          )}
+      <JobSearchBar onSearch={handleSearch} initialFilters={filters} />
 
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
-
-        {/* Right: Job Details */}
-        <div className="hidden md:block w-3/5 h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-          {loadingJobDetails ? (
-            <JobDetailsSkeleton />
-          ) : selectedJob ? (
+      {isMobile ? (
+        selectedJob ? (
+          <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <button
+              onClick={() => setSelectedJob(null)}
+              className="mb-4 text-sm text-blue-600 underline"
+            >
+              ← Back to job list
+            </button>
             <JobDetailsCard job={selectedJob} />
-          ) : (
-            <div className="text-gray-500 text-center pt-20">
-              Select a job to view details.
-            </div>
-          )}
+          </div>
+        ) : (
+          <div className="h-[75vh] overflow-y-auto pr-2">
+            {loading ? (
+              Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <JobCardSkeleton key={i} />
+              ))
+            ) : jobs.length > 0 ? (
+              jobs.map((job) => (
+                <div
+                  key={job.id}
+                  onClick={() => handleJobClick(job)}
+                  className="cursor-pointer mb-4"
+                >
+                  <JobCard job={job} />
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No jobs found.</p>
+            )}
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        )
+      ) : (
+        // Desktop layout: side-by-side
+        <div className="flex gap-6">
+          <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200">
+            {loading ? (
+              Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                <JobCardSkeleton key={i} />
+              ))
+            ) : jobs.length > 0 ? (
+              jobs.map((job) => (
+                <div
+                  key={job.id}
+                  onClick={() => handleJobClick(job)}
+                  className={`cursor-pointer mb-4 ${
+                    selectedJob?.id === job.id && !loadingJobDetails
+                      ? "bg-[#f0f4f8]"
+                      : ""
+                  }`}
+                >
+                  <JobCard job={job} />
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500 text-center">No jobs found.</p>
+            )}
+
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+
+          <div className="hidden md:block w-3/5 h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            {loadingJobDetails ? (
+              <JobDetailsSkeleton />
+            ) : selectedJob ? (
+              <JobDetailsCard job={selectedJob} />
+            ) : (
+              <div className="text-gray-500 text-center pt-20">
+                <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                  No Job Selected
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Please select a job from the list to view detailed
+                  information.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

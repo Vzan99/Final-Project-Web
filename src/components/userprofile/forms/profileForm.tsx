@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { UserProfileData } from "@/types/userprofile";
+import { profileSchema } from "@/schemas/profile/user/profileSchema";
 
 type ProfileFormProps = {
   initialData: UserProfileData | null;
@@ -16,34 +18,25 @@ export default function ProfileForm({
   onSuccess,
   onCancel,
 }: ProfileFormProps) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [about, setAbout] = useState("");
-  const [loading, setLoading] = useState(false);
+  const initialValues = {
+    name: initialData?.name || "",
+    address: initialData?.profile?.address || "",
+    about: initialData?.profile?.about || "",
+  };
 
-  useEffect(() => {
-    if (!initialData) return;
-
-    setName(initialData.name || "");
-    setEmail(initialData.email || "");
-    setAddress(initialData.profile?.address || "");
-    setAbout(initialData.profile?.about || "");
-  }, [initialData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }
+  ) => {
+    setSubmitting(true);
 
     try {
-      const payload = {
+      await API.put("/profile/edit/user", {
         userId: initialData?.id,
-        name,
-        address,
-        about,
-      };
-
-      await API.put("/profile/edit/user", payload);
+        name: values.name,
+        address: values.address,
+        about: values.about,
+      });
 
       toast.success("Profile updated successfully!");
       onSuccess();
@@ -53,74 +46,101 @@ export default function ProfileForm({
           (error?.response?.data?.message || error.message)
       );
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name */}
-      <div>
-        <label htmlFor="name" className="block font-medium text-gray-700">
-          Name
-        </label>
-        <input
-          id="name"
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="mt-1 block w-full border rounded px-3 py-2"
-        />
-      </div>
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      validationSchema={profileSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ isSubmitting }) => (
+        <Form className="space-y-6">
+          {/* Name */}
+          <div>
+            <label htmlFor="name" className="block font-medium text-gray-700">
+              Name
+            </label>
+            <Field
+              id="name"
+              name="name"
+              type="text"
+              className="mt-1 block w-full border rounded px-3 py-2"
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              name="name"
+              component="div"
+              className="text-red-600 text-sm mt-1"
+            />
+          </div>
 
-      {/* Address */}
-      <div>
-        <label htmlFor="address" className="block font-medium text-gray-700">
-          Address
-        </label>
-        <input
-          id="address"
-          type="text"
-          value={address || ""}
-          onChange={(e) => setAddress(e.target.value)}
-          className="mt-1 block w-full border rounded px-3 py-2"
-        />
-      </div>
+          {/* Address */}
+          <div>
+            <label
+              htmlFor="address"
+              className="block font-medium text-gray-700"
+            >
+              Address
+            </label>
+            <Field
+              id="address"
+              name="address"
+              type="text"
+              className="mt-1 block w-full border rounded px-3 py-2"
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              name="address"
+              component="div"
+              className="text-red-600 text-sm mt-1"
+            />
+          </div>
 
-      {/* About */}
-      <div>
-        <label htmlFor="about" className="block font-medium text-gray-700">
-          About Me
-        </label>
-        <textarea
-          id="about"
-          value={about || ""}
-          onChange={(e) => setAbout(e.target.value)}
-          rows={4}
-          className="mt-1 block w-full border rounded px-3 py-2"
-          placeholder="Write a short bio about yourself"
-        />
-      </div>
+          {/* About */}
+          <div>
+            <label htmlFor="about" className="block font-medium text-gray-700">
+              About Me
+            </label>
+            <Field
+              id="about"
+              name="about"
+              as="textarea"
+              rows={4}
+              placeholder="Write a short bio about yourself"
+              className="mt-1 block w-full border rounded px-3 py-2"
+              disabled={isSubmitting}
+            />
+            <ErrorMessage
+              name="about"
+              component="div"
+              className="text-red-600 text-sm mt-1"
+            />
+          </div>
 
-      {/* Buttons */}
-      <div className="flex justify-end space-x-3">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 rounded border border-gray-400 text-gray-700 hover:bg-gray-100"
-          disabled={loading}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1]"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Save"}
-        </button>
-      </div>
-    </form>
+          {/* Buttons */}
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 rounded border border-gray-400 text-gray-700 hover:bg-gray-100"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1]"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </Form>
+      )}
+    </Formik>
   );
 }
