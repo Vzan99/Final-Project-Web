@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import SalaryTrendsSkeleton from "@/components/dashboard/analytics/SalaryTrendsSkeleton";
 
 interface SalaryTrend {
   title: string;
@@ -31,7 +32,13 @@ export default function SalaryTrendsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+        <h1 className="text-3xl font-bold text-[#6096B4]">Salary Trends</h1>
+        <SalaryTrendsSkeleton />
+      </div>
+    );
 
   // Label gabungan untuk chart
   const chartData = trends.map((t) => ({

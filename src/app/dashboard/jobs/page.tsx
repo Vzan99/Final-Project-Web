@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import API from "@/lib/axios";
 import { useAppSelector } from "@/lib/redux/hooks";
 import JobCard from "@/components/dashboard/jobs/JobCard";
+import AdminJobCardSkeleton from "@/components/dashboard/jobs/AdminJobSkeleton";
 
 interface Job {
   id: string;
@@ -103,7 +104,22 @@ export default function JobManagementPage() {
     }));
   };
 
-  if (loading || isLoading) return <p>Loading jobs...</p>;
+  const isInitialLoading = loading || (isLoading && jobs.length === 0);
+
+  if (isInitialLoading) {
+    return (
+      <div className="p-6 bg-[#EEE9DA] min-h-screen">
+        <h1 className="text-3xl font-bold text-[#6096B4] mb-6">
+          Job Management
+        </h1>
+        <section className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <AdminJobCardSkeleton key={i} />
+          ))}
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-[#EEE9DA] min-h-screen">

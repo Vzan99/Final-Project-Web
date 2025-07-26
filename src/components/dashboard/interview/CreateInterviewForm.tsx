@@ -54,27 +54,25 @@ export default function CreateInterviewForm({ onCreated }: Props) {
     },
   });
 
-  // Fetch jobs on mount
   useEffect(() => {
     API.get("/jobs/")
       .then((res) => setJobs(res.data.jobs))
       .catch(() => toast.error("Gagal mengambil daftar job"));
   }, []);
 
-  // Fetch applicants when jobId changes
   useEffect(() => {
     if (formik.values.jobId) {
       API.get(`/applications/jobs/${formik.values.jobId}/applicants`)
         .then((res) => {
-          const filtered = res.data.data.filter(
+          const filtered = res.data.data.applicants.filter(
             (a: any) => a.status === "INTERVIEW"
           );
           console.log("Applicants from BE:", res.data.data);
           setApplicants(
             filtered.map((a: any) => ({
-              userId: a.userId,
-              name: a.name,
-              email: a.email,
+              userId: a.user?.id,
+              name: a.user?.name,
+              email: a.user?.email,
             }))
           );
         })

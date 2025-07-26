@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import ApplicantInterestsSkeleton from "@/components/dashboard/analytics/ApplicantInterestsSkeleton";
 
 interface Interest {
   category: string;
@@ -29,7 +30,15 @@ export default function ApplicantInterestsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
+        <h1 className="text-3xl font-bold text-[#6096B4]">
+          Applicant Interests
+        </h1>
+        <ApplicantInterestsSkeleton />
+      </div>
+    );
 
   return (
     <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">

@@ -34,7 +34,6 @@ export default function EditJobPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Edit Job</h1>
       <JobForm initialValues={initialValues} onSubmit={handleSubmit} isEdit />
     </div>
   );

@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
-import slugify from "slugify";
 
 type Job = {
   id: string;
@@ -46,9 +45,6 @@ export default function JobCard({
     }
   };
 
-  const slug = slugify(job.title, { lower: true });
-  const jobSlug = `${job.id}-${slug}`;
-
   return (
     <div className="border rounded-xl shadow-sm bg-white overflow-hidden flex flex-col hover:shadow-md transition">
       <img
@@ -76,7 +72,7 @@ export default function JobCard({
         {/* Action Buttons */}
         <div className="flex flex-wrap sm:flex-col gap-2 sm:items-end">
           <button
-            onClick={() => router.push(`/dashboard/jobs/${jobSlug}`)}
+            onClick={() => router.push(`/dashboard/jobs/${job.id}`)}
             className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-[#6096B4] text-white hover:bg-[#4d7a96] transition"
           >
             View
@@ -91,7 +87,17 @@ export default function JobCard({
 
           {job.status === "DRAFT" && (
             <button
-              onClick={() => onPublish?.(job.id)}
+              onClick={async () => {
+                try {
+                  await API.patch(`/jobs/${job.id}/publish`, {
+                    status: "PUBLISHED",
+                  });
+                  onStatusChange?.(job.id, "PUBLISHED");
+                  toast.success("Job published");
+                } catch (err: any) {
+                  alert(err.response?.data?.message || "Failed to publish job");
+                }
+              }}
               className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition"
             >
               Publish
@@ -105,7 +111,8 @@ export default function JobCard({
                   await API.patch(`/jobs/${job.id}/publish`, {
                     status: "ARCHIVED",
                   });
-                  alert("Job archived");
+                  onStatusChange?.(job.id, "ARCHIVED");
+                  toast.success("Job archived");
                 } catch (err: any) {
                   alert(err.response?.data?.message || "Failed to archive job");
                 }
@@ -124,7 +131,7 @@ export default function JobCard({
                     status: "CLOSED",
                   });
                   onStatusChange?.(job.id, "CLOSED");
-                  alert("Job closed successfully");
+                  toast.success("Job closed successfully");
                 } catch (err: any) {
                   alert(err.response?.data?.message || "Failed to close job");
                 }

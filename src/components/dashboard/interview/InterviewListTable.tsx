@@ -30,6 +30,26 @@ export default function InterviewListTable({ data, onUpdated }: Props) {
     }
   };
 
+  const handleUpdateStatus = async (
+    id: string,
+    status: "COMPLETED" | "CANCELLED"
+  ) => {
+    if (
+      !confirm(`Yakin ingin mengubah status interview ini menjadi ${status}?`)
+    )
+      return;
+    try {
+      setLoadingId(id);
+      await API.patch(`/interviews/${id}/status`, { status });
+      toast.success(`Status berhasil diubah menjadi ${status}`);
+      onUpdated();
+    } catch {
+      toast.error("Gagal mengubah status interview.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
   return (
     <div className="overflow-x-auto border rounded-lg shadow bg-white">
       <table className="w-full table-auto">
@@ -91,12 +111,14 @@ export default function InterviewListTable({ data, onUpdated }: Props) {
                   </span>
                 </td>
                 <td className="px-5 py-3 space-x-2">
-                  <button
-                    onClick={() => setSelectedInterview(item)}
-                    className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-5 py-2 rounded-lg font-medium transition"
-                  >
-                    Edit
-                  </button>
+                  {!["COMPLETED", "CANCELLED"].includes(item.status) && (
+                    <button
+                      onClick={() => setSelectedInterview(item)}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-5 py-2 rounded-lg font-medium transition"
+                    >
+                      Edit
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDelete(item.id)}
                     disabled={loadingId === item.id}
@@ -104,6 +126,24 @@ export default function InterviewListTable({ data, onUpdated }: Props) {
                   >
                     Hapus
                   </button>
+                  {!["COMPLETED", "CANCELLED"].includes(item.status) && (
+                    <>
+                      <button
+                        onClick={() => handleUpdateStatus(item.id, "COMPLETED")}
+                        disabled={loadingId === item.id}
+                        className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
+                      >
+                        Tandai Selesai
+                      </button>
+                      <button
+                        onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
+                        disabled={loadingId === item.id}
+                        className="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
+                      >
+                        Batalkan
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))

@@ -16,7 +16,7 @@ interface JobFormValues {
   jobType: "Full-time" | "Part-time" | "Contract";
   isRemote: boolean;
   tags: string[];
-  banner?: File; // ✅ ganti dari bannerUrl menjadi banner (File)
+  banner?: File;
   hasTest: boolean;
 }
 
@@ -41,15 +41,6 @@ const defaultValues: JobFormValues = {
   hasTest: false,
 };
 
-const textFields = [
-  ["title", "Job Title"],
-  ["description", "Description"],
-  ["location", "Location"],
-  ["category", "Category Name (e.g., UI/UX, Backend, etc)"],
-  ["deadline", "Deadline (YYYY-MM-DD)"],
-  ["salary", "Salary (optional)"],
-] as const;
-
 export default function JobForm({
   initialValues = {},
   onSubmit,
@@ -69,9 +60,7 @@ export default function JobForm({
 
         Object.entries(values).forEach(([key, val]) => {
           if (key === "tags") {
-            (val as string[]).forEach((tag: string) =>
-              formData.append("tags", tag)
-            );
+            (val as string[]).forEach((tag) => formData.append("tags", tag));
           } else if (key === "banner" && val instanceof File) {
             formData.append("banner", val);
           } else if (
@@ -93,136 +82,168 @@ export default function JobForm({
     },
   });
 
-  const inputClass =
-    "w-full border px-3 py-2 rounded mt-1 focus:ring-[#6096B4] focus:border-[#6096B4]";
-
   return (
-    <form
-      onSubmit={formik.handleSubmit}
-      className="space-y-6 max-w-xl bg-white p-6 rounded-xl shadow-md"
-    >
-      {textFields.map(([key, label]) => {
-        type FieldKey = keyof JobFormValues;
-        const fieldKey = key as FieldKey;
+    <div className="p-6 bg-[#EEE9DA] min-h-screen">
+      <form
+        onSubmit={formik.handleSubmit}
+        className="space-y-6 max-w-xl bg-white p-6 rounded-xl shadow-md mx-auto"
+      >
+        <h2 className="text-2xl font-bold text-[#6096B4] mb-4">
+          {isEdit ? "Edit Job" : "Create Job"}
+        </h2>
 
-        return (
-          <div key={key}>
+        {/* Input Fields */}
+        {[
+          { label: "Job Title", name: "title" },
+          { label: "Description", name: "description" },
+          { label: "Location", name: "location" },
+          { label: "Category", name: "category" },
+        ].map(({ label, name }) => (
+          <div key={name}>
             <label className="block font-semibold text-[#1a1a1a]">
               {label}
             </label>
             <input
-              type={fieldKey === "salary" ? "number" : "text"}
-              name={fieldKey}
+              type="text"
+              name={name}
+              value={(formik.values as any)[name] ?? ""}
               onChange={formik.handleChange}
-              value={
-                formik.values[fieldKey] !== undefined
-                  ? String(formik.values[fieldKey])
-                  : ""
-              }
-              className={inputClass}
+              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
             />
-            {formik.touched[fieldKey] && formik.errors[fieldKey] && (
+            {(formik.errors as any)[name] && (
               <p className="text-red-500 text-sm">
-                {formik.errors[fieldKey] as string}
+                {(formik.errors as any)[name]}
               </p>
             )}
           </div>
-        );
-      })}
+        ))}
 
-      {/* Upload Banner */}
-      <div>
-        <label className="block font-semibold text-[#1a1a1a]">
-          Upload Banner
-        </label>
-        <input
-          type="file"
-          name="banner"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.currentTarget.files?.[0];
-            formik.setFieldValue("banner", file);
-          }}
-          className="w-full border border-gray-300 px-3 py-2 rounded-md mt-1 text-sm file:bg-[#6096B4] file:text-white file:border-none file:px-4 file:py-2 file:rounded file:cursor-pointer"
-        />
-        {formik.errors.banner && (
-          <p className="text-red-500 text-sm">
-            {formik.errors.banner as string}
-          </p>
-        )}
-      </div>
+        {/* Deadline */}
+        <div>
+          <label className="block font-semibold text-[#1a1a1a]">Deadline</label>
+          <input
+            type="date"
+            name="deadline"
+            value={formik.values.deadline}
+            onChange={formik.handleChange}
+            className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+          />
+          {formik.errors.deadline && (
+            <p className="text-red-500 text-sm">{formik.errors.deadline}</p>
+          )}
+        </div>
 
-      {/* Experience Level */}
-      <div>
-        <label className="block font-semibold text-[#1a1a1a]">
-          Experience Level
-        </label>
-        <select
-          name="experienceLevel"
-          value={formik.values.experienceLevel}
-          onChange={formik.handleChange}
-          className={inputClass}
+        {/* Salary */}
+        <div>
+          <label className="block font-semibold text-[#1a1a1a]">Salary</label>
+          <input
+            type="number"
+            name="salary"
+            value={formik.values.salary ?? ""}
+            onChange={formik.handleChange}
+            className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+          />
+          {formik.errors.salary && (
+            <p className="text-red-500 text-sm">{formik.errors.salary}</p>
+          )}
+        </div>
+
+        {/* Banner Upload */}
+        <div>
+          <label className="block font-semibold text-[#1a1a1a]">
+            Upload Banner
+          </label>
+          <input
+            type="file"
+            name="banner"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.currentTarget.files?.[0];
+              formik.setFieldValue("banner", file);
+            }}
+            className="w-full border px-3 py-2 rounded mt-1 text-sm file:bg-[#6096B4] file:text-white file:border-none file:px-4 file:py-2 file:rounded file:cursor-pointer"
+          />
+          {formik.errors.banner && (
+            <p className="text-red-500 text-sm">{formik.errors.banner}</p>
+          )}
+        </div>
+
+        {/* Select Fields */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-semibold text-[#1a1a1a]">
+              Experience Level
+            </label>
+            <select
+              name="experienceLevel"
+              value={formik.values.experienceLevel}
+              onChange={formik.handleChange}
+              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+            >
+              {["Entry", "Mid", "Senior"].map((level) => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold text-[#1a1a1a]">
+              Job Type
+            </label>
+            <select
+              name="jobType"
+              value={formik.values.jobType}
+              onChange={formik.handleChange}
+              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+            >
+              {["Full-time", "Part-time", "Contract"].map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Checkboxes */}
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            name="isRemote"
+            checked={formik.values.isRemote}
+            onChange={formik.handleChange}
+            className="accent-[#6096B4]"
+          />
+          <label className="font-semibold text-[#1a1a1a]">Remote?</label>
+        </div>
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            name="hasTest"
+            checked={formik.values.hasTest}
+            onChange={formik.handleChange}
+            className="accent-[#6096B4]"
+          />
+          <label className="font-semibold text-[#1a1a1a]">Include Test?</label>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-[#6096B4] text-white px-5 py-2 rounded-lg hover:bg-[#4d7a96] transition font-medium"
         >
-          <option value="Entry">Entry</option>
-          <option value="Mid">Mid</option>
-          <option value="Senior">Senior</option>
-        </select>
-      </div>
-
-      {/* Job Type */}
-      <div>
-        <label className="block font-semibold text-[#1a1a1a]">Job Type</label>
-        <select
-          name="jobType"
-          value={formik.values.jobType}
-          onChange={formik.handleChange}
-          className={inputClass}
-        >
-          <option value="Full-time">Full-time</option>
-          <option value="Part-time">Part-time</option>
-          <option value="Contract">Contract</option>
-        </select>
-      </div>
-
-      {/* Remote and Test */}
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          name="isRemote"
-          checked={formik.values.isRemote}
-          onChange={formik.handleChange}
-          className="accent-[#6096B4]"
-        />
-        <label className="font-semibold text-[#1a1a1a]">Is Remote?</label>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <input
-          type="checkbox"
-          name="hasTest"
-          checked={formik.values.hasTest}
-          onChange={formik.handleChange}
-          className="accent-[#6096B4]"
-        />
-        <label className="font-semibold text-[#1a1a1a]">
-          Include Pre-Selection Test?
-        </label>
-      </div>
-
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-[#6096B4] text-white px-5 py-2 rounded-md hover:bg-[#4d7a96] transition font-medium"
-      >
-        {loading
-          ? isEdit
-            ? "Updating..."
-            : "Submitting..."
-          : isEdit
-          ? "Update Job"
-          : "Create Job"}
-      </button>
-    </form>
+          {loading
+            ? isEdit
+              ? "Updating..."
+              : "Submitting..."
+            : isEdit
+            ? "Update Job"
+            : "Create Job"}
+        </button>
+      </form>
+    </div>
   );
 }
