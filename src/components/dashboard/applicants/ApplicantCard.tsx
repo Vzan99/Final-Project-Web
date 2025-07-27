@@ -5,43 +5,44 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
+import { Applicant } from "@/types/applicant";
 
-interface Applicant {
-  id: string;
-  status: string;
-  expectedSalary: number;
-  cvFile: string;
-  coverLetter?: string;
-  appliedAt: string;
+// interface Applicant {
+//   id: string;
+//   status: string;
+//   expectedSalary: number;
+//   cvFile: string;
+//   coverLetter?: string;
+//   appliedAt: string;
 
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    profile?: {
-      photoUrl?: string;
-      birthDate?: string;
-      gender?: string;
-      address?: string;
-      education?: string;
-      skills?: string[];
-    };
-  };
+//   user: {
+//     id: string;
+//     name: string;
+//     email: string;
+//     profile?: {
+//       photoUrl?: string | null;
+//       birthDate?: string;
+//       gender?: string;
+//       address?: string;
+//       education?: string;
+//       skills?: string[];
+//     };
+//   };
 
-  job: {
-    id: string;
-    title: string;
-  };
+//   job: {
+//     id: string;
+//     title: string;
+//   };
 
-  test?: {
-    score?: number;
-    passed?: boolean;
-    submittedAt?: string;
-  };
+//   test?: {
+//     score?: number;
+//     passed?: boolean;
+//     submittedAt?: string;
+//   };
 
-  subscriptionType?: string;
-  interviewStatus?: string;
-}
+//   subscriptionType?: string;
+//   interviewStatus?: string;
+// }
 
 export default function ApplicantCard({
   applicant,
@@ -184,7 +185,7 @@ export default function ApplicantCard({
         {/* Photo */}
         <div className="flex-shrink-0">
           <img
-            src={applicant.user.profile?.photoUrl}
+            src={applicant.user.profile?.photoUrl ?? undefined}
             alt={applicant.user.name}
             className="w-16 h-16 rounded-full object-cover border"
           />
