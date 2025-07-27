@@ -9,40 +9,7 @@ import ApplicantFilterForm, {
   ApplicantFilter,
 } from "@/components/dashboard/applicants/ApplicantFilterForm";
 import ApplicantCardSkeleton from "@/components/dashboard/applicants/ApplicantCardSkeleton";
-
-interface Applicant {
-  id: string;
-  expectedSalary: number;
-  status: string;
-  cvFile: string;
-  coverLetter?: string;
-  testScore?: number | null;
-  submittedAt?: string | null;
-  passed?: boolean | null;
-  subscriptionType?: "STANDARD" | "PROFESSIONAL" | null;
-  appliedAt: string;
-
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    profile: {
-      photoUrl: string | null;
-      education: string | null;
-      birthDate: string | null;
-      gender?: string | null;
-      address?: string | null;
-      skills?: string | null;
-    };
-  };
-
-  job: {
-    id: string;
-    title: string;
-  };
-
-  interviewStatus: string | null;
-}
+import { Applicant } from "@/types/applicant";
 
 function getAge(birthDate: string | null) {
   if (!birthDate) return null;
