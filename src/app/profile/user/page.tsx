@@ -16,7 +16,6 @@ import ExperienceForm from "@/components/userprofile/forms/experienceForm";
 import SectionCard from "@/components/userprofile/sectionCard";
 import EditDialog from "@/components/userprofile/editDialog";
 import { Pencil } from "lucide-react";
-import ResumeDownloadButton from "@/components/userprofile/resumeDownloadButton";
 import { toast } from "react-toastify";
 import ProtectedRoute from "@/components/protectedRoute";
 import UserProfileSkeleton from "@/components/loadingSkeleton/userProfileSkeleton";
@@ -38,7 +37,6 @@ export default function UserProfilePage() {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fileImageRef = useRef<HTMLInputElement>(null);
-  const fileResumeRef = useRef<HTMLInputElement>(null);
   const fileBannerRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -65,7 +63,6 @@ export default function UserProfilePage() {
   const bannerImageUrl =
     getCloudinaryImageUrl(profile?.profile?.bannerUrl) ||
     "/placeholder_banner.png";
-  const resumeFilename = profile?.profile?.resumeUrl || null;
 
   const handleSuccess = (
     dialogSetter: React.Dispatch<React.SetStateAction<boolean>>
@@ -74,30 +71,6 @@ export default function UserProfilePage() {
       dispatch(fetchUser());
       dialogSetter(false);
     };
-  };
-
-  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadError(null);
-    setUploadLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("resume", file);
-
-      await API.put("/profile/edit/resume", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      await dispatch(fetchUser());
-    } catch (err) {
-      console.error("Resume upload failed:", err);
-      setUploadError("Failed to upload resume. Please try again.");
-    } finally {
-      setUploadLoading(false);
-    }
   };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -339,36 +312,7 @@ export default function UserProfilePage() {
                 <h2 className="text-lg font-semibold text-gray-800 mb-2">
                   Resume
                 </h2>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  ref={fileResumeRef}
-                  onChange={handleResumeUpload}
-                  hidden
-                />
-                {uploadLoading ? (
-                  <div className="h-10 w-40 bg-gray-300 rounded mx-auto animate-pulse mb-2 flex items-center justify-center text-gray-700 font-medium">
-                    Uploading...
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => fileResumeRef.current?.click()}
-                    className="bg-[#89A8B2] text-white px-4 py-2 rounded mb-2 hover:bg-[#7a98a1]"
-                    disabled={uploadLoading}
-                  >
-                    {resumeFilename ? "Change Resume" : "Upload Resume"}
-                  </button>
-                )}
-                {resumeFilename && (
-                  <>
-                    <p className="text-sm text-[#89A8B2] mb-2">
-                      {resumeFilename}
-                    </p>
-                    <ResumeDownloadButton
-                      resumeUrl={profile?.profile?.resumeUrl}
-                    />
-                  </>
-                )}
+
                 {profile?.subscription?.status !== "ACTIVE" && (
                   <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-900">
                     <h3 className="font-semibold mb-2">

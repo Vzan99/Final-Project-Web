@@ -64,3 +64,14 @@ body {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-hide::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-hide::-webkit-scrollbar-thumb {
+  background-color: #bdcdd6;
+  border-radius: 8px;
+}

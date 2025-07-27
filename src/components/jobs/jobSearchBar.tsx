@@ -17,17 +17,18 @@ const listingTimeOptions = [
 type SortOption = "date" | "salaryAsc" | "salaryDesc" | "relevance";
 
 type FilterMeta = {
-  employmentTypes: string[];
+  employmentTypes: { label: string; value: string }[];
   isRemoteOptions: { label: string; value: boolean }[];
-  categories: { id: string; name: string }[];
+  jobCategories: { label: string; value: string }[];
+  experienceLevels?: string[];
 };
 
 export type Filters = {
   title: string;
   location: string;
-  jobType: string;
+  employmentType: string[];
   isRemote: boolean | null;
-  classifications: string[];
+  jobCategory: string[];
   listingTime: string;
   customStartDate?: string;
   customEndDate?: string;
@@ -52,15 +53,19 @@ export default function JobSearchBar({
 }: JobSearchBarProps) {
   const [title, setTitle] = useState(initialFilters.title || "");
   const [location, setLocation] = useState(initialFilters.location || "");
-  const [jobType, setJobType] = useState(initialFilters.jobType || "");
+  const [employmentTypes, setemploymentTypes] = useState<string[]>(
+    initialFilters.employmentType || []
+  );
+
   const [remoteFilter, setRemoteFilter] = useState<string>(() => {
     if (initialFilters.isRemote === true) return "true";
     if (initialFilters.isRemote === false) return "false";
     return "all";
   });
-  const [classifications, setClassifications] = useState<string[]>(
-    initialFilters.classifications || []
+  const [jobCategory, setJobCategory] = useState<string[]>(
+    initialFilters.jobCategory || []
   );
+
   const [filtersMeta, setFiltersMeta] = useState<FilterMeta | null>(null);
   const [loadingMeta, setLoadingMeta] = useState(true);
 
@@ -85,23 +90,32 @@ export default function JobSearchBar({
     }
   });
 
-  const [showClassificationDropdown, setShowClassificationDropdown] =
+  const [showemploymentTypeDropdown, setShowemploymentTypeDropdown] =
     useState(false);
-  const [showListingTimeDropdown, setShowListingTimeDropdown] = useState(false);
+  const employmentTypeRef = useRef<HTMLDivElement>(null);
 
-  const classificationRef = useRef<HTMLDivElement>(null);
+  const [showRemoteDropdown, setShowRemoteDropdown] = useState(false);
+  const remoteRef = useRef<HTMLDivElement>(null);
+
+  const [showJobCategoryDropdown, setShowJobCategoryDropdown] = useState(false);
+  const jobCategoryRef = useRef<HTMLDivElement>(null);
+
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  const [showListingTimeDropdown, setShowListingTimeDropdown] = useState(false);
   const listingTimeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setTitle(initialFilters.title || "");
     setLocation(initialFilters.location || "");
-    setJobType(initialFilters.jobType || "");
+    setemploymentTypes(initialFilters.employmentType || []);
     setRemoteFilter(() => {
       if (initialFilters.isRemote === true) return "true";
       if (initialFilters.isRemote === false) return "false";
       return "all";
     });
-    setClassifications(initialFilters.classifications || []);
+    setJobCategory(initialFilters.jobCategory || []);
     setListingTime(initialFilters.listingTime || "any");
     setCustomStartDate(initialFilters.customStartDate || "");
     setCustomEndDate(initialFilters.customEndDate || "");
@@ -140,16 +154,31 @@ export default function JobSearchBar({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        classificationRef.current &&
-        !classificationRef.current.contains(event.target as Node)
+        employmentTypeRef.current &&
+        !employmentTypeRef.current.contains(event.target as Node)
       ) {
-        setShowClassificationDropdown(false);
+        setShowemploymentTypeDropdown(false);
+      }
+      if (
+        jobCategoryRef.current &&
+        !jobCategoryRef.current.contains(event.target as Node)
+      ) {
+        setShowJobCategoryDropdown(false);
       }
       if (
         listingTimeRef.current &&
         !listingTimeRef.current.contains(event.target as Node)
       ) {
         setShowListingTimeDropdown(false);
+      }
+      if (
+        remoteRef.current &&
+        !remoteRef.current.contains(event.target as Node)
+      ) {
+        setShowRemoteDropdown(false);
+      }
+      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
+        setShowSortDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -158,8 +187,14 @@ export default function JobSearchBar({
     };
   }, []);
 
-  const toggleClassification = (value: string) => {
-    setClassifications((prev) =>
+  const toggleJobCategory = (value: string) => {
+    setJobCategory((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  };
+
+  const toggleemploymentType = (value: string) => {
+    setemploymentTypes((prev) =>
       prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
     );
   };
@@ -193,7 +228,7 @@ export default function JobSearchBar({
     onSearch({
       title: title.trim(),
       location: location.trim(),
-      jobType,
+      employmentType: employmentTypes,
       isRemote:
         remoteFilter === "all"
           ? null
@@ -202,7 +237,7 @@ export default function JobSearchBar({
           : remoteFilter === "false"
           ? false
           : null,
-      classifications,
+      jobCategory,
       listingTime,
       customStartDate: listingTime === "custom" ? customStartDate : undefined,
       customEndDate: listingTime === "custom" ? customEndDate : undefined,
@@ -264,48 +299,18 @@ export default function JobSearchBar({
       {/* Filters Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 items-center">
         {/* Employment Types */}
-        <select
-          value={jobType}
-          onChange={(e) => setJobType(e.target.value)}
-          className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg h-12 bg-white text-gray-700"
-          disabled={loadingMeta}
-        >
-          <option value="">All Work Types</option>
-          {filtersMeta?.employmentTypes.map((et) => (
-            <option key={et} value={et}>
-              {et.replace(/_/g, " ")}
-            </option>
-          ))}
-        </select>
-
-        {/* Location (isRemote) Types */}
-        <select
-          value={remoteFilter}
-          onChange={(e) => setRemoteFilter(e.target.value)}
-          className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg h-12 bg-white text-gray-700"
-          disabled={loadingMeta}
-        >
-          <option value="all">All Locations</option>
-          {filtersMeta?.isRemoteOptions.map(({ label, value }) => (
-            <option key={String(value)} value={String(value)}>
-              {label}
-            </option>
-          ))}
-        </select>
-
-        {/* Classification Dropdown */}
-        <div className="relative w-full" ref={classificationRef}>
+        <div className="relative w-full" ref={employmentTypeRef}>
           <button
             onClick={() =>
-              setShowClassificationDropdown(!showClassificationDropdown)
+              setShowemploymentTypeDropdown(!showemploymentTypeDropdown)
             }
             className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg bg-white flex items-center justify-between h-12"
             disabled={loadingMeta}
           >
-            Category
+            Work Types
             <svg
               className={`w-4 h-4 transition-transform ${
-                showClassificationDropdown ? "rotate-180" : ""
+                showemploymentTypeDropdown ? "rotate-180" : ""
               }`}
               fill="none"
               stroke="currentColor"
@@ -319,30 +324,152 @@ export default function JobSearchBar({
               />
             </svg>
           </button>
-          {showClassificationDropdown && (
-            <div className="absolute z-10 mt-2 max-h-48 w-full overflow-y-auto border border-[#BDCDD6] bg-white p-4 shadow-lg rounded-md">
-              {filtersMeta?.categories.map((option) => (
-                <label
-                  key={option.id}
-                  className="flex items-center space-x-2 mb-2"
+
+          {showemploymentTypeDropdown && (
+            <div className="absolute z-10 mt-2 min-w-full w-max max-w-screen-sm border border-[#BDCDD6] bg-white shadow-lg rounded-md">
+              <div className="max-h-48 overflow-y-auto p-4 rounded-md scrollbar-hide">
+                {filtersMeta?.employmentTypes.map(({ label, value }) => (
+                  <label
+                    key={value}
+                    className="flex items-center space-x-2 mb-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={employmentTypes.includes(value)}
+                      onChange={() => toggleemploymentType(value)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+                <button
+                  onClick={() => {
+                    setShowemploymentTypeDropdown(false);
+                    triggerSearch();
+                  }}
+                  className="mt-2 w-full bg-[#6096B4] text-white py-2 rounded-lg hover:bg-[#517d98] font-semibold"
                 >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Remote Filter Dropdown */}
+        <div className="relative w-full" ref={remoteRef}>
+          <button
+            onClick={() => setShowRemoteDropdown((prev) => !prev)}
+            className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg bg-white flex items-center justify-between h-12"
+            disabled={loadingMeta}
+          >
+            {remoteFilter === "all"
+              ? "All Locations"
+              : remoteFilter === "true"
+              ? "Remote"
+              : "On‑site"}
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showRemoteDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {showRemoteDropdown && (
+            <div className="absolute z-10 mt-2 w-full border border-[#BDCDD6] bg-white shadow-lg rounded-md p-4">
+              {[
+                { label: "All Locations", value: "all" },
+                { label: "Remote", value: "true" },
+                { label: "On‑site", value: "false" },
+              ].map(({ label, value }) => (
+                <label key={value} className="flex items-center space-x-2 mb-2">
                   <input
-                    type="checkbox"
-                    checked={classifications.includes(option.name)}
-                    onChange={() => toggleClassification(option.name)}
+                    type="radio"
+                    name="remoteFilter"
+                    value={value}
+                    checked={remoteFilter === value}
+                    onChange={() => {
+                      setRemoteFilter(value);
+                    }}
                   />
-                  <span>{option.name}</span>
+                  <span>{label}</span>
                 </label>
               ))}
+
               <button
                 onClick={() => {
-                  setShowClassificationDropdown(false);
+                  setShowRemoteDropdown(false);
                   triggerSearch();
                 }}
                 className="mt-2 w-full bg-[#6096B4] text-white py-2 rounded-lg hover:bg-[#517d98] font-semibold"
               >
                 Apply
               </button>
+            </div>
+          )}
+        </div>
+
+        {/* Job Category Dropdown */}
+        <div className="relative w-full" ref={jobCategoryRef}>
+          <button
+            onClick={() => setShowJobCategoryDropdown(!showJobCategoryDropdown)}
+            className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg bg-white flex items-center justify-between h-12"
+            disabled={loadingMeta}
+          >
+            Category
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showJobCategoryDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {showJobCategoryDropdown && (
+            <div className="absolute z-10 mt-2 min-w-full w-max max-w-screen-sm border border-[#BDCDD6] bg-white shadow-lg rounded-md">
+              <div className="max-h-48 overflow-y-auto p-4 rounded-md scrollbar-hide">
+                {filtersMeta?.jobCategories.map(({ label, value }) => (
+                  <label
+                    key={value}
+                    className="flex items-center space-x-2 mb-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={jobCategory.includes(value)}
+                      onChange={() => toggleJobCategory(value)}
+                    />
+
+                    <span>{label}</span>
+                  </label>
+                ))}
+
+                <button
+                  onClick={() => {
+                    setShowJobCategoryDropdown(false);
+                    triggerSearch();
+                  }}
+                  className="mt-2 w-full bg-[#6096B4] text-white py-2 rounded-lg hover:bg-[#517d98] font-semibold"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -426,64 +553,79 @@ export default function JobSearchBar({
         </div>
 
         {/* Sort By Dropdown */}
-        <select
-          value={sort}
-          onChange={(e) => {
-            const selectedSort = e.target.value as SortOption;
-            setSort(selectedSort);
-
-            let sortBy: "createdAt" | "salary" | "relevance" = "createdAt";
-            let sortOrder: "asc" | "desc" = "desc";
-
-            if (selectedSort === "salaryAsc") {
-              sortBy = "salary";
-              sortOrder = "asc";
-            } else if (selectedSort === "salaryDesc") {
-              sortBy = "salary";
-              sortOrder = "desc";
-            } else if (selectedSort === "relevance") {
-              sortBy = "relevance";
-              sortOrder = "desc";
+        <div className="relative w-full" ref={sortRef}>
+          <button
+            onClick={() => setShowSortDropdown((prev) => !prev)}
+            className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg bg-white flex items-center justify-between h-12"
+          >
+            {
+              {
+                date: "Date (Newest)",
+                salaryAsc: "Salary (Low to High)",
+                salaryDesc: "Salary (High to Low)",
+                relevance: "Relevance",
+              }[sort]
             }
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showSortDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
 
-            onSearch({
-              title: title.trim(),
-              location: location.trim(),
-              jobType,
-              isRemote:
-                remoteFilter === "all"
-                  ? null
-                  : remoteFilter === "true"
-                  ? true
-                  : remoteFilter === "false"
-                  ? false
-                  : null,
-              classifications,
-              listingTime,
-              customStartDate:
-                listingTime === "custom" ? customStartDate : undefined,
-              customEndDate:
-                listingTime === "custom" ? customEndDate : undefined,
-              sortBy,
-              sortOrder,
-            });
-          }}
-          className="w-full px-4 py-3 border border-[#BDCDD6] rounded-lg h-12 bg-white text-gray-700"
-        >
-          <option value="date">Date Posted (Newest)</option>
-          <option value="salaryDesc">Salary (High to Low)</option>
-          <option value="salaryAsc">Salary (Low to High)</option>
-          <option value="relevance">Relevance</option>
-        </select>
+          {showSortDropdown && (
+            <div className="absolute z-10 mt-2 w-full border border-[#BDCDD6] bg-white shadow-lg rounded-md p-4">
+              {[
+                { label: "Date (Newest)", value: "date" },
+                { label: "Salary (Low to High)", value: "salaryAsc" },
+                { label: "Salary (High to Low)", value: "salaryDesc" },
+                { label: "Relevance", value: "relevance" },
+              ].map(({ label, value }) => (
+                <label key={value} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="radio"
+                    name="sortOption"
+                    value={value}
+                    checked={sort === (value as SortOption)}
+                    onChange={() => {
+                      setSort(value as SortOption);
+                    }}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+
+              <button
+                onClick={() => {
+                  setShowSortDropdown(false);
+                  triggerSearch();
+                }}
+                className="mt-2 w-full bg-[#6096B4] text-white py-2 rounded-lg hover:bg-[#517d98] font-semibold"
+              >
+                Apply
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Reset All Button */}
         <button
           onClick={() => {
             setTitle("");
             setLocation("");
-            setJobType("");
+            setemploymentTypes([]);
             setRemoteFilter("all");
-            setClassifications([]);
+            setJobCategory([]);
             setListingTime("any");
             setCustomStartDate("");
             setCustomEndDate("");
@@ -492,9 +634,9 @@ export default function JobSearchBar({
             onSearch({
               title: "",
               location: "",
-              jobType: "",
+              employmentType: [],
               isRemote: null,
-              classifications: [],
+              jobCategory: [],
               listingTime: "any",
               sortBy: "createdAt",
               sortOrder: "desc",

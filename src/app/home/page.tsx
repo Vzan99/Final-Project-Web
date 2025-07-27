@@ -15,9 +15,9 @@ export default function HomePage() {
   const emptyFilters: Partial<Filters> = {
     title: "",
     location: "",
-    jobType: "",
+    employmentType: [],
     isRemote: null,
-    classifications: [],
+    jobCategory: [],
     listingTime: "any",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -75,28 +75,31 @@ export default function HomePage() {
     );
   }, []);
 
-  const handleSearch = (newFilters: Filters) => {
-    setFilters(newFilters);
+  const handleSearch = (filters: Filters) => {
+    const queryParams = new URLSearchParams();
 
-    const query = new URLSearchParams();
+    if (filters.title) queryParams.append("title", filters.title);
+    if (filters.location) queryParams.append("location", filters.location);
+    if (filters.employmentType.length)
+      filters.employmentType.forEach((type) =>
+        queryParams.append("employmentType", type)
+      );
+    if (filters.jobCategory.length)
+      filters.jobCategory.forEach((cat) =>
+        queryParams.append("jobCategory", cat)
+      );
+    if (filters.isRemote !== null)
+      queryParams.append("isRemote", String(filters.isRemote));
+    if (filters.listingTime)
+      queryParams.append("listingTime", filters.listingTime);
+    if (filters.customStartDate)
+      queryParams.append("customStartDate", filters.customStartDate);
+    if (filters.customEndDate)
+      queryParams.append("customEndDate", filters.customEndDate);
+    if (filters.sortBy) queryParams.append("sortBy", filters.sortBy);
+    if (filters.sortOrder) queryParams.append("sortOrder", filters.sortOrder);
 
-    if (newFilters.title) query.set("title", newFilters.title);
-    if (newFilters.location) query.set("location", newFilters.location);
-    if (newFilters.jobType) query.set("jobType", newFilters.jobType);
-    if (newFilters.isRemote !== null)
-      query.set("isRemote", String(newFilters.isRemote));
-    if (newFilters.classifications.length > 0)
-      query.set("classifications", newFilters.classifications.join(","));
-    if (newFilters.listingTime)
-      query.set("listingTime", newFilters.listingTime);
-    if (newFilters.customStartDate)
-      query.set("customStartDate", newFilters.customStartDate);
-    if (newFilters.customEndDate)
-      query.set("customEndDate", newFilters.customEndDate);
-    if (newFilters.sortBy) query.set("sortBy", newFilters.sortBy);
-    if (newFilters.sortOrder) query.set("sortOrder", newFilters.sortOrder);
-
-    router.push(`/jobs?${query.toString()}`);
+    router.push(`/jobs?${queryParams.toString()}`);
   };
 
   return (
