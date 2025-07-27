@@ -6,7 +6,7 @@ import API from "@/lib/axios";
 import { JobCard } from "@/components/jobs/jobCard";
 import { JobCardSkeleton } from "@/components/loadingSkeleton/jobCardSkeleton";
 import { Pagination } from "@/components/pagination";
-import JobSearchBar from "@/components/jobs/jobSearchBar";
+import JobSearchBar, { Filters } from "@/components/jobs/jobSearchBar";
 import { JobDetailsCard } from "@/components/jobs/jobDetailsCard";
 import { JobDetailsSkeleton } from "@/components/loadingSkeleton/jobDetailsSkeleton";
 import { Job } from "@/types/jobs";
@@ -20,24 +20,12 @@ export default function JobListingsPage() {
   const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loadingJobDetails, setLoadingJobDetails] = useState(false);
-
-  const [filters, setFilters] = useState<{
-    title: string;
-    location: string;
-    jobType: string;
-    isRemote: boolean | null;
-    classifications: string[];
-    listingTime: string;
-    customStartDate?: string;
-    customEndDate?: string;
-    sortBy: "createdAt" | "salary" | "relevance";
-    sortOrder: "asc" | "desc";
-  }>({
+  const [filters, setFilters] = useState<Filters>({
     title: "",
     location: "",
-    jobType: "",
+    employmentType: [],
     isRemote: null,
-    classifications: [],
+    jobCategory: [],
     listingTime: "any",
     sortBy: "createdAt",
     sortOrder: "desc",
@@ -47,22 +35,16 @@ export default function JobListingsPage() {
   const router = useRouter();
 
   const updateSearchParams = (
-    updatedFilters: typeof filters,
+    updatedFilters: Filters,
     pageNumber: number = 1
   ) => {
     const query = new URLSearchParams();
     Object.entries(updatedFilters).forEach(([key, value]) => {
-      if (
-        value !== undefined &&
-        value !== null &&
-        value !== "" &&
-        !(Array.isArray(value) && value.length === 0)
-      ) {
-        if (Array.isArray(value)) {
-          query.set(key, value.join(","));
-        } else {
-          query.set(key, value.toString());
-        }
+      if (value === null || value === undefined) return;
+      if (Array.isArray(value)) {
+        value.forEach((v) => query.append(key, v));
+      } else {
+        query.append(key, value.toString());
       }
     });
     query.set("page", pageNumber.toString());
@@ -73,37 +55,42 @@ export default function JobListingsPage() {
     async (filtersParams = filters, pageNumber = page) => {
       setLoading(true);
       try {
-        const params: any = {
+        const params: Record<string, any> = {
           ...filtersParams,
           page: pageNumber,
           pageSize: PAGE_SIZE,
         };
 
-        if (filtersParams.classifications.length > 0) {
-          params.classifications = filtersParams.classifications.join(",");
+        if (filtersParams.employmentType?.length) {
+          params.employmentType = filtersParams.employmentType.join(",");
+        }
+        if (filtersParams.jobCategory?.length) {
+          params.jobCategory = filtersParams.jobCategory.join(",");
         }
 
-        if (filtersParams.listingTime && filtersParams.listingTime !== "any") {
-          const daysMap: Record<string, number> = {
-            today: 1,
-            "3days": 3,
-            "7days": 7,
-            "14days": 14,
-            "30days": 30,
-            older: -1,
-          };
-          const days = daysMap[filtersParams.listingTime];
+        const daysMap: Record<string, number> = {
+          today: 1,
+          "3days": 3,
+          "7days": 7,
+          "14days": 14,
+          "30days": 30,
+          older: -1,
+        };
 
-          if (days !== undefined) {
-            if (days > 0) {
-              const sinceDate = new Date();
-              sinceDate.setDate(sinceDate.getDate() - days);
-              params.postedAfter = sinceDate.toISOString();
-            } else if (days === -1) {
-              const untilDate = new Date();
-              untilDate.setDate(untilDate.getDate() - 30);
-              params.postedBefore = untilDate.toISOString();
-            }
+        if (
+          filtersParams.listingTime &&
+          filtersParams.listingTime !== "any" &&
+          filtersParams.listingTime !== "custom"
+        ) {
+          const days = daysMap[filtersParams.listingTime];
+          if (days > 0) {
+            const sinceDate = new Date();
+            sinceDate.setDate(sinceDate.getDate() - days);
+            params.postedAfter = sinceDate.toISOString();
+          } else if (days === -1) {
+            const untilDate = new Date();
+            untilDate.setDate(untilDate.getDate() - 30);
+            params.postedBefore = untilDate.toISOString();
           }
         }
 
@@ -143,31 +130,28 @@ export default function JobListingsPage() {
   );
 
   useEffect(() => {
-    const queryFilters = {
+    const queryFilters: Filters = {
       title: searchParams.get("title") || "",
       location: searchParams.get("location") || "",
-      jobType: searchParams.get("jobType") || "",
+      employmentType: searchParams.getAll("employmentType") || [],
       isRemote: searchParams.get("isRemote")
         ? searchParams.get("isRemote") === "true"
         : null,
-      classifications: searchParams.get("classifications")
-        ? searchParams.get("classifications")!.split(",")
-        : [],
+      jobCategory: searchParams.getAll("jobCategory") || [],
       listingTime: searchParams.get("listingTime") || "any",
       customStartDate: searchParams.get("customStartDate") || undefined,
       customEndDate: searchParams.get("customEndDate") || undefined,
-      sortBy: (searchParams.get("sortBy") || "createdAt") as
-        | "createdAt"
-        | "salary"
-        | "relevance",
-      sortOrder: (searchParams.get("sortOrder") || "desc") as "asc" | "desc",
+      sortBy: (searchParams.get("sortBy") || "createdAt") as Filters["sortBy"],
+      sortOrder: (searchParams.get("sortOrder") ||
+        "desc") as Filters["sortOrder"],
     };
+
     const pageQuery = parseInt(searchParams.get("page") || "1", 10);
     setFilters(queryFilters);
     fetchJobs(queryFilters, pageQuery);
   }, [searchParams]);
 
-  const handleSearch = useCallback((newFilters: typeof filters) => {
+  const handleSearch = useCallback((newFilters: Filters) => {
     setFilters(newFilters);
     updateSearchParams(newFilters, 1);
   }, []);
@@ -205,7 +189,7 @@ export default function JobListingsPage() {
 
   return (
     <div className="flex flex-col px-4 lg:px-12 py-6 gap-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-[#6096B4]">Search Jobs </h1>
+      <h1 className="text-2xl font-bold text-[#6096B4]">Search Jobs</h1>
 
       <JobSearchBar onSearch={handleSearch} initialFilters={filters} />
 
@@ -247,7 +231,6 @@ export default function JobListingsPage() {
           </div>
         )
       ) : (
-        // Desktop layout: side-by-side
         <div className="flex gap-6">
           <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200">
             {loading ? (
@@ -271,7 +254,6 @@ export default function JobListingsPage() {
             ) : (
               <p className="text-gray-500 text-center">No jobs found.</p>
             )}
-
             <Pagination
               page={page}
               totalPages={totalPages}
