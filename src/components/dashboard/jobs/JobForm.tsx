@@ -9,11 +9,11 @@ interface JobFormValues {
   title: string;
   description: string;
   location: string;
-  category: string;
+  jobCategory: string;
   deadline: string;
   salary?: number;
-  experienceLevel: "Entry" | "Mid" | "Senior";
-  jobType: "Full-time" | "Part-time" | "Contract";
+  experienceLevel: string;
+  employmentType: string;
   isRemote: boolean;
   tags: string[];
   banner?: File;
@@ -30,16 +30,39 @@ const defaultValues: JobFormValues = {
   title: "",
   description: "",
   location: "",
-  category: "",
+  jobCategory: "",
   deadline: "",
   salary: undefined,
   experienceLevel: "Entry",
-  jobType: "Full-time",
+  employmentType: "Full-time",
   isRemote: false,
   tags: [],
   banner: undefined,
   hasTest: false,
 };
+
+const jobCategories = [
+  "FRONTEND_DEVELOPER",
+  "BACKEND_DEVELOPER",
+  "FULL_STACK_DEVELOPER",
+  "MOBILE_APP_DEVELOPER",
+  "DEVOPS_ENGINEER",
+  "GAME_DEVELOPER",
+  "SOFTWARE_ENGINEER",
+  "DATA_ENGINEER",
+  "SECURITY_ENGINEER",
+  "OTHER",
+];
+
+const employmentTypes = [
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACT",
+  "INTERNSHIP",
+  "TEMPORARY",
+  "VOLUNTEER",
+  "OTHER",
+];
 
 export default function JobForm({
   initialValues = {},
@@ -47,6 +70,7 @@ export default function JobForm({
   isEdit = false,
 }: JobFormProps) {
   const [loading, setLoading] = useState(false);
+  const [tagInput, setTagInput] = useState("");
 
   const formik = useFormik<JobFormValues>({
     initialValues: { ...defaultValues, ...initialValues },
@@ -58,19 +82,20 @@ export default function JobForm({
       try {
         const formData = new FormData();
 
-        Object.entries(values).forEach(([key, val]) => {
-          if (key === "tags") {
-            (val as string[]).forEach((tag) => formData.append("tags", tag));
-          } else if (key === "banner" && val instanceof File) {
-            formData.append("banner", val);
-          } else if (
-            typeof val === "boolean" ||
-            typeof val === "number" ||
-            typeof val === "string"
-          ) {
-            formData.append(key, String(val));
-          }
-        });
+        formData.append("title", values.title);
+        formData.append("description", values.description);
+        formData.append("location", values.location);
+        formData.append("deadline", values.deadline);
+        formData.append("experienceLevel", values.experienceLevel);
+        formData.append("employmentType", values.employmentType);
+        formData.append("jobCategory", values.jobCategory);
+        formData.append("isRemote", String(values.isRemote));
+        formData.append("hasTest", String(values.hasTest));
+        if (values.salary) formData.append("salary", String(values.salary));
+        if (values.banner instanceof File) {
+          formData.append("banner", values.banner);
+        }
+        values.tags.forEach((tag) => formData.append("tags", tag));
 
         await onSubmit(formData);
         toast.success(isEdit ? "Job updated!" : "Job created!");
@@ -92,12 +117,11 @@ export default function JobForm({
           {isEdit ? "Edit Job" : "Create Job"}
         </h2>
 
-        {/* Input Fields */}
+        {/* Text Inputs */}
         {[
           { label: "Job Title", name: "title" },
           { label: "Description", name: "description" },
           { label: "Location", name: "location" },
-          { label: "Category", name: "category" },
         ].map(({ label, name }) => (
           <div key={name}>
             <label className="block font-semibold text-[#1a1a1a]">
@@ -148,6 +172,116 @@ export default function JobForm({
           )}
         </div>
 
+        {/* Category Select */}
+        <div>
+          <label className="block font-semibold text-[#1a1a1a]">Category</label>
+          <select
+            name="jobCategory"
+            value={formik.values.jobCategory}
+            onChange={formik.handleChange}
+            className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+          >
+            <option value="">Select a category</option>
+            {jobCategories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+          {formik.errors.jobCategory && (
+            <p className="text-red-500 text-sm">{formik.errors.jobCategory}</p>
+          )}
+        </div>
+
+        {/* Job Type & Experience Level */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-semibold text-[#1a1a1a]">
+              Experience Level
+            </label>
+            <select
+              name="experienceLevel"
+              value={formik.values.experienceLevel}
+              onChange={formik.handleChange}
+              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+            >
+              {["Entry", "Mid", "Senior"].map((level) => (
+                <option key={level} value={level}>
+                  {level}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block font-semibold text-[#1a1a1a]">
+              Job Type
+            </label>
+            <select
+              name="employmentType"
+              value={formik.values.employmentType}
+              onChange={formik.handleChange}
+              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+            >
+              <option value="">Select type</option>
+              {employmentTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="block font-semibold text-[#1a1a1a]">
+            Tags (comma separated)
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. react, frontend, remote"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "," || e.key === "Enter") {
+                e.preventDefault();
+                const value = tagInput.trim();
+                if (value && !formik.values.tags.includes(value)) {
+                  formik.setFieldValue("tags", [...formik.values.tags, value]);
+                }
+                setTagInput("");
+              } else if (e.key === "Backspace" && tagInput === "") {
+                const newTags = [...formik.values.tags];
+                newTags.pop();
+                formik.setFieldValue("tags", newTags);
+              }
+            }}
+            className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+          />
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formik.values.tags.map((tag, index) => (
+              <span
+                key={index}
+                className="bg-[#6096B4] text-white px-2 py-1 rounded-full text-xs flex items-center gap-2"
+              >
+                {tag}
+                <button
+                  type="button"
+                  onClick={() =>
+                    formik.setFieldValue(
+                      "tags",
+                      formik.values.tags.filter((t) => t !== tag)
+                    )
+                  }
+                  className="text-white hover:text-gray-200"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Banner Upload */}
         <div>
           <label className="block font-semibold text-[#1a1a1a]">
@@ -168,45 +302,6 @@ export default function JobForm({
           )}
         </div>
 
-        {/* Select Fields */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-semibold text-[#1a1a1a]">
-              Experience Level
-            </label>
-            <select
-              name="experienceLevel"
-              value={formik.values.experienceLevel}
-              onChange={formik.handleChange}
-              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
-            >
-              {["Entry", "Mid", "Senior"].map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-semibold text-[#1a1a1a]">
-              Job Type
-            </label>
-            <select
-              name="jobType"
-              value={formik.values.jobType}
-              onChange={formik.handleChange}
-              className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
-            >
-              {["Full-time", "Part-time", "Contract"].map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
         {/* Checkboxes */}
         <div className="flex items-center gap-3">
           <input
@@ -218,6 +313,7 @@ export default function JobForm({
           />
           <label className="font-semibold text-[#1a1a1a]">Remote?</label>
         </div>
+
         <div className="flex items-center gap-3">
           <input
             type="checkbox"

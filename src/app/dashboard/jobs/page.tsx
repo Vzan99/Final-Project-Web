@@ -18,6 +18,8 @@ interface Job {
   deadline: string;
   experienceLevel: string;
   jobType: string;
+  jobCategory: string;
+  employmentType: string;
   bannerUrl?: string;
   category: {
     name: string;

@@ -5,6 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import AdminJobDetailSkeleton from "@/components/dashboard/jobs/AdminJobDetailSkeleton";
+import {
+  formatEmploymentType,
+  formatJobCategory,
+} from "@/components/dashboard/jobs/jobsFormatEnum";
 
 interface JobDetail {
   id: string;
@@ -14,6 +18,8 @@ interface JobDetail {
   salary: number | null;
   deadline: string;
   experienceLevel: string;
+  jobCategory: string;
+  employmentType: string;
   jobType: string;
   isRemote: boolean;
   hasTest: boolean;
@@ -104,13 +110,13 @@ export default function JobDetailPage() {
       <div className="grid gap-4 bg-white p-6 rounded shadow">
         <div className="flex flex-wrap gap-2 text-sm">
           <span className="bg-[#EEE0C9] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
-            {job.category.name}
+            {formatJobCategory(job.jobCategory)}
           </span>
           <span className="bg-[#EEE0C9] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
             {job.experienceLevel}
           </span>
           <span className="bg-[#EEE0C9] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
-            {job.jobType}
+            {formatEmploymentType(job.employmentType)}
           </span>
           <span className="bg-[#EEE0C9] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
             {job.isRemote ? "Remote" : "On-site"}

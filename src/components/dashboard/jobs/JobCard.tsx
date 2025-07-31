@@ -3,15 +3,15 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
+import { formatEmploymentType, formatJobCategory } from "./jobsFormatEnum";
 
 type Job = {
   id: string;
   title: string;
   location: string;
   bannerUrl?: string;
-  category: {
-    name: string;
-  };
+  jobCategory: string;
+  employmentType: string;
   experienceLevel: string;
   jobType: string;
   status: string;
@@ -59,7 +59,8 @@ export default function JobCard({
           <h2 className="text-xl font-semibold text-[#1a1a1a]">{job.title}</h2>
           <p className="text-sm text-[#4B5563]">{job.location}</p>
           <p className="text-sm text-[#6B7280] mt-1">
-            {job.category.name} • {job.experienceLevel} • {job.jobType}
+            {formatJobCategory(job.jobCategory)} • {job.experienceLevel} •{" "}
+            {formatEmploymentType(job.employmentType)}
           </p>
           <p className="text-sm mt-2 text-[#9CA3AF]">
             <span className="font-medium">Status:</span>{" "}
