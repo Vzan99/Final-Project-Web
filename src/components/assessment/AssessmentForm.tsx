@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
+import * as Yup from "yup";
 import API from "@/lib/axios";
 
 type Question = {
@@ -24,6 +25,25 @@ type AssessmentFormProps = {
   onFinishEdit?: () => void;
 };
 
+const AssessmentSchema = Yup.object().shape({
+  name: Yup.string().min(3).required("Name is required"),
+  description: Yup.string(),
+  passingScore: Yup.number().min(0).max(100).required(),
+  timeLimit: Yup.number().min(1).required(),
+  questions: Yup.array()
+    .of(
+      Yup.object().shape({
+        question: Yup.string().required("Question is required"),
+        options: Yup.array()
+          .of(Yup.string().required("Option is required"))
+          .min(2, "At least 2 options")
+          .max(6, "Maximum 6 options"),
+        answer: Yup.number().min(0),
+      })
+    )
+    .min(1, "At least one question is required"),
+});
+
 export default function AssessmentForm({
   onCreated,
   editData,
@@ -31,81 +51,31 @@ export default function AssessmentForm({
 }: AssessmentFormProps) {
   const isEdit = !!editData;
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [passingScore, setPassingScore] = useState(75);
-  const [timeLimit, setTimeLimit] = useState(30);
-  const [questions, setQuestions] = useState<Question[]>([
-    { question: "", options: ["", "", "", ""], answer: 0 },
-  ]);
-
-  // Load data saat edit
-  useEffect(() => {
-    if (editData) {
-      setName(editData.name || "");
-      setDescription(editData.description || "");
-      setPassingScore(editData.passingScore || 75);
-      setTimeLimit(editData.timeLimit || 30);
-      setQuestions(editData.questions || []);
-    }
-  }, [editData]);
-
-  // Reset saat keluar dari mode edit
-  useEffect(() => {
-    if (!editData) {
-      setName("");
-      setDescription("");
-      setPassingScore(75);
-      setTimeLimit(30);
-      setQuestions([{ question: "", options: ["", "", "", ""], answer: 0 }]);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }, [editData]);
-
-  const handleAddQuestion = () => {
-    setQuestions([
-      ...questions,
-      { question: "", options: ["", "", "", ""], answer: 0 },
-    ]);
+  const initialValues: Assessment = editData || {
+    id: "",
+    name: "",
+    description: "",
+    passingScore: 75,
+    timeLimit: 30,
+    questions: [
+      {
+        question: "",
+        options: ["", "", "", ""],
+        answer: 0,
+      },
+    ],
   };
 
-  const handleChangeQuestion = (index: number, value: string) => {
-    const updated = [...questions];
-    updated[index].question = value;
-    setQuestions(updated);
-  };
-
-  const handleChangeOption = (qIdx: number, optIdx: number, value: string) => {
-    const updated = [...questions];
-    updated[qIdx].options[optIdx] = value;
-    setQuestions(updated);
-  };
-
-  const handleChangeAnswer = (qIdx: number, value: number) => {
-    const updated = [...questions];
-    updated[qIdx].answer = value;
-    setQuestions(updated);
-  };
-
-  const handleSubmit = async () => {
-    if (!name.trim()) return alert("Assessment name is required.");
-    if (questions.length === 0) return alert("Add at least one question.");
-    if (questions.some((q) => !q.question.trim())) {
-      return alert("All questions must be filled.");
-    }
-    if (questions.some((q) => q.options.some((opt) => !opt.trim()))) {
-      return alert("All answer options must be filled.");
-    }
-
-    const payload = {
-      name,
-      description,
-      passingScore,
-      timeLimit,
-      questions,
-    };
-
+  const handleSubmit = async (values: Assessment) => {
     try {
+      const payload = {
+        name: values.name,
+        description: values.description,
+        passingScore: values.passingScore,
+        timeLimit: values.timeLimit,
+        questions: values.questions,
+      };
+
       if (isEdit && editData) {
         await API.put(`/assessments/${editData.id}`, payload);
         alert("Assessment updated!");
@@ -115,7 +85,7 @@ export default function AssessmentForm({
         alert("Assessment created!");
         onCreated?.();
       }
-    } catch (err) {
+    } catch {
       alert("Failed to submit assessment.");
     }
   };
@@ -126,103 +96,168 @@ export default function AssessmentForm({
         {isEdit ? "Edit Assessment" : "Create Assessment"}
       </h1>
 
-      <div className="space-y-4">
-        <input
-          className="border p-2 w-full rounded"
-          placeholder="Assessment Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        <textarea
-          className="border p-2 w-full rounded"
-          placeholder="Description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <div className="flex gap-4">
-          <input
-            type="number"
-            min={0}
-            className="border p-2 rounded w-full"
-            placeholder="Passing Score"
-            value={passingScore}
-            onChange={(e) => setPassingScore(Number(e.target.value))}
-          />
-          <input
-            type="number"
-            min={1}
-            className="border p-2 rounded w-full"
-            placeholder="Time Limit (minutes)"
-            value={timeLimit}
-            onChange={(e) => setTimeLimit(Number(e.target.value))}
-          />
-        </div>
-
-        {questions.map((q, i) => (
-          <div
-            key={i}
-            className="border p-4 rounded space-y-2 bg-gray-50 relative"
-          >
-            <p className="text-sm font-semibold text-gray-600">
-              Question {i + 1}
-            </p>
-
-            <input
-              className="border p-2 w-full"
-              placeholder="Question text"
-              value={q.question}
-              onChange={(e) => handleChangeQuestion(i, e.target.value)}
-            />
-
-            {q.options.map((opt, j) => (
-              <input
-                key={j}
-                className="border p-2 w-full"
-                placeholder={`Option ${j + 1}`}
-                value={opt}
-                onChange={(e) => handleChangeOption(i, j, e.target.value)}
+      <Formik
+        initialValues={initialValues}
+        validationSchema={AssessmentSchema}
+        onSubmit={handleSubmit}
+        enableReinitialize
+      >
+        {({ values }) => (
+          <Form className="space-y-4">
+            <div>
+              <Field
+                name="name"
+                placeholder="Assessment Name"
+                className="border p-2 w-full rounded"
               />
-            ))}
+              <ErrorMessage
+                name="name"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+            </div>
 
-            <select
-              className="border p-2 w-full"
-              value={q.answer}
-              onChange={(e) => handleChangeAnswer(i, Number(e.target.value))}
-            >
-              {q.options.map((_, j) => (
-                <option key={j} value={j}>
-                  Correct Answer: Option {j + 1}
-                </option>
-              ))}
-            </select>
-          </div>
-        ))}
+            <div>
+              <Field
+                name="description"
+                as="textarea"
+                placeholder="Description (optional)"
+                className="border p-2 w-full rounded"
+              />
+            </div>
 
-        <div className="flex gap-4 mt-4">
-          <button
-            onClick={handleAddQuestion}
-            className="bg-gray-200 px-4 py-2 rounded"
-          >
-            Add Question
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-          >
-            {isEdit ? "Update Assessment" : "Submit Assessment"}
-          </button>
-          {isEdit && (
-            <button
-              onClick={onFinishEdit}
-              className="bg-gray-300 text-black px-4 py-2 rounded"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </div>
+            <div className="flex gap-4">
+              <div className="w-full">
+                <Field
+                  name="passingScore"
+                  type="number"
+                  placeholder="Passing Score"
+                  className="border p-2 rounded w-full"
+                />
+                <ErrorMessage
+                  name="passingScore"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+              <div className="w-full">
+                <Field
+                  name="timeLimit"
+                  type="number"
+                  placeholder="Time Limit (minutes)"
+                  className="border p-2 rounded w-full"
+                />
+                <ErrorMessage
+                  name="timeLimit"
+                  component="div"
+                  className="text-red-500 text-sm"
+                />
+              </div>
+            </div>
+
+            <FieldArray name="questions">
+              {({ push, remove }) => (
+                <div className="space-y-4">
+                  {values.questions.map((q, i) => (
+                    <div
+                      key={i}
+                      className="border p-4 rounded bg-gray-50 space-y-2"
+                    >
+                      <p className="text-sm font-semibold text-gray-600">
+                        Question {i + 1}
+                      </p>
+
+                      <div>
+                        <Field
+                          name={`questions.${i}.question`}
+                          placeholder="Question"
+                          className="border p-2 w-full"
+                        />
+                        <ErrorMessage
+                          name={`questions.${i}.question`}
+                          component="div"
+                          className="text-red-500 text-sm"
+                        />
+                      </div>
+
+                      {q.options.map((_, j) => (
+                        <div key={j}>
+                          <Field
+                            name={`questions.${i}.options.${j}`}
+                            placeholder={`Option ${j + 1}`}
+                            className="border p-2 w-full"
+                          />
+                          <ErrorMessage
+                            name={`questions.${i}.options.${j}`}
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
+                      ))}
+
+                      <div>
+                        <Field
+                          as="select"
+                          name={`questions.${i}.answer`}
+                          className="border p-2 w-full"
+                        >
+                          {q.options.map((_, j) => (
+                            <option key={j} value={j}>
+                              Correct Answer: Option {j + 1}
+                            </option>
+                          ))}
+                        </Field>
+                      </div>
+
+                      {values.questions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => remove(i)}
+                          className="text-red-600 text-sm underline"
+                        >
+                          Remove Question
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      push({
+                        question: "",
+                        options: ["", "", "", ""],
+                        answer: 0,
+                      })
+                    }
+                    className="bg-gray-200 px-4 py-2 rounded"
+                  >
+                    Add Question
+                  </button>
+                </div>
+              )}
+            </FieldArray>
+
+            <div className="flex gap-4 mt-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                {isEdit ? "Update Assessment" : "Submit Assessment"}
+              </button>
+              {isEdit && (
+                <button
+                  type="button"
+                  onClick={onFinishEdit}
+                  className="bg-gray-300 text-black px-4 py-2 rounded"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 }

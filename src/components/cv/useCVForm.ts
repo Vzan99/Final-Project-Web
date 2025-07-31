@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import API from "@/lib/axios";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 export function useCVForm() {
   const [form, setForm] = useState({
@@ -24,17 +22,6 @@ export function useCVForm() {
     });
   }, []);
 
-  const handleDownload = async () => {
-    if (!pdfRef.current) return;
-    const canvas = await html2canvas(pdfRef.current!);
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
-    const width = pdf.internal.pageSize.getWidth();
-    const height = (canvas.height * width) / canvas.width;
-    pdf.addImage(imgData, "PNG", 0, 0, width, height);
-    pdf.save("cv.pdf");
-  };
-
   const handleDownloadFromServer = async () => {
     try {
       const payload = {
@@ -50,14 +37,14 @@ export function useCVForm() {
       );
       const link = document.createElement("a");
       link.href = url;
-      link.download = "cv-server.pdf";
+      link.download = "cv.pdf";
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (err) {
-      alert("Failed to download from server");
+      alert("Failed to download CV");
     }
   };
 
-  return { form, setForm, pdfRef, handleDownload, handleDownloadFromServer };
+  return { form, setForm, pdfRef, handleDownloadFromServer };
 }
