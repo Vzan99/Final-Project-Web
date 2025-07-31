@@ -48,12 +48,6 @@ export default function CompanyDetailsPage() {
   const [jobTotalPages, setJobTotalPages] = useState(1);
   const jobPageSize = 5;
 
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [reviewPage, setReviewPage] = useState(1);
-  const [reviewTotal, setReviewTotal] = useState(0);
-  const reviewPageSize = 3;
-  const totalReviewPages = Math.ceil(reviewTotal / reviewPageSize);
-
   useEffect(() => {
     const fetchCompany = async () => {
       try {
@@ -91,23 +85,6 @@ export default function CompanyDetailsPage() {
       fetchJobs();
     }
   }, [activeTab, companyId, jobPage]);
-
-  useEffect(() => {
-    if (activeTab === "Reviews") {
-      const fetchReviews = async () => {
-        try {
-          const res = await API.get(`/reviews/company/${companyId}`, {
-            params: { page: reviewPage, pageSize: reviewPageSize },
-          });
-          setReviews(res.data.reviews);
-          setReviewTotal(res.data.total);
-        } catch (err) {
-          console.error("Error loading reviews", err);
-        }
-      };
-      fetchReviews();
-    }
-  }, [activeTab, companyId, reviewPage]);
 
   if (loading) {
     return <CompanyDetailsSkeleton />;
@@ -216,7 +193,6 @@ export default function CompanyDetailsPage() {
                     No company description provided.
                   </p>
                 )}
-
                 {company.foundedYear && (
                   <p className="text-sm">Founded Year: {company.foundedYear}</p>
                 )}
@@ -272,36 +248,7 @@ export default function CompanyDetailsPage() {
                 <h3 className="text-lg font-semibold">Leave a Review</h3>
                 <ReviewForm companyId={company.id} />
                 <h3 className="text-lg font-semibold mt-6">User Reviews</h3>
-                <ReviewList reviews={reviews} />
-
-                {/* Pagination */}
-                {totalReviewPages > 1 && (
-                  <div className="flex justify-center items-center gap-4 mt-4">
-                    <button
-                      onClick={() =>
-                        setReviewPage((prev) => Math.max(prev - 1, 1))
-                      }
-                      disabled={reviewPage === 1}
-                      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                    >
-                      Prev
-                    </button>
-                    <span>
-                      Page {reviewPage} of {totalReviewPages}
-                    </span>
-                    <button
-                      onClick={() =>
-                        setReviewPage((prev) =>
-                          Math.min(prev + 1, totalReviewPages)
-                        )
-                      }
-                      disabled={reviewPage === totalReviewPages}
-                      className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                    >
-                      Next
-                    </button>
-                  </div>
-                )}
+                <ReviewList companyId={company.id} />
               </div>
             )}
           </div>

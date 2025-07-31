@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import API from "@/lib/axios";
+import { toast } from "react-toastify";
+
 export default function AssessmentDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -20,7 +22,6 @@ export default function AssessmentDetailPage() {
         const res = await API.get(`/assessments/${id}/detail`);
         const data = res.data;
 
-        // Cek apakah user sudah mengerjakan
         const result = await API.get(`/assessments/${id}/result`);
         if (result.data) {
           router.replace(`/assessments/${id}/result`);
@@ -31,7 +32,7 @@ export default function AssessmentDetailPage() {
         setAnswers(new Array(data.questions.length).fill(""));
         setTimeLeft((data.timeLimit || 30) * 60); // fallback 30 menit
       } catch (err) {
-        alert("Gagal memuat data assessment");
+        toast.error("Gagal memuat data assessment.");
         router.push("/assessments");
       }
     };
@@ -39,7 +40,6 @@ export default function AssessmentDetailPage() {
     fetchData();
   }, [id]);
 
-  // Timer effect
   useEffect(() => {
     if (timeLeft === null || submitting) return;
     if (timeLeft <= 0) {
@@ -62,13 +62,32 @@ export default function AssessmentDetailPage() {
 
   const handleSubmit = async () => {
     if (submitting) return;
+
+    const incomplete = answers.some((ans) => !ans);
+    if (incomplete) {
+      toast.error("Semua pertanyaan harus dijawab.");
+      return;
+    }
+
     setSubmitting(true);
+    const toastId = toast.loading("Mengirim jawaban...");
 
     try {
       await API.post(`/assessments/${id}/submit`, { answers });
+      toast.update(toastId, {
+        render: "Berhasil submit!",
+        type: "success",
+        isLoading: false,
+        autoClose: 2000,
+      });
       router.push(`/assessments/${id}/result`);
     } catch (err) {
-      alert("Gagal submit jawaban");
+      toast.update(toastId, {
+        render: "Gagal submit jawaban",
+        type: "error",
+        isLoading: false,
+        autoClose: 2000,
+      });
     }
   };
 
@@ -115,7 +134,7 @@ export default function AssessmentDetailPage() {
 
       <button
         onClick={handleSubmit}
-        disabled={submitting}
+        disabled={submitting || answers.some((a) => !a)}
         className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition disabled:opacity-50"
       >
         {submitting ? "Submitting..." : "Submit"}

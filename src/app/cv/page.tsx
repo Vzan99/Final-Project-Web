@@ -1,8 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAppSelector } from "@/lib/redux/hooks";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import CVForm from "@/components/cv/CVForm";
 import CVPreview from "@/components/cv/CVPreview";
 import { useCVForm } from "@/components/cv/useCVForm";
@@ -12,31 +12,29 @@ export default function CVGeneratorPage() {
   const loading = useAppSelector((state) => state.auth.loading);
   const router = useRouter();
 
-  const { form, setForm, pdfRef, handleDownload, handleDownloadFromServer } =
-    useCVForm();
+  const { form, setForm, pdfRef, handleDownloadFromServer } = useCVForm();
 
   useEffect(() => {
     if (!loading && subscription?.status !== "ACTIVE") {
       router.replace("/subscription/upgrade");
     }
-  }, [loading, subscription]);
+  }, [loading, subscription, router]);
 
   if (loading || subscription?.status !== "ACTIVE") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Checking...
-      </div>
+      <main className="min-h-screen flex items-center justify-center text-gray-600">
+        Checking subscription...
+      </main>
     );
   }
 
   return (
-    <main className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">CV Generator</h1>
+    <main className="p-6 max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold text-[#497187] mb-6">CV Generator</h1>
       <div className="grid md:grid-cols-2 gap-8">
         <CVForm
           form={form}
           setForm={setForm}
-          onClientDownload={handleDownload}
           onServerDownload={handleDownloadFromServer}
         />
         <CVPreview form={form} pdfRef={pdfRef} />
