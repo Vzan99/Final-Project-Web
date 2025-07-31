@@ -5,7 +5,7 @@ import API from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { Job } from "@/types/jobs";
 import { Bookmark, BookmarkCheck, Send } from "lucide-react";
-import SavedJobsSkeleton from "@/components/loadingSkeleton/savedjobsSkeleon";
+import SavedJobsSkeleton from "@/components/loadingSkeleton/savedjobsSkeleton";
 import ProtectedRoute from "@/components/protectedRoute";
 import SocialShare from "@/components/socialShare";
 import { toast } from "react-toastify";
