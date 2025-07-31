@@ -10,6 +10,7 @@ import JobSearchBar, { Filters } from "@/components/jobs/jobSearchBar";
 import { JobDetailsCard } from "@/components/jobs/jobDetailsCard";
 import { JobDetailsSkeleton } from "@/components/loadingSkeleton/jobDetailsSkeleton";
 import { Job } from "@/types/jobs";
+import { ArrowLeft } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -27,7 +28,7 @@ export default function JobListingsPage() {
     isRemote: null,
     jobCategory: [],
     listingTime: "any",
-    sortBy: "createdAt",
+    sortBy: "nearby",
     sortOrder: "desc",
   });
 
@@ -130,7 +131,7 @@ export default function JobListingsPage() {
   );
 
   useEffect(() => {
-    const queryFilters: Filters = {
+    const queryFilters: Filters & { lat?: number; lng?: number } = {
       title: searchParams.get("title") || "",
       location: searchParams.get("location") || "",
       employmentType: searchParams.getAll("employmentType") || [],
@@ -141,12 +142,98 @@ export default function JobListingsPage() {
       listingTime: searchParams.get("listingTime") || "any",
       customStartDate: searchParams.get("customStartDate") || undefined,
       customEndDate: searchParams.get("customEndDate") || undefined,
-      sortBy: (searchParams.get("sortBy") || "createdAt") as Filters["sortBy"],
+      sortBy: (searchParams.get("sortBy") || "nearby") as Filters["sortBy"],
       sortOrder: (searchParams.get("sortOrder") ||
         "desc") as Filters["sortOrder"],
+      lat: searchParams.get("lat")
+        ? Number(searchParams.get("lat"))
+        : undefined,
+      lng: searchParams.get("lng")
+        ? Number(searchParams.get("lng"))
+        : undefined,
     };
 
     const pageQuery = parseInt(searchParams.get("page") || "1", 10);
+
+    if (
+      queryFilters.sortBy === "nearby" &&
+      (!queryFilters.lat || !queryFilters.lng)
+    ) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const userLat = pos.coords.latitude;
+            const userLng = pos.coords.longitude;
+
+            const newFilters = {
+              ...queryFilters,
+              lat: userLat,
+              lng: userLng,
+            };
+
+            const query = new URLSearchParams();
+            Object.entries(newFilters).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                if (Array.isArray(value)) {
+                  value.forEach((v) => query.append(key, v));
+                } else {
+                  query.set(key, value.toString());
+                }
+              }
+            });
+            query.set("page", pageQuery.toString());
+
+            router.replace("/jobs?" + query.toString());
+          },
+          (error) => {
+            const fallbackFilters = {
+              ...queryFilters,
+              sortBy: "createdAt",
+              lat: undefined,
+              lng: undefined,
+            };
+
+            const query = new URLSearchParams();
+            Object.entries(fallbackFilters).forEach(([key, value]) => {
+              if (value !== undefined && value !== null) {
+                if (Array.isArray(value)) {
+                  value.forEach((v) => query.append(key, v));
+                } else {
+                  query.set(key, value.toString());
+                }
+              }
+            });
+            query.set("page", pageQuery.toString());
+
+            router.replace("/jobs?" + query.toString());
+          }
+        );
+        return;
+      } else {
+        const fallbackFilters = {
+          ...queryFilters,
+          sortBy: "createdAt",
+          lat: undefined,
+          lng: undefined,
+        };
+
+        const query = new URLSearchParams();
+        Object.entries(fallbackFilters).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              value.forEach((v) => query.append(key, v));
+            } else {
+              query.set(key, value.toString());
+            }
+          }
+        });
+        query.set("page", pageQuery.toString());
+
+        router.replace("/jobs?" + query.toString());
+        return;
+      }
+    }
+
     setFilters(queryFilters);
     fetchJobs(queryFilters, pageQuery);
   }, [searchParams]);
@@ -194,42 +281,51 @@ export default function JobListingsPage() {
       <JobSearchBar onSearch={handleSearch} initialFilters={filters} />
 
       {isMobile ? (
-        selectedJob ? (
-          <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-            <button
-              onClick={() => setSelectedJob(null)}
-              className="mb-4 text-sm text-blue-600 underline"
-            >
-              ← Back to job list
-            </button>
-            <JobDetailsCard job={selectedJob} />
-          </div>
-        ) : (
-          <div className="h-[75vh] overflow-y-auto pr-2">
-            {loading ? (
-              Array.from({ length: PAGE_SIZE }).map((_, i) => (
-                <JobCardSkeleton key={i} />
-              ))
-            ) : jobs.length > 0 ? (
-              jobs.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => handleJobClick(job)}
-                  className="cursor-pointer mb-4"
+        <>
+          {selectedJob && !loadingJobDetails ? (
+            <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <JobDetailsCard job={selectedJob} />
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={() => setSelectedJob(null)}
+                  className="flex items-center gap-1 text-sm text-[#6096B4] hover:text-[#517d98] font-medium"
                 >
-                  <JobCard job={job} />
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center">No jobs found.</p>
-            )}
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        )
+                  <ArrowLeft size={16} />
+                  Back to job list
+                </button>
+              </div>
+            </div>
+          ) : loadingJobDetails ? (
+            <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <JobDetailsSkeleton />
+            </div>
+          ) : (
+            <div className="h-[75vh] overflow-y-auto pr-2">
+              {loading ? (
+                Array.from({ length: PAGE_SIZE }).map((_, i) => (
+                  <JobCardSkeleton key={i} />
+                ))
+              ) : jobs.length > 0 ? (
+                jobs.map((job) => (
+                  <div
+                    key={job.id}
+                    onClick={() => handleJobClick(job)}
+                    className="cursor-pointer mb-4"
+                  >
+                    <JobCard job={job} />
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center">No jobs found.</p>
+              )}
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
+        </>
       ) : (
         <div className="flex gap-6">
           <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200">

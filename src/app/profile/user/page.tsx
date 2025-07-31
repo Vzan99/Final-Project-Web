@@ -34,7 +34,6 @@ export default function UserProfilePage() {
   const [loadingVerify, setLoadingVerify] = useState(false);
 
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fileImageRef = useRef<HTMLInputElement>(null);
   const fileBannerRef = useRef<HTMLInputElement>(null);
@@ -77,7 +76,6 @@ export default function UserProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadError(null);
     setUploadLoading(true);
 
     try {
@@ -90,8 +88,9 @@ export default function UserProfilePage() {
 
       await dispatch(fetchUser());
     } catch (err) {
-      console.error("Upload failed:", err);
-      setUploadError("Failed to upload photo. Please try again.");
+      toast.error(
+        "Failed to upload photo. File must be JPG, JPEG or PNG, Maximum 1 MB"
+      );
     } finally {
       setUploadLoading(false);
     }
@@ -101,7 +100,6 @@ export default function UserProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadError(null);
     setUploadLoading(true);
 
     try {
@@ -114,8 +112,9 @@ export default function UserProfilePage() {
 
       await dispatch(fetchUser());
     } catch (err) {
-      console.error("Banner upload failed:", err);
-      setUploadError("Failed to upload banner. Please try again.");
+      toast.error(
+        "Failed to upload banner. File must be JPG, JPEG or PNG, Maximum 1 MB"
+      );
     } finally {
       setUploadLoading(false);
     }
@@ -180,12 +179,6 @@ export default function UserProfilePage() {
                   hidden
                 />
               </div>
-
-              {uploadError && (
-                <p className="text-sm text-red-600 mt-2 text-center md:text-left">
-                  {uploadError}
-                </p>
-              )}
             </div>
 
             <button

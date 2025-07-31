@@ -96,19 +96,21 @@ export default function CompaniesPage() {
                             width: 60,
                             height: 60,
                             crop: "fit",
-                          }) ?? "/default-logo.png"
+                          }) ?? "/precise_logo.jpeg"
                         }
                         alt={`${c.admin.name} logo`}
                         className="w-12 h-12 object-contain"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
-                            "/default-logo.png";
+                            "/precise_logo.jpeg";
                         }}
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gray-200 flex items-center justify-center text-xs text-gray-500">
-                        No Logo
-                      </div>
+                      <img
+                        src="/precise_logo.jpeg"
+                        alt="Default logo"
+                        className="w-12 h-12 object-contain"
+                      />
                     )}
                   </div>
 

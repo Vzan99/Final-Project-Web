@@ -34,6 +34,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     try {
       await API.post("/auth/logout");
+      localStorage.clear();
       dispatch(logout());
       setIsOpen(false);
       setProfileOpen(false);

@@ -14,7 +14,7 @@ const listingTimeOptions = [
   { label: "Range", value: "custom" },
 ];
 
-type SortOption = "date" | "salaryAsc" | "salaryDesc" | "relevance";
+type SortOption = "date" | "salaryAsc" | "salaryDesc" | "nearby";
 
 type FilterMeta = {
   employmentTypes: { label: string; value: string }[];
@@ -32,8 +32,10 @@ export type Filters = {
   listingTime: string;
   customStartDate?: string;
   customEndDate?: string;
-  sortBy: "createdAt" | "salary" | "relevance";
+  sortBy: "createdAt" | "salary" | "nearby";
   sortOrder: "asc" | "desc";
+  lat?: number;
+  lng?: number;
 };
 
 type JobSearchBarProps = {
@@ -82,8 +84,8 @@ export default function JobSearchBar({
     switch (initialFilters.sortBy) {
       case "salary":
         return initialFilters.sortOrder === "asc" ? "salaryAsc" : "salaryDesc";
-      case "relevance":
-        return "relevance";
+      case "nearby":
+        return "nearby";
       case "createdAt":
       default:
         return "date";
@@ -125,8 +127,8 @@ export default function JobSearchBar({
           return initialFilters.sortOrder === "asc"
             ? "salaryAsc"
             : "salaryDesc";
-        case "relevance":
-          return "relevance";
+        case "nearby":
+          return "nearby";
         case "createdAt":
         default:
           return "date";
@@ -211,7 +213,7 @@ export default function JobSearchBar({
       }
     }
 
-    let sortBy: "createdAt" | "salary" | "relevance" = "createdAt";
+    let sortBy: "createdAt" | "salary" | "nearby" = "createdAt";
     let sortOrder: "asc" | "desc" = "desc";
 
     if (sort === "salaryAsc") {
@@ -220,8 +222,8 @@ export default function JobSearchBar({
     } else if (sort === "salaryDesc") {
       sortBy = "salary";
       sortOrder = "desc";
-    } else if (sort === "relevance") {
-      sortBy = "relevance";
+    } else if (sort === "nearby") {
+      sortBy = "nearby";
       sortOrder = "desc";
     }
 
@@ -563,7 +565,7 @@ export default function JobSearchBar({
                 date: "Date (Newest)",
                 salaryAsc: "Salary (Low to High)",
                 salaryDesc: "Salary (High to Low)",
-                relevance: "Relevance",
+                nearby: "Nearby",
               }[sort]
             }
             <svg
@@ -589,7 +591,7 @@ export default function JobSearchBar({
                 { label: "Date (Newest)", value: "date" },
                 { label: "Salary (Low to High)", value: "salaryAsc" },
                 { label: "Salary (High to Low)", value: "salaryDesc" },
-                { label: "Relevance", value: "relevance" },
+                { label: "Nearby", value: "nearby" },
               ].map(({ label, value }) => (
                 <label key={value} className="flex items-center space-x-2 mb-2">
                   <input

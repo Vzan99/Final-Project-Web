@@ -25,6 +25,8 @@ export type Job = {
   updatedAt: string;
   hasTest: boolean;
   companyId: string;
+  isExpired?: boolean;
+  isClosed?: boolean;
   company?: {
     id: string;
     logo?: string;

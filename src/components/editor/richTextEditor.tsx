@@ -87,9 +87,7 @@ export default function RichTextEditor({
               ? "text-blue-600 bg-gray-100"
               : "text-gray-600"
           }`}
-        >
-          <Heading2 size={18} />
-        </button>
+        ></button>
       </div>
 
       {/* Editor content container */}

@@ -7,6 +7,7 @@ import { resetPasswordSchema } from "@/schemas/auth/resetPassword";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import ResetPasswordSkeleton from "@/components/loadingSkeleton/resetPasswordSkeleton";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ export default function ResetPasswordPage() {
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) {
@@ -22,6 +24,8 @@ export default function ResetPasswordPage() {
       router.replace("/auth/login");
     }
   }, [token, router]);
+
+  if (loading) return <ResetPasswordSkeleton />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f1f0e8] px-4">
