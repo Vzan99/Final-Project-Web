@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import API from "@/lib/axios";
 import JobForm from "@/components/dashboard/jobs/JobForm";
 import { toast } from "react-toastify";
+import JobFormSkeleton from "@/components/dashboard/jobs/JobFormSkeleton";
 
 export default function EditJobPage() {
   const { id } = useParams();
@@ -30,7 +31,7 @@ export default function EditJobPage() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <JobFormSkeleton />;
 
   return (
     <div>
