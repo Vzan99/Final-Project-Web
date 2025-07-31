@@ -31,7 +31,7 @@ export default function VerifyNewEmailPage() {
           setVerified(true);
 
           setTimeout(() => {
-            router.push("/auth/login");
+            router.push("/auth/login?refresh=true");
           }, 2000);
         } else {
           setMessage("Verification failed or token expired.");

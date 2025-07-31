@@ -1,10 +1,23 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import RegisterForm from "./registerForm";
 import Image from "next/image";
+import RegisterPageSkeleton from "@/components/loadingSkeleton/registerPageSkeleton";
 
 export default function RegisterPage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) return <RegisterPageSkeleton />;
+
   return (
     <main className="flex flex-col md:flex-row justify-center items-start bg-white pt-16 pb-12 px-4 md:px-8">
-      {/* Left side*/}
+      {/* Left side */}
       <div className="hidden md:flex flex-col items-center justify-center w-1/2 pr-8">
         <div className="text-center mb-6 max-w-md">
           <h1 className="text-4xl font-bold mb-4 text-[#6096B4]">
@@ -23,7 +36,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right side: Just center the form */}
+      {/* Right side */}
       <div className="w-full md:w-1/2 flex justify-center">
         <RegisterForm />
       </div>

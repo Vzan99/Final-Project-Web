@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { Dialog } from "@headlessui/react";
 import { X, FileText } from "lucide-react";
-import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
+import { Formik, Form, Field, ErrorMessage, useField } from "formik";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { applyJobSchema } from "@/schemas/jobs/applyJobSchema";
@@ -15,42 +15,40 @@ type Props = {
   setHasApplied: (value: boolean) => void;
 };
 
-// Custom component to format salary input nicely while syncing with Formik
 function SalaryInput() {
-  const { values, setFieldValue } = useFormikContext<{
-    expectedSalary: string;
-  }>();
-  const [salaryInput, setSalaryInput] = useState(values.expectedSalary || "");
+  const [field, meta, helpers] = useField("expectedSalary");
+  const [salaryInput, setSalaryInput] = useState(field.value || "");
 
-  // Sanitize raw salary string (only digits)
   const salary = useMemo(
     () => salaryInput.replace(/[^\d]/g, ""),
     [salaryInput]
   );
 
-  // Format with commas e.g. 50,000
   const formattedSalary = useMemo(
     () => salary.replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     [salary]
   );
 
-  // When input changes, update both local and Formik value
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^\d]/g, "");
     setSalaryInput(raw);
-    setFieldValue("expectedSalary", raw);
+    helpers.setValue(raw);
   };
 
   return (
-    <input
-      type="text"
-      inputMode="numeric"
-      value={formattedSalary}
-      onChange={handleChange}
-      className="w-full px-3 py-2 border rounded"
-      placeholder="e.g. 50,000"
-      required
-    />
+    <>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={formattedSalary}
+        onChange={handleChange}
+        className="w-full px-3 py-2 border rounded"
+        placeholder="e.g. 50,000"
+      />
+      {meta.touched && meta.error && (
+        <div className="text-red-600 text-sm mt-1">{meta.error}</div>
+      )}
+    </>
   );
 }
 
@@ -92,6 +90,7 @@ export default function ApplyJobModal({
                 toast.error("Please upload a resume.");
                 return;
               }
+
               setLoading(true);
               try {
                 const formData = new FormData();
@@ -115,6 +114,9 @@ export default function ApplyJobModal({
                 setLoading(false);
               }
             }}
+            validateOnBlur={true}
+            validateOnChange={false}
+            validateOnMount={true}
           >
             {({ setFieldValue, isSubmitting, values }) => (
               <Form className="space-y-4">
@@ -123,11 +125,6 @@ export default function ApplyJobModal({
                     Expected Salary
                   </label>
                   <SalaryInput />
-                  <ErrorMessage
-                    name="expectedSalary"
-                    component="div"
-                    className="text-red-600 text-sm mt-1"
-                  />
                 </div>
 
                 <div>
@@ -164,7 +161,6 @@ export default function ApplyJobModal({
                           e.currentTarget.files?.[0] ?? null
                         );
                       }}
-                      required
                     />
 
                     <label
@@ -190,6 +186,7 @@ export default function ApplyJobModal({
                         </button>
                       </div>
                     )}
+
                     <ErrorMessage
                       name="resume"
                       component="div"

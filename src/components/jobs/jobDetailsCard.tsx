@@ -182,6 +182,9 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
     return <JobDetailsSkeleton />;
   }
 
+  const isExpired = job.isExpired;
+  const isClosed = job.isClosed;
+  const isPublished = job.status === "PUBLISHED";
   const companyName = job.company?.admin?.name ?? "Unknown Company";
   const logoUrl = job.company?.logo || "/precise_logo.jpeg";
   const bannerUrl = job.company?.bannerUrl;
@@ -208,16 +211,26 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   };
 
   const renderApplyButton = () => {
+    if (!isPublished || isClosed || isExpired) {
+      return (
+        <p className="mt-2 text-md text-red-800 font-bold">
+          {isClosed
+            ? "This job has been closed by the company."
+            : isExpired
+            ? "This job has expired."
+            : "This job is not available."}
+        </p>
+      );
+    }
+
     if (hasApplied) {
       return (
-        <>
-          <button
-            disabled
-            className="mt-2 flex items-center gap-2 bg-gray-300 text-gray-600 px-6 py-2 rounded-lg cursor-not-allowed"
-          >
-            Already Applied
-          </button>
-        </>
+        <button
+          disabled
+          className="mt-2 flex items-center gap-2 bg-gray-300 text-gray-600 px-6 py-2 rounded-lg cursor-not-allowed"
+        >
+          Already Applied
+        </button>
       );
     }
 
@@ -277,7 +290,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
       }
 
       return (
-        <p className="text-sm text-red-500">You did not pass the pre-test</p>
+        <p className="text-sm text-red-500">You did not pass the pre-test.</p>
       );
     }
 
@@ -333,9 +346,12 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           className="w-16 h-16 object-contain rounded"
         />
         <div>
-          <h2 className="text-2xl font-bold text-gray-800 hover:underline cursor-pointer">
-            <Link href={`/jobs/${job.id}`}>{job.title}</Link>
-          </h2>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800 hover:underline cursor-pointer">
+              <Link href={`/jobs/${job.id}`}>{job.title}</Link>
+            </h2>
+          </div>
+
           {job.company?.id ? (
             <Link
               href={`/companies/${job.company.id}`}
@@ -369,7 +385,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         )}
         {job.salary !== undefined && (
           <div>
-            <span className="font-semibold text-gray-700">Salary:</span> $
+            <span className="font-semibold text-gray-700">Salary:</span> Rp.
             {job.salary.toLocaleString()}
           </div>
         )}

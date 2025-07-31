@@ -83,7 +83,7 @@ export default function AppliedJobsPage() {
       requireVerified={true}
       fallback={<AppliedJobsSkeleton />}
     >
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 h-screen">
         <h1 className="text-2xl font-bold text-[#497187] mb-4">Applied Jobs</h1>
 
         {/* Filter Tabs */}

@@ -5,19 +5,31 @@ import { loginSchema } from "@/schemas/auth/loginSchema";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FaGoogle } from "react-icons/fa6";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { fetchUser } from "@/lib/redux/features/authSlice";
 import { supabase } from "@/lib/supabase";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import LoginPageSkeleton from "@/components/loadingSkeleton/loginPageSkeleton";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const refresh = searchParams.get("refresh");
+    if (refresh === "true") {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("refresh");
+
+      window.location.replace(newUrl.toString());
+    }
+  }, [searchParams]);
 
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -27,6 +39,10 @@ export default function LoginPage() {
 
     if (error) toast.error(`Google login failed: ${error.message}`);
   };
+
+  if (loading) {
+    return <LoginPageSkeleton />;
+  }
 
   return (
     <main className="flex flex-col md:flex-row justify-center items-start text-black bg-white pt-16 pb-12 px-4 md:px-8">

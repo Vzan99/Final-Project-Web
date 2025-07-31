@@ -2,14 +2,23 @@
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { forgotPasswordSchema } from "@/schemas/auth/forgotPassword";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
+import ForgotPasswordSkeleton from "@/components/loadingSkeleton/forgotPasswordSkeleton";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setInitializing(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (initializing) return <ForgotPasswordSkeleton />;
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-[#f1f0e8] px-4">
@@ -42,7 +51,6 @@ export default function ForgotPasswordPage() {
         >
           {({ isSubmitting }) => (
             <Form className="space-y-4">
-              {/* Email Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Email
@@ -61,7 +69,6 @@ export default function ForgotPasswordPage() {
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting || loading}

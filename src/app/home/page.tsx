@@ -4,10 +4,11 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import JobSearchBar from "@/components/jobs/jobSearchBar";
 import SignInCardSection from "@/components/signInCardSection";
-import Link from "next/link";
 import type { Filters } from "@/components/jobs/jobSearchBar";
 import API from "@/lib/axios";
 import type { Job } from "@/types/jobs";
+import FeaturedJobsCardSkeleton from "@/components/loadingSkeleton/featuredJobsCardSkeleton";
+import HomePageSkeleton from "@/components/loadingSkeleton/homePageSkeleton";
 
 export default function HomePage() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function HomePage() {
   const [filters, setFilters] = useState<Partial<Filters>>(emptyFilters);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
+  const [isNearby, setIsNearby] = useState(false);
 
   const fetchLatestJobs = async () => {
     try {
@@ -45,14 +47,17 @@ export default function HomePage() {
   const fetchNearbyJobs = async (lat: number, lng: number) => {
     try {
       setLoadingJobs(true);
-      const res = await API.get("/jobs/public", {
+      const res = await API.get("/jobs/nearby", {
         params: { lat, lng, page: 1, pageSize: 8 },
         withCredentials: false,
       });
-      setJobs(res.data.jobs);
+
+      if (res.data.jobs.length > 0) {
+        setJobs(res.data.jobs);
+        setIsNearby(true);
+      }
     } catch (err) {
       console.error("Failed to fetch nearby jobs:", err);
-      fetchLatestJobs();
     } finally {
       setLoadingJobs(false);
     }
@@ -62,15 +67,22 @@ export default function HomePage() {
     setFilters(emptyFilters);
     fetchLatestJobs();
 
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported.");
+      return;
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+
+        localStorage.setItem("userLat", latitude.toString());
+        localStorage.setItem("userLng", longitude.toString());
+
         fetchNearbyJobs(latitude, longitude);
       },
       () => {
-        console.warn("Geolocation denied or unavailable, showing latest jobs.");
+        console.warn("Geolocation denied or unavailable.");
       }
     );
   }, []);
@@ -102,7 +114,9 @@ export default function HomePage() {
     router.push(`/jobs?${queryParams.toString()}`);
   };
 
-  return (
+  return loadingJobs ? (
+    <HomePageSkeleton />
+  ) : (
     <main className="min-h-screen bg-[#EEE9DA] text-[#1a1a1a]">
       {/* Hero Section */}
       <section className="bg-white text-center py-20 px-6">
@@ -116,15 +130,22 @@ export default function HomePage() {
 
         <JobSearchBar onSearch={handleSearch} initialFilters={filters} />
       </section>
+
       <SignInCardSection />
 
-      {/* Nearby or Latest Jobs Section */}
+      {/* Nearby or Featured Jobs Section */}
       <section className="py-10 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6">Featured Jobs</h2>
+          <h2 className="text-2xl font-bold mb-6">
+            {isNearby ? "Nearby Jobs" : "Featured Jobs"}
+          </h2>
 
           {loadingJobs ? (
-            <p className="text-center text-gray-500">Loading jobs...</p>
+            <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 py-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <FeaturedJobsCardSkeleton key={i} />
+              ))}
+            </div>
           ) : jobs.length === 0 ? (
             <p className="text-center text-gray-500">No jobs found.</p>
           ) : (
