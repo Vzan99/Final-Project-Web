@@ -121,18 +121,20 @@ export default function CompanyDetailsPage() {
         <div className="relative bg-white rounded-b-xl shadow p-6 px-4 md:px-8 pt-10 flex flex-col items-start z-20">
           {/* Logo */}
           <div className="absolute -top-20 left-0 right-0 md:left-8 md:right-auto z-30">
-            <div className="w-32 h-32 mx-auto md:mx-0 border-6 border-white rounded-md overflow-hidden">
-              <img
-                src={
-                  getCloudinaryImageUrl(company.logo, {
-                    width: 200,
-                    height: 200,
-                    crop: "fill",
-                  }) || "/placeholder_user.png"
-                }
-                alt="Company Logo"
-                className="object-cover w-full h-full"
-              />
+            <div className="w-32 h-32 mx-auto md:mx-0 border-6 border-white rounded-md bg-white p-1">
+              <div className="w-full h-full bg-white rounded-md overflow-hidden flex items-center justify-center">
+                <img
+                  src={
+                    getCloudinaryImageUrl(company.logo, {
+                      width: 200,
+                      height: 200,
+                      crop: "fill",
+                    }) || "/placeholder_user.png"
+                  }
+                  alt="Company Logo"
+                  className="object-contain w-full h-full"
+                />
+              </div>
             </div>
           </div>
 

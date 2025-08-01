@@ -52,7 +52,7 @@ export default function SocialShare({
     >
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="p-2 rounded-full transition hover:bg-gray-100 text-gray-600 hover:text-[#6096B4] flex items-center justify-center"
+        className="p-2 rounded-full transition bg-white hover:bg-gray-100 text-gray-600 hover:text-[#6096B4] flex items-center justify-center"
         title="Share Job"
       >
         <Share2 className="w-5 h-5" />

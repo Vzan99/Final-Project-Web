@@ -159,18 +159,21 @@ export default function UserProfilePage() {
                   type="button"
                   onClick={() => fileImageRef.current?.click()}
                   disabled={uploadLoading}
-                  className={`rounded-full overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto ${
+                  className={`rounded-full w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white p-1 ${
                     uploadLoading ? "animate-pulse" : ""
                   }`}
                   aria-label="Change Profile Picture"
                 >
-                  <img
-                    src={profileImageUrl}
-                    alt="Profile"
-                    className="object-cover w-full h-full"
-                    draggable={false}
-                  />
+                  <div className="bg-white w-full h-full flex items-center justify-center rounded-full overflow-hidden">
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      className="object-contain w-full h-full"
+                      draggable={false}
+                    />
+                  </div>
                 </button>
+
                 <input
                   type="file"
                   accept="image/*"

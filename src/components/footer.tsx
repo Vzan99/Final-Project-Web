@@ -22,12 +22,12 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/register" className="hover:underline">
+              <Link href="/auth/register" className="hover:underline">
                 Register
               </Link>
             </li>
             <li>
-              <Link href="/login" className="hover:underline">
+              <Link href="/auth/login" className="hover:underline">
                 Login
               </Link>
             </li>
@@ -43,7 +43,7 @@ export default function Footer() {
           <h4 className="text-md font-semibold mb-3">Companies</h4>
           <ul className="space-y-2">
             <li>
-              <Link href="/register?role=admin" className="hover:underline">
+              <Link href="/dashboard/jobs" className="hover:underline">
                 Post a Job
               </Link>
             </li>
@@ -53,7 +53,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/login" className="hover:underline">
+              <Link href="/auth/login" className="hover:underline">
                 Employer Login
               </Link>
             </li>

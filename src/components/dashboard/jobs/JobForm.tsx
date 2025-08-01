@@ -4,11 +4,14 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import { jobSchema } from "./JobSchema";
+import debounce from "lodash.debounce";
 
 interface JobFormValues {
   title: string;
   description: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
   jobCategory: string;
   deadline: string;
   salary?: number;
@@ -71,6 +74,27 @@ export default function JobForm({
 }: JobFormProps) {
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [suggestions, setSuggestions] = useState<
+    { formatted: string; lat: number; lng: number }[]
+  >([]);
+
+  const fetchSuggestions = debounce(async (q: string) => {
+    if (!q) return setSuggestions([]);
+
+    const res = await fetch(
+      `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
+        q
+      )}&key=${process.env.NEXT_PUBLIC_OPENCAGE_KEY}&limit=5`
+    );
+    const { results } = await res.json();
+    setSuggestions(
+      results.map((r: any) => ({
+        formatted: r.formatted,
+        lat: r.geometry.lat,
+        lng: r.geometry.lng,
+      }))
+    );
+  }, 300);
 
   const formik = useFormik<JobFormValues>({
     initialValues: { ...defaultValues, ...initialValues },
@@ -85,6 +109,10 @@ export default function JobForm({
         formData.append("title", values.title);
         formData.append("description", values.description);
         formData.append("location", values.location);
+        if (values.latitude != null)
+          formData.append("latitude", String(values.latitude));
+        if (values.longitude != null)
+          formData.append("longitude", String(values.longitude));
         formData.append("deadline", values.deadline);
         formData.append("experienceLevel", values.experienceLevel);
         formData.append("employmentType", values.employmentType);
@@ -121,7 +149,6 @@ export default function JobForm({
         {[
           { label: "Job Title", name: "title" },
           { label: "Description", name: "description" },
-          { label: "Location", name: "location" },
         ].map(({ label, name }) => (
           <div key={name}>
             <label className="block font-semibold text-[#1a1a1a]">
@@ -141,6 +168,44 @@ export default function JobForm({
             )}
           </div>
         ))}
+
+        <div className="relative">
+          <label className="block font-semibold text-[#1a1a1a]">Location</label>
+          <input
+            type="text"
+            name="location"
+            value={formik.values.location}
+            onChange={(e) => {
+              formik.setFieldValue("location", e.target.value);
+              fetchSuggestions(e.target.value);
+              formik.setFieldValue("latitude", undefined);
+              formik.setFieldValue("longitude", undefined);
+            }}
+            autoComplete="off"
+            className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
+          />
+          {suggestions.length > 0 && (
+            <ul className="absolute z-10 bg-white border w-full mt-1 max-h-60 overflow-auto rounded shadow-lg">
+              {suggestions.map((s, i) => (
+                <li
+                  key={i}
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    formik.setFieldValue("location", s.formatted);
+                    formik.setFieldValue("latitude", s.lat);
+                    formik.setFieldValue("longitude", s.lng);
+                    setSuggestions([]);
+                  }}
+                >
+                  {s.formatted}
+                </li>
+              ))}
+            </ul>
+          )}
+          {formik.errors.location && (
+            <p className="text-red-500 text-sm">{formik.errors.location}</p>
+          )}
+        </div>
 
         {/* Deadline */}
         <div>
