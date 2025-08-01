@@ -28,6 +28,7 @@ export default function CompanyProfilePage() {
     industry: company?.industry || "",
     foundedYear: company?.foundedYear?.toString() || "",
   });
+  const [loadingVerify, setLoadingVerify] = useState(false);
 
   const [uploadLoading, setUploadLoading] = useState(false);
   const fileLogoRef = useRef<HTMLInputElement>(null);
@@ -110,6 +111,20 @@ export default function CompanyProfilePage() {
     }
   };
 
+  const handleResendVerification = async () => {
+    setLoadingVerify(true);
+    try {
+      await API.post("/auth/resend-verification");
+      toast.success("Verification email sent!");
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.message || "Failed to resend verification email."
+      );
+    } finally {
+      setLoadingVerify(false);
+    }
+  };
+
   return (
     <ProtectedRoute
       allowedRoles={["ADMIN"]}
@@ -158,24 +173,27 @@ export default function CompanyProfilePage() {
                   type="button"
                   onClick={() => fileLogoRef.current?.click()}
                   disabled={uploadLoading}
-                  className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto${
+                  className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white p-1 ${
                     uploadLoading ? "animate-pulse" : ""
                   }`}
                   aria-label="Change Company Logo"
                 >
-                  <img
-                    src={
-                      getCloudinaryImageUrl(company?.logo, {
-                        width: 200,
-                        height: 200,
-                        crop: "fill",
-                      }) || "/placeholder_user.png"
-                    }
-                    alt="Company Logo"
-                    className="object-cover w-full h-full"
-                    draggable={false}
-                  />
+                  <div className="bg-white w-full h-full flex items-center justify-center">
+                    <img
+                      src={
+                        getCloudinaryImageUrl(company?.logo, {
+                          width: 200,
+                          height: 200,
+                          crop: "fill",
+                        }) || "/placeholder_user.png"
+                      }
+                      alt="Company Logo"
+                      className="object-contain w-full h-full bg-white"
+                      draggable={false}
+                    />
+                  </div>
                 </button>
+
                 <input
                   type="file"
                   accept="image/*"
@@ -197,7 +215,42 @@ export default function CompanyProfilePage() {
 
             {/* Company info */}
             <div className="flex flex-col justify-center mt-4 w-full space-y-1">
-              <h1 className="text-2xl font-bold text-gray-800">{user?.name}</h1>
+              <div className="flex items-center space-x-2 mt-1">
+                <h1 className="text-2xl font-bold text-gray-800">
+                  {user?.name}
+                </h1>
+
+                {user?.isVerified ? (
+                  <div className="relative group">
+                    <img
+                      src="/verified_true.png"
+                      alt="Verified User"
+                      className="w-6 h-6"
+                    />
+                    <span className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+                      Verified Admin
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src="/verified_false.png"
+                      alt="Unverified"
+                      className="w-6 h-6"
+                    />
+                    <button
+                      onClick={handleResendVerification}
+                      disabled={loadingVerify}
+                      className={`text-sm text-[#89A8B2] border border-dashed border-[#89A8B2] rounded-4xl px-3 py-1 hover:bg-[#7a98a1] hover:text-white transition flex items-center justify-center ${
+                        loadingVerify ? "animate-pulse" : ""
+                      }`}
+                      aria-label="Get Verified Now"
+                    >
+                      {loadingVerify ? "Sending..." : "Get verified now"}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Location */}
               <p className="text-sm text-gray-600">

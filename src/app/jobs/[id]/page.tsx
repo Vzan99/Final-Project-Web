@@ -6,6 +6,7 @@ import API from "@/lib/axios";
 import { Job } from "@/types/jobs";
 import { JobDetailsSkeleton } from "@/components/loadingSkeleton/jobDetailsSkeleton";
 import { JobDetailsCard } from "@/components/jobs/jobDetailsCard";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 export default function JobDetailsPage() {
   const params = useParams();
@@ -51,8 +52,13 @@ export default function JobDetailsPage() {
     );
   }
 
-  const bannerUrl = job.company?.bannerUrl || "/precise_logo.jpeg";
-  const companyName = job.company?.admin?.name || "Unknown Company";
+  const rawBannerId = job.company?.bannerUrl;
+  const cloudBanner = getCloudinaryImageUrl(rawBannerId, {
+    width: 1600,
+    height: 400,
+    crop: "fill",
+  });
+  const bannerUrl = cloudBanner || "/precise_logo.jpeg";
 
   return (
     <main className="min-h-screen bg-gray-50">

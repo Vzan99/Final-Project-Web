@@ -1,5 +1,6 @@
 import React from "react";
 import { Job } from "@/types/jobs";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 export type JobCardProps = {
   job: Job;
@@ -7,21 +8,22 @@ export type JobCardProps = {
 
 export function JobCard({ job }: JobCardProps) {
   const companyName = job.company?.admin?.name ?? "Unknown Company";
-  const logoUrl = job.company?.logo || "/precise_logo.jpeg";
+  const logoUrl =
+    getCloudinaryImageUrl(job.company?.logo) || "/precise_logo.jpeg";
 
   return (
     <div
       className="relative bg-white border border-gray-200 rounded-lg shadow-sm p-4 cursor-pointer hover:border-2
-                 hover:border-[#6096B4] hover:bg-[#f9fbfc] transition"
+                 hover:border-[#6096B4] hover:bg-[#f9fbfc] transition h-[175px]"
     >
       {/* Logo top-right */}
       <img
         src={logoUrl}
         alt={`${companyName} logo`}
         className="absolute top-4 right-4 w-12 h-12 object-contain rounded"
-        onError={(e) =>
-          ((e.currentTarget as HTMLImageElement).src = "/precise_logo.jpeg")
-        }
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = "/precise_logo.jpeg";
+        }}
       />
 
       {/* Content with right padding */}

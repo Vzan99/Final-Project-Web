@@ -9,6 +9,7 @@ import API from "@/lib/axios";
 import type { Job } from "@/types/jobs";
 import FeaturedJobsCardSkeleton from "@/components/loadingSkeleton/featuredJobsCardSkeleton";
 import HomePageSkeleton from "@/components/loadingSkeleton/homePageSkeleton";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 export default function HomePage() {
   const router = useRouter();
@@ -153,7 +154,12 @@ export default function HomePage() {
               {jobs.map((job) => {
                 const companyName =
                   job.company?.admin?.name ?? "Unknown Company";
-                const logoUrl = job.company?.logo || "/precise_logo.jpeg";
+                const logoUrl =
+                  getCloudinaryImageUrl(job.company?.logo, {
+                    width: 80,
+                    height: 80,
+                    crop: "fill",
+                  }) ?? "/precise_logo.jpeg";
 
                 return (
                   <div

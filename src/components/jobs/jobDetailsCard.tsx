@@ -12,6 +12,7 @@ import ProtectedButton from "@/components/protectedButton";
 import SocialShare from "@/components/socialShare";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 function isProfileComplete(user: RootState["auth"]["user"] | null) {
   if (!user || !user.profile) return false;
@@ -138,6 +139,14 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
     };
   }, [job, user, isUserVerifiedAndAllowed]);
 
+  const rawLogoId = job?.company?.logo;
+  const logoUrl =
+    getCloudinaryImageUrl(rawLogoId, {
+      width: 128,
+      height: 128,
+      crop: "fill",
+    }) || "/precise_logo.jpeg";
+
   const handleSave = async () => {
     if (!job || isSaved === null) return;
 
@@ -186,8 +195,6 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   const isClosed = job.isClosed;
   const isPublished = job.status === "PUBLISHED";
   const companyName = job.company?.admin?.name ?? "Unknown Company";
-  const logoUrl = job.company?.logo || "/precise_logo.jpeg";
-  const bannerUrl = job.company?.bannerUrl;
 
   const renderSaveButton = () => {
     if (isSaved === null) {
@@ -200,8 +207,10 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         requireVerified={true}
         onClick={handleSave}
         disabled={saving}
-        className={`p-2 rounded-full transition ${
-          isSaved ? "bg-[#6096B4]/20 text-[#6096B4]" : "hover:bg-gray-100"
+        className={`p-2 rounded-full bg-white transition ${
+          isSaved
+            ? "bg-[#6096B4]/20 text-[#6096B4]"
+            : "hover:bg-gray-100 hover:text-[#6096B4]"
         }`}
         title={isSaved ? "Unsave Job" : "Save Job"}
       >
@@ -322,14 +331,6 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
 
   return (
     <div className="relative space-y-4">
-      {bannerUrl && (
-        <img
-          src={bannerUrl}
-          alt={`${companyName} banner`}
-          className="w-full h-48 object-cover rounded-lg mb-4"
-        />
-      )}
-
       <div className="absolute top-0 right-0 flex gap-2 p-2 z-10">
         {renderSaveButton()}
 
