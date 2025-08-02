@@ -38,7 +38,10 @@ const AssessmentSchema = Yup.object().shape({
           .of(Yup.string().required("Option is required"))
           .min(2, "At least 2 options")
           .max(6, "Maximum 6 options"),
-        answer: Yup.number().min(0),
+        answer: Yup.number()
+          .typeError("Answer is required")
+          .min(0, "Answer must be valid")
+          .required("Answer is required"),
       })
     )
     .min(1, "At least one question is required"),

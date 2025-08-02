@@ -171,6 +171,14 @@ export default function Navbar() {
                         Subscription
                       </button>
                       <button
+                        onClick={() =>
+                          handleProtectedNavigation("/assessments")
+                        }
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
+                      >
+                        Skill Assessments
+                      </button>
+                      <button
                         onClick={() => handleProtectedNavigation("/settings")}
                         className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 rounded"
                       >

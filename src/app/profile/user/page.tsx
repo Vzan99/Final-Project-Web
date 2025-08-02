@@ -303,40 +303,52 @@ export default function UserProfilePage() {
                 </p>
               </SectionCard>
 
-              {/* Resume */}
-              <div className="bg-white rounded-xl shadow p-6 text-center">
-                <h2 className="text-lg font-semibold text-gray-800 mb-2">
-                  Resume
-                </h2>
-
-                {profile?.subscription?.status !== "ACTIVE" && (
-                  <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-900">
-                    <h3 className="font-semibold mb-2">
-                      Upgrade to Create Stunning CVs!
+              <SectionCard title="CV Generator">
+                {profile?.subscription?.status !== "ACTIVE" ? (
+                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-yellow-800 mb-1">
+                      Unlock CV Generator!
                     </h3>
-                    <p className="mb-3">
-                      Unlock our CV Generator to create professional,
-                      ready-to-download resumes. Customize, preview, and export
-                      with ease — exclusive for subscribed users.
+                    <p className="text-sm text-yellow-900 mb-4">
+                      Create stunning, exportable CVs with our easy-to-use
+                      generator. Customize, preview, and download in seconds.
+                      Available for subscribed users only.
                     </p>
                     <a
                       href="/subscription/upgrade"
-                      className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded font-medium"
+                      className="inline-flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded-md transition"
                     >
-                      Upgrade to Access CV Generator
+                      Upgrade Now
+                    </a>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-3">
+                    <p className="text-sm text-gray-600">
+                      You're subscribed! Start building your professional CV
+                      now.
+                    </p>
+                    <a
+                      href="/cv"
+                      className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2 rounded-md transition"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8 16l4 4 4-4m-4-4v8M4 4h16v16H4V4z"
+                        />
+                      </svg>
+                      Open CV Generator
                     </a>
                   </div>
                 )}
-
-                {profile?.subscription?.status === "ACTIVE" && (
-                  <a
-                    href="/cv"
-                    className="inline-block mt-3 text-sm text-blue-600 hover:underline font-medium"
-                  >
-                    Open CV Generator
-                  </a>
-                )}
-              </div>
+              </SectionCard>
             </div>
 
             <div className="md:col-span-2 space-y-6">
