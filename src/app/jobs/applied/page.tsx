@@ -11,6 +11,7 @@ type Application = {
   id: string;
   status: "PENDING" | "REVIEWED" | "INTERVIEW" | "ACCEPTED" | "REJECTED";
   createdAt: string;
+  feedback?: string;
   job: {
     id: string;
     title: string;
@@ -173,6 +174,26 @@ export default function AppliedJobsPage() {
                       </p>
                     </div>
                   </div>
+                  {app.status === "REJECTED" && app.feedback && (
+                    <p className="text-sm text-black mt-2">
+                      <span className="font-medium">Feedback:</span>{" "}
+                      {app.feedback}
+                    </p>
+                  )}
+
+                  {app.status === "INTERVIEW" && (
+                    <p className="text-sm text-black mt-2">
+                      <span className="font-medium">Next step:</span> Please
+                      check your email for your interview details.
+                    </p>
+                  )}
+
+                  {app.status === "ACCEPTED" && (
+                    <p className="text-sm text-green-700 mt-2">
+                      <span className="font-medium"></span> Congratulations! You
+                      have been accepted in this job!
+                    </p>
+                  )}
                 </div>
               );
             })

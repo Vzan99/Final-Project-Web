@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import API from "@/lib/axios";
+import ProtectedRoute from "@/components/protectedRoute";
+import Spinner from "@/components/loadingSkeleton/spinner";
 
 export default function UserAssessmentListPage() {
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -20,30 +22,37 @@ export default function UserAssessmentListPage() {
   }, []);
 
   return (
-    <main className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Available Skill Assessments</h1>
+    <ProtectedRoute
+      allowedRoles={["USER"]}
+      requireVerified={true}
+      requireSubscriptionStatus="ACTIVE"
+      fallback={<Spinner />}
+    >
+      <main className="p-6 max-w-3xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Available Skill Assessments</h1>
 
-      {assessments.length === 0 ? (
-        <p className="text-gray-600">No assessments available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {assessments.map((a: any) => (
-            <li key={a.id} className="border p-4 rounded shadow">
-              <h2 className="text-lg font-semibold">{a.name}</h2>
-              <p className="text-sm text-gray-600">{a.description}</p>
-              <p className="text-sm text-gray-500">
-                Time Limit: {a.timeLimit} minutes
-              </p>
-              <Link
-                href={`/assessments/${a.id}`}
-                className="inline-block mt-2 text-blue-600 hover:underline"
-              >
-                Mulai Assessment
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+        {assessments.length === 0 ? (
+          <p className="text-gray-600">No assessments available.</p>
+        ) : (
+          <ul className="space-y-4">
+            {assessments.map((a: any) => (
+              <li key={a.id} className="border p-4 rounded shadow">
+                <h2 className="text-lg font-semibold">{a.name}</h2>
+                <p className="text-sm text-gray-600">{a.description}</p>
+                <p className="text-sm text-gray-500">
+                  Time Limit: {a.timeLimit} minutes
+                </p>
+                <Link
+                  href={`/assessments/${a.id}`}
+                  className="inline-block mt-2 text-blue-600 hover:underline"
+                >
+                  Mulai Assessment
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
+    </ProtectedRoute>
   );
 }

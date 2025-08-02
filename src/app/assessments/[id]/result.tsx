@@ -3,6 +3,8 @@
 import API from "@/lib/axios";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import ProtectedRoute from "@/components/protectedRoute";
+import Spinner from "@/components/loadingSkeleton/spinner";
 
 export default function AssessmentResultPage() {
   const { id } = useParams();
@@ -55,33 +57,40 @@ export default function AssessmentResultPage() {
   if (!result) return <p className="p-6">No result found.</p>;
 
   return (
-    <main className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Hasil Assessment</h1>
+    <ProtectedRoute
+      allowedRoles={["USER"]}
+      requireVerified={true}
+      requireSubscriptionStatus="ACTIVE"
+      fallback={<Spinner />}
+    >
+      <main className="max-w-2xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-4">Hasil Assessment</h1>
 
-      <p>
-        Skor: <strong>{result.score}</strong>
-      </p>
-      <p>
-        Status:{" "}
-        <strong className={result.passed ? "text-green-600" : "text-red-600"}>
-          {result.passed ? "Lulus" : "Tidak Lulus"}
-        </strong>
-      </p>
+        <p>
+          Skor: <strong>{result.score}</strong>
+        </p>
+        <p>
+          Status:{" "}
+          <strong className={result.passed ? "text-green-600" : "text-red-600"}>
+            {result.passed ? "Lulus" : "Tidak Lulus"}
+          </strong>
+        </p>
 
-      {result.passed && result.certificateId ? (
-        <button
-          onClick={handleDownloadCertificate}
-          className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-        >
-          🎓 Download Sertifikat PDF
-        </button>
-      ) : (
-        result.passed && (
-          <p className="mt-4 text-sm text-gray-500">
-            Sertifikat belum tersedia. Silakan cek kembali nanti.
-          </p>
-        )
-      )}
-    </main>
+        {result.passed && result.certificateId ? (
+          <button
+            onClick={handleDownloadCertificate}
+            className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+          >
+            🎓 Download Sertifikat PDF
+          </button>
+        ) : (
+          result.passed && (
+            <p className="mt-4 text-sm text-gray-500">
+              Sertifikat belum tersedia. Silakan cek kembali nanti.
+            </p>
+          )
+        )}
+      </main>
+    </ProtectedRoute>
   );
 }

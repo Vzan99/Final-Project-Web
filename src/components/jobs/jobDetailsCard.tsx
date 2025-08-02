@@ -209,7 +209,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         disabled={saving}
         className={`p-2 rounded-full bg-white transition ${
           isSaved
-            ? "bg-[#6096B4]/20 text-[#6096B4]"
+            ? "bg-[#6096B4]/20 text-[#6096B4] hover:bg-gray-100"
             : "hover:bg-gray-100 hover:text-[#6096B4]"
         }`}
         title={isSaved ? "Unsave Job" : "Save Job"}
@@ -331,9 +331,8 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
 
   return (
     <div className="relative space-y-4">
-      <div className="absolute top-0 right-0 flex gap-2 p-2 z-10">
+      <div className="hidden sm:flex absolute top-0 right-0 gap-2 p-2 z-10">
         {renderSaveButton()}
-
         <SocialShare
           url={typeof window !== "undefined" ? window.location.href : ""}
           title={`Check out this job: ${job.title} at ${companyName}`}
@@ -396,9 +395,36 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
         </div>
       </div>
 
-      {renderApplyButton()}
+      <div className="flex flex-col gap-2 sm:block">
+        <div className="flex items-center justify-between gap-2 sm:block">
+          {renderApplyButton()}
 
-      <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line pt-4">
+          {/* Mobile-only save/share buttons */}
+          <div className="flex gap-2 sm:hidden">
+            {renderSaveButton()}
+            <SocialShare
+              url={typeof window !== "undefined" ? window.location.href : ""}
+              title={`Check out this job: ${job.title} at ${companyName}`}
+            />
+          </div>
+        </div>
+
+        {/* Incomplete profile banner (if shown) */}
+        {showProfileIncompleteBanner && (
+          <div className="mt-2 p-3 rounded bg-yellow-100 border border-yellow-300 text-yellow-900 font-semibold text-center">
+            Please complete your profile (birth date, gender, education, and
+            current address) before applying.{" "}
+            <Link
+              href="/profile/user"
+              className="underline hover:text-yellow-700"
+            >
+              Go to Profile
+            </Link>
+          </div>
+        )}
+      </div>
+
+      <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line pt-4 text-justify">
         {job.description}
       </div>
 
@@ -421,7 +447,7 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
                   {suggestedJob.location}
                 </p>
                 <p className="text-xs text-gray-400">
-                  ${suggestedJob.salary?.toLocaleString()}
+                  Rp. {suggestedJob.salary?.toLocaleString()}
                 </p>
               </Link>
             ))}

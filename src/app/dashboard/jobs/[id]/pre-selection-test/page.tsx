@@ -33,7 +33,6 @@ export default function PreSelectionTestPage() {
             }
           } catch (err: any) {
             if (err.response?.status === 404) {
-              // belum ada pre-test = create mode
               setMode("create");
             } else {
               console.error("Error fetching pre-test:", err);
