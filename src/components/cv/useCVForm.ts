@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import API from "@/lib/axios";
 
 export function useCVForm() {
@@ -8,13 +8,11 @@ export function useCVForm() {
     name: "",
     email: "",
     phone: "",
-    summary: "",
+    about: "",
     experience: "",
     education: "",
     skills: "",
   });
-
-  const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     API.get("/user/cv-form").then((res) => {
@@ -22,16 +20,18 @@ export function useCVForm() {
     });
   }, []);
 
-  const handleDownloadFromServer = async () => {
+  const handleDownloadFromServer = async (values: typeof form) => {
     try {
       const payload = {
-        summary: form.summary,
-        extraSkills: form.skills.split(",").map((s) => s.trim()),
+        ...values,
+        extraSkills: values.skills.split(",").map((s) => s.trim()),
         projects: [],
       };
+
       const res = await API.post("/user/generate-cv", payload, {
         responseType: "blob",
       });
+
       const url = URL.createObjectURL(
         new Blob([res.data], { type: "application/pdf" })
       );
@@ -41,10 +41,10 @@ export function useCVForm() {
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
+    } catch {
       alert("Failed to download CV");
     }
   };
 
-  return { form, setForm, pdfRef, handleDownloadFromServer };
+  return { form, setForm, handleDownloadFromServer };
 }

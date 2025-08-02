@@ -6,7 +6,7 @@ import { cvSchema } from "@/schemas/cvSchema";
 type Props = {
   form: any;
   setForm: React.Dispatch<React.SetStateAction<any>>;
-  onServerDownload: () => void;
+  onServerDownload: (values: any) => void;
 };
 
 export default function CVForm({ form, setForm, onServerDownload }: Props) {
@@ -15,14 +15,17 @@ export default function CVForm({ form, setForm, onServerDownload }: Props) {
       initialValues={form}
       enableReinitialize
       validationSchema={cvSchema}
-      onSubmit={onServerDownload}
+      onSubmit={(values) => {
+        setForm(values);
+        onServerDownload(values);
+      }}
     >
       {({ isValid, isSubmitting }) => (
         <Form className="space-y-4">
           <Input label="Full Name" name="name" />
           <Input label="Email" name="email" type="email" />
           <Input label="Phone" name="phone" />
-          <Textarea label="Professional Summary" name="summary" />
+          <Textarea label="About" name="about" />
           <Textarea label="Work Experience" name="experience" />
           <Textarea label="Education" name="education" />
           <Textarea label="Skills (comma separated)" name="skills" />
