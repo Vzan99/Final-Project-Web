@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
 import { formatEmploymentType, formatJobCategory } from "./jobsFormatEnum";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 type Job = {
   id: string;
@@ -31,24 +33,13 @@ export default function JobCard({
   onPublish,
   onStatusChange,
 }: JobCardProps) {
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const router = useRouter();
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this job?")) return;
-
-    try {
-      await API.delete(`/jobs/${job.id}`);
-      toast.success("Job deleted successfully");
-      onDelete?.(job.id);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Failed to delete job");
-    }
-  };
 
   return (
     <div className="border rounded-xl shadow-sm bg-white overflow-hidden flex flex-col hover:shadow-md transition">
       <img
-        src={job.bannerUrl || "/placeholder_banner.png"}
+        src={getCloudinaryImageUrl(job.bannerUrl) || "/placeholder_banner.png"}
         alt="Job Banner"
         className="w-full h-40 object-cover"
       />
@@ -80,16 +71,37 @@ export default function JobCard({
           </button>
 
           <button
-            onClick={handleDelete}
-            className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-red-500 text-white hover:bg-red-600 transition"
+            disabled={loadingAction === "delete"}
+            onClick={async () => {
+              if (!confirm("Are you sure you want to delete this job?")) return;
+
+              try {
+                setLoadingAction("delete");
+                await API.delete(`/jobs/${job.id}`);
+                toast.success("Job deleted successfully");
+                onDelete?.(job.id);
+              } catch (err: any) {
+                toast.error(
+                  err.response?.data?.message || "Failed to delete job"
+                );
+              } finally {
+                setLoadingAction(null);
+              }
+            }}
+            className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-60"
           >
-            Delete
+            {loadingAction === "delete" ? "Deleting..." : "Delete"}
           </button>
 
           {job.status === "DRAFT" && (
             <button
+              disabled={loadingAction === "publish"}
               onClick={async () => {
+                if (!confirm("Are you sure you want to publish this job?"))
+                  return;
+
                 try {
+                  setLoadingAction("publish");
                   await API.patch(`/jobs/${job.id}/publish`, {
                     status: "PUBLISHED",
                   });
@@ -97,18 +109,25 @@ export default function JobCard({
                   toast.success("Job published");
                 } catch (err: any) {
                   alert(err.response?.data?.message || "Failed to publish job");
+                } finally {
+                  setLoadingAction(null);
                 }
               }}
-              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition"
+              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-yellow-500 text-white hover:bg-yellow-600 transition disabled:opacity-60"
             >
-              Publish
+              {loadingAction === "publish" ? "Publishing..." : "Publish"}
             </button>
           )}
 
           {job.status === "CLOSED" && (
             <button
+              disabled={loadingAction === "archive"}
               onClick={async () => {
+                if (!confirm("Are you sure you want to archive this job?"))
+                  return;
+
                 try {
+                  setLoadingAction("archive");
                   await API.patch(`/jobs/${job.id}/publish`, {
                     status: "ARCHIVED",
                   });
@@ -116,18 +135,25 @@ export default function JobCard({
                   toast.success("Job archived");
                 } catch (err: any) {
                   alert(err.response?.data?.message || "Failed to archive job");
+                } finally {
+                  setLoadingAction(null);
                 }
               }}
-              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-gray-600 text-white hover:bg-gray-700 transition"
+              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-gray-600 text-white hover:bg-gray-700 transition disabled:opacity-60"
             >
-              Archive
+              {loadingAction === "archive" ? "Archiving..." : "Archive"}
             </button>
           )}
 
           {job.status === "PUBLISHED" && (
             <button
+              disabled={loadingAction === "close"}
               onClick={async () => {
+                if (!confirm("Are you sure you want to close this job?"))
+                  return;
+
                 try {
+                  setLoadingAction("close");
                   await API.patch(`/jobs/${job.id}/publish`, {
                     status: "CLOSED",
                   });
@@ -135,11 +161,13 @@ export default function JobCard({
                   toast.success("Job closed successfully");
                 } catch (err: any) {
                   alert(err.response?.data?.message || "Failed to close job");
+                } finally {
+                  setLoadingAction(null);
                 }
               }}
-              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-orange-500 text-white hover:bg-orange-600 transition"
+              className="text-sm px-4 py-2 min-w-[100px] rounded-md bg-orange-500 text-white hover:bg-orange-600 transition disabled:opacity-60"
             >
-              Close
+              {loadingAction === "close" ? "Closing..." : "Close"}
             </button>
           )}
         </div>
