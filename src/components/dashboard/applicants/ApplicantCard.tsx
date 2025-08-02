@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
 import { Applicant } from "@/types/applicant";
+import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
 // interface Applicant {
 //   id: string;
@@ -185,7 +186,13 @@ export default function ApplicantCard({
         {/* Photo */}
         <div className="flex-shrink-0">
           <img
-            src={applicant.user.profile?.photoUrl ?? undefined}
+            src={
+              getCloudinaryImageUrl(applicant.user.profile?.photoUrl, {
+                width: 64,
+                height: 64,
+                crop: "fill",
+              }) ?? "/default-avatar.png" // fallback if null
+            }
             alt={applicant.user.name}
             className="w-16 h-16 rounded-full object-cover border"
           />

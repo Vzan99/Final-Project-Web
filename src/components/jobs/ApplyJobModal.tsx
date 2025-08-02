@@ -146,7 +146,7 @@ export default function ApplyJobModal({
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Resume
+                    Resume (pdf, word, docx, maximum 1 mb)
                   </label>
                   <div className="mt-2 flex flex-col space-y-2">
                     <input

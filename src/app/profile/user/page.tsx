@@ -159,7 +159,7 @@ export default function UserProfilePage() {
                   type="button"
                   onClick={() => fileImageRef.current?.click()}
                   disabled={uploadLoading}
-                  className={`rounded-full w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white p-1 ${
+                  className={`rounded-full w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white ${
                     uploadLoading ? "animate-pulse" : ""
                   }`}
                   aria-label="Change Profile Picture"
@@ -168,7 +168,7 @@ export default function UserProfilePage() {
                     <img
                       src={profileImageUrl}
                       alt="Profile"
-                      className="object-contain w-full h-full"
+                      className="object-cover w-full h-full"
                       draggable={false}
                     />
                   </div>
@@ -370,11 +370,20 @@ export default function UserProfilePage() {
                 title="Skills"
                 onEdit={() => setSkillsEditOpen(true)}
               >
-                <p>
-                  {profile?.profile?.skills?.length
-                    ? profile.profile.skills.join(", ")
-                    : "Add your key skills here."}
-                </p>
+                {profile?.profile?.skills?.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {profile.profile.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p>Add your key skills here.</p>
+                )}
               </SectionCard>
 
               <SectionCard

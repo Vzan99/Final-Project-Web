@@ -173,7 +173,7 @@ export default function CompanyProfilePage() {
                   type="button"
                   onClick={() => fileLogoRef.current?.click()}
                   disabled={uploadLoading}
-                  className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white p-1 ${
+                  className={`rounded-md overflow-hidden w-32 h-32 border-6 border-white block cursor-pointer pointer-events-auto bg-white ${
                     uploadLoading ? "animate-pulse" : ""
                   }`}
                   aria-label="Change Company Logo"
@@ -188,7 +188,7 @@ export default function CompanyProfilePage() {
                         }) || "/placeholder_user.png"
                       }
                       alt="Company Logo"
-                      className="object-contain w-full h-full bg-white"
+                      className="object-cover w-full h-full bg-white"
                       draggable={false}
                     />
                   </div>
