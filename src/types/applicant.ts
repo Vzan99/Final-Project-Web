@@ -33,4 +33,6 @@ export interface Applicant {
 
   subscriptionType?: string;
   interviewStatus?: string;
+
+  feedback?: string;
 }

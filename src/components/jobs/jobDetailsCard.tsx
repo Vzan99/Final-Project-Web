@@ -408,20 +408,6 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
             />
           </div>
         </div>
-
-        {/* Incomplete profile banner (if shown) */}
-        {showProfileIncompleteBanner && (
-          <div className="mt-2 p-3 rounded bg-yellow-100 border border-yellow-300 text-yellow-900 font-semibold text-center">
-            Please complete your profile (birth date, gender, education, and
-            current address) before applying.{" "}
-            <Link
-              href="/profile/user"
-              className="underline hover:text-yellow-700"
-            >
-              Go to Profile
-            </Link>
-          </div>
-        )}
       </div>
 
       <div className="prose max-w-none text-sm text-gray-800 whitespace-pre-line pt-4 text-justify">
