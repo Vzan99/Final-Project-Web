@@ -3,50 +3,71 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import API from "@/lib/axios";
-import ProtectedRoute from "@/components/protectedRoute";
 import Spinner from "@/components/loadingSkeleton/spinner";
+import ProtectedRoute from "@/components/protectedRoute";
+
+type Assessment = {
+  id: string;
+  name: string;
+  description?: string;
+  timeLimit: number;
+};
 
 export default function UserAssessmentListPage() {
-  const [assessments, setAssessments] = useState<any[]>([]);
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     API.get("/assessments")
       .then((res) => setAssessments(res.data))
       .catch((err) => {
         if (err.response?.status === 403) {
-          alert("Fitur ini hanya untuk user dengan subscription aktif.");
+          setError(
+            "Fitur ini hanya tersedia untuk user dengan subscription aktif."
+          );
         } else {
-          alert("Gagal memuat data assessment.");
+          setError("Gagal memuat data assessment.");
         }
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
     <ProtectedRoute
       allowedRoles={["USER"]}
-      requireVerified={true}
+      requireVerified
       requireSubscriptionStatus="ACTIVE"
       fallback={<Spinner />}
     >
-      <main className="p-6 max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Available Skill Assessments</h1>
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        <h1 className="text-2xl font-bold mb-6">Daftar Assessment</h1>
 
-        {assessments.length === 0 ? (
-          <p className="text-gray-600">No assessments available.</p>
+        {loading ? (
+          <Spinner />
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
+        ) : assessments.length === 0 ? (
+          <p className="text-gray-600">Belum ada assessment tersedia.</p>
         ) : (
           <ul className="space-y-4">
-            {assessments.map((a: any) => (
-              <li key={a.id} className="border p-4 rounded shadow">
+            {assessments.map((a) => (
+              <li
+                key={a.id}
+                className="border border-gray-200 rounded p-4 shadow bg-white"
+              >
                 <h2 className="text-lg font-semibold">{a.name}</h2>
-                <p className="text-sm text-gray-600">{a.description}</p>
+                <p className="text-sm text-gray-600">
+                  {a.description || "Tanpa deskripsi"}
+                </p>
                 <p className="text-sm text-gray-500">
-                  Time Limit: {a.timeLimit} minutes
+                  Batas Waktu: {a.timeLimit} menit
                 </p>
                 <Link
                   href={`/assessments/${a.id}`}
-                  className="inline-block mt-2 text-blue-600 hover:underline"
+                  className="inline-block mt-2 text-blue-600 font-medium hover:underline"
                 >
-                  Mulai Assessment
+                  Mulai Assessment →
                 </Link>
               </li>
             ))}

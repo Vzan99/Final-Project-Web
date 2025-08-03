@@ -1,12 +1,44 @@
 "use client";
 
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form, Field, ErrorMessage, useFormikContext } from "formik";
+import StarRatings from "react-star-ratings";
 import API from "@/lib/axios";
-import { useRouter } from "next/navigation";
 import { ReviewSchema } from "@/schemas/reviewSchema";
+import { useAppSelector } from "@/lib/redux/hooks";
 
-export default function ReviewForm({ companyId }: { companyId: string }) {
-  const router = useRouter();
+function StarRatingInput({ name, label }: { name: string; label: string }) {
+  const { values, setFieldValue } = useFormikContext<any>();
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="font-medium">{label}</label>
+      <StarRatings
+        rating={values[name]}
+        starRatedColor="orange"
+        starHoverColor="orange"
+        changeRating={(newRating: number) => setFieldValue(name, newRating)}
+        numberOfStars={5}
+        starDimension="24px"
+        starSpacing="2px"
+        name={name}
+      />
+      <ErrorMessage
+        name={name}
+        component="div"
+        className="text-red-500 text-sm"
+      />
+    </div>
+  );
+}
+
+export default function ReviewForm({
+  companyId,
+  onSubmitted,
+}: {
+  companyId: string;
+  onSubmitted?: () => void;
+}) {
+  const { user } = useAppSelector((state) => state.auth);
+  const isVerified = user?.isVerified;
 
   return (
     <Formik
@@ -30,7 +62,7 @@ export default function ReviewForm({ companyId }: { companyId: string }) {
           });
           alert("Review submitted!");
           resetForm();
-          router.refresh();
+          onSubmitted?.();
         } catch {
           alert("Failed to submit review.");
         }
@@ -38,96 +70,52 @@ export default function ReviewForm({ companyId }: { companyId: string }) {
     >
       {() => (
         <Form className="space-y-4 mt-6">
-          <Field
-            name="position"
-            placeholder="Posisi"
-            className="border p-2 w-full"
-          />
-          <ErrorMessage
-            name="position"
-            component="div"
-            className="text-red-500 text-sm"
-          />
-
-          <Field
-            name="salaryEstimate"
-            placeholder="Gaji (per bulan)"
-            className="border p-2 w-full"
-          />
-          <ErrorMessage
-            name="salaryEstimate"
-            component="div"
-            className="text-red-500 text-sm"
-          />
-
-          <Field
-            name="content"
-            as="textarea"
-            placeholder="Isi review..."
-            className="border p-2 w-full"
-          />
-          <ErrorMessage
-            name="content"
-            component="div"
-            className="text-red-500 text-sm"
-          />
-
-          <div className="flex items-center gap-2">
-            <label>Rating Umum:</label>
+          <div>
             <Field
-              name="rating"
-              type="number"
-              min={1}
-              max={5}
-              className="border p-1 w-16"
+              name="position"
+              placeholder="Posisi"
+              className="border p-2 w-full"
             />
             <ErrorMessage
-              name="rating"
+              name="position"
               component="div"
               className="text-red-500 text-sm"
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div>
-              <Field
-                name="cultureRating"
-                type="number"
-                placeholder="Culture"
-                className="border p-2 w-full"
-              />
-              <ErrorMessage
-                name="cultureRating"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-            </div>
-            <div>
-              <Field
-                name="workLifeRating"
-                type="number"
-                placeholder="Work-Life"
-                className="border p-2 w-full"
-              />
-              <ErrorMessage
-                name="workLifeRating"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-            </div>
-            <div>
-              <Field
-                name="careerRating"
-                type="number"
-                placeholder="Career"
-                className="border p-2 w-full"
-              />
-              <ErrorMessage
-                name="careerRating"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-            </div>
+          <div>
+            <Field
+              name="salaryEstimate"
+              placeholder="Gaji (per bulan)"
+              className="border p-2 w-full"
+            />
+            <ErrorMessage
+              name="salaryEstimate"
+              component="div"
+              className="text-red-500 text-sm"
+            />
+          </div>
+
+          <div>
+            <Field
+              name="content"
+              as="textarea"
+              placeholder="Isi review..."
+              className="border p-2 w-full"
+            />
+            <ErrorMessage
+              name="content"
+              component="div"
+              className="text-red-500 text-sm"
+            />
+          </div>
+
+          <StarRatingInput name="rating" label="Rating Umum" />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <StarRatingInput name="cultureRating" label="Culture" />
+            <StarRatingInput name="workLifeRating" label="Work-Life Balance" />
+            <StarRatingInput name="careerRating" label="Career Opportunity" />
           </div>
 
           <label className="flex items-center gap-2">
@@ -137,10 +125,19 @@ export default function ReviewForm({ companyId }: { companyId: string }) {
 
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-4 py-2 rounded"
+            className={`bg-indigo-600 text-white px-4 py-2 rounded ${
+              !isVerified ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={!isVerified}
           >
-            Kirim Review
+            {isVerified ? "Kirim Review" : "Akun belum terverifikasi"}
           </button>
+
+          {!isVerified && (
+            <p className="text-sm text-red-600">
+              Verifikasi akun terlebih dahulu untuk mengirim review.
+            </p>
+          )}
         </Form>
       )}
     </Formik>

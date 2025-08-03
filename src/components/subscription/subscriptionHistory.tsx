@@ -11,14 +11,12 @@ export default function SubscriptionHistory() {
   useEffect(() => {
     API.get("/subscriptions/user/history")
       .then((res) => setHistory(res.data))
-      .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="bg-white shadow-md rounded-2xl p-6 max-w-2xl w-full mt-6">
       <h2 className="text-xl font-semibold mb-4">Subscription History</h2>
-
       {loading ? (
         <p className="text-gray-500 italic">Loading history...</p>
       ) : history.length === 0 ? (

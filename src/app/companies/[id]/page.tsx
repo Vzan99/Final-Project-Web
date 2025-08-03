@@ -48,6 +48,8 @@ export default function CompanyDetailsPage() {
   const [jobTotalPages, setJobTotalPages] = useState(1);
   const jobPageSize = 5;
 
+  const [refreshKey, setRefreshKey] = useState<number>(0);
+
   useEffect(() => {
     const fetchCompany = async () => {
       try {
@@ -204,7 +206,6 @@ export default function CompanyDetailsPage() {
                 )}
               </div>
             )}
-
             {activeTab === "Jobs" && (
               <div>
                 {jobsLoading ? (
@@ -245,13 +246,15 @@ export default function CompanyDetailsPage() {
                 )}
               </div>
             )}
-
             {activeTab === "Reviews" && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold">Leave a Review</h3>
-                <ReviewForm companyId={company.id} />
+                <ReviewForm
+                  companyId={company.id}
+                  onSubmitted={() => setRefreshKey((prev) => prev + 1)}
+                />
                 <h3 className="text-lg font-semibold mt-6">User Reviews</h3>
-                <ReviewList companyId={company.id} />
+                <ReviewList companyId={company.id} refreshKey={refreshKey} />
               </div>
             )}
           </div>

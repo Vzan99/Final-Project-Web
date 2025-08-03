@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import API from "@/lib/axios";
+import StarRatings from "react-star-ratings";
 
 interface Review {
   id: string;
@@ -17,7 +18,13 @@ interface Review {
   careerRating: number;
 }
 
-export default function ReviewList({ companyId }: { companyId: string }) {
+export default function ReviewList({
+  companyId,
+  refreshKey = 0,
+}: {
+  companyId: string;
+  refreshKey?: number;
+}) {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -28,16 +35,13 @@ export default function ReviewList({ companyId }: { companyId: string }) {
     try {
       setLoading(true);
       const res = await API.get(`/reviews/company/${companyId}`, {
-        params: {
-          page,
-          pageSize,
-        },
+        params: { page, pageSize },
       });
       setReviews(res.data.reviews || []);
       const total = res.data.total || 0;
       setTotalPages(Math.max(1, Math.ceil(total / pageSize)));
     } catch (err) {
-      console.error("Failed to fetch reviews");
+      console.error("Failed to fetch reviews", err);
     } finally {
       setLoading(false);
     }
@@ -45,15 +49,11 @@ export default function ReviewList({ companyId }: { companyId: string }) {
 
   useEffect(() => {
     fetchReviews();
-  }, [page, companyId]);
+  }, [page, companyId, refreshKey]);
 
-  if (loading) {
-    return <p className="text-gray-500">Loading reviews...</p>;
-  }
-
-  if (!Array.isArray(reviews) || reviews.length === 0) {
+  if (loading) return <p className="text-gray-500">Loading reviews...</p>;
+  if (!Array.isArray(reviews) || reviews.length === 0)
     return <p className="text-gray-500">Belum ada review.</p>;
-  }
 
   return (
     <div className="space-y-6 mt-6">
@@ -70,17 +70,36 @@ export default function ReviewList({ companyId }: { companyId: string }) {
             )}
           </div>
           <p className="text-sm text-gray-600 mb-1">
-            {rev.position} | Est. Gaji: Rp {rev.salaryEstimate.toLocaleString()}
+            {rev.position} | Estimasi Gaji: Rp{" "}
+            {rev.salaryEstimate.toLocaleString("id-ID")}
           </p>
-          <p className="mb-2">{rev.content}</p>
-          <div className="text-sm text-gray-500">
-            🌟 {rev.rating}/5 | Culture: {rev.cultureRating} | WLB:{" "}
-            {rev.workLifeRating} | Career: {rev.careerRating}
+          <p className="mb-2 text-gray-800">{rev.content}</p>
+
+          <div className="space-y-1 text-sm text-gray-700">
+            <RatingRow
+              label="🌟 Rating Umum:"
+              value={rev.rating}
+              name={`r-${rev.id}`}
+            />
+            <RatingRow
+              label="Culture:"
+              value={rev.cultureRating}
+              name={`c-${rev.id}`}
+            />
+            <RatingRow
+              label="Work-Life Balance:"
+              value={rev.workLifeRating}
+              name={`w-${rev.id}`}
+            />
+            <RatingRow
+              label="Career Opportunity:"
+              value={rev.careerRating}
+              name={`ca-${rev.id}`}
+            />
           </div>
         </div>
       ))}
 
-      {/* Pagination Controls */}
       <div className="flex justify-between items-center pt-4">
         <button
           onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -100,6 +119,30 @@ export default function ReviewList({ companyId }: { companyId: string }) {
           Next
         </button>
       </div>
+    </div>
+  );
+}
+
+function RatingRow({
+  label,
+  value,
+  name,
+}: {
+  label: string;
+  value: number;
+  name: string;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-36">{label}</span>
+      <StarRatings
+        rating={value}
+        starRatedColor="orange"
+        numberOfStars={5}
+        starDimension="18px"
+        starSpacing="2px"
+        name={name}
+      />
     </div>
   );
 }

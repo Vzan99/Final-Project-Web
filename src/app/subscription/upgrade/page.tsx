@@ -9,7 +9,7 @@ export default function SubscriptionUpgradePage() {
       requireVerified={true}
       fallback={<Spinner />}
     >
-      <SubscriptionUpgradeForm />;
+      <SubscriptionUpgradeForm />
     </ProtectedRoute>
   );
 }
