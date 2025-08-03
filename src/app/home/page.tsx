@@ -10,6 +10,8 @@ import type { Job } from "@/types/jobs";
 import FeaturedJobsCardSkeleton from "@/components/loadingSkeleton/featuredJobsCardSkeleton";
 import HomePageSkeleton from "@/components/loadingSkeleton/homePageSkeleton";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
+import { useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
@@ -48,7 +50,7 @@ export default function HomePage() {
   const fetchNearbyJobs = async (lat: number, lng: number) => {
     try {
       setLoadingJobs(true);
-      const res = await API.get("/jobs/nearby", {
+      const res = await API.get("/jobs/public", {
         params: { lat, lng, page: 1, pageSize: 8 },
         withCredentials: false,
       });
@@ -115,6 +117,20 @@ export default function HomePage() {
     router.push(`/jobs?${queryParams.toString()}`);
   };
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
+
   return loadingJobs ? (
     <HomePageSkeleton />
   ) : (
@@ -142,7 +158,7 @@ export default function HomePage() {
           </h2>
 
           {loadingJobs ? (
-            <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 py-2">
+            <div className="flex space-x-6 overflow-x-auto scrollbar-hide py-2">
               {Array.from({ length: 4 }).map((_, i) => (
                 <FeaturedJobsCardSkeleton key={i} />
               ))}
@@ -150,48 +166,75 @@ export default function HomePage() {
           ) : jobs.length === 0 ? (
             <p className="text-center text-gray-500">No jobs found.</p>
           ) : (
-            <div className="flex space-x-6 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 py-2">
-              {jobs.map((job) => {
-                const companyName =
-                  job.company?.admin?.name ?? "Unknown Company";
-                const logoUrl =
-                  getCloudinaryImageUrl(job.company?.logo, {
-                    width: 80,
-                    height: 80,
-                    crop: "fill",
-                  }) ?? "/precise_logo.jpeg";
+            <div className="relative flex items-center">
+              {/* Left scroll button */}
+              <button
+                onClick={scrollLeft}
+                aria-label="Scroll left"
+                className="absolute left-0 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                style={{ top: "50%", transform: "translateY(-50%)" }}
+              >
+                <ChevronLeft size={24} />
+              </button>
 
-                return (
-                  <div
-                    key={job.id}
-                    className="flex-shrink-0 w-64 h-64 bg-white rounded-lg shadow-md border border-gray-200 p-4 relative hover:border-[#6096B4] hover:bg-[#f9fbfc] transition cursor-pointer"
-                    onClick={() => router.push(`/jobs/${job.id}`)}
-                  >
-                    {/* Logo top-right */}
-                    <img
-                      src={logoUrl}
-                      alt={`${companyName} logo`}
-                      className="absolute top-4 right-4 w-12 h-12 object-contain rounded"
-                      onError={(e) =>
-                        ((e.currentTarget as HTMLImageElement).src =
-                          "/precise_logo.jpeg")
-                      }
-                    />
+              {/* Scroll container */}
+              <div
+                ref={scrollRef}
+                className="flex space-x-6 overflow-x-auto scrollbar-hide py-2 px-10"
+                style={{ scrollBehavior: "smooth" }}
+              >
+                {jobs.map((job) => {
+                  const companyName =
+                    job.company?.admin?.name ?? "Unknown Company";
+                  const logoUrl =
+                    getCloudinaryImageUrl(job.company?.logo, {
+                      width: 80,
+                      height: 80,
+                      crop: "fill",
+                    }) ?? "/precise_logo.jpeg";
 
-                    {/* Text content with right padding */}
-                    <div className="pr-20">
-                      <h3 className="text-xl font-semibold text-gray-800">
-                        {job.title}
-                      </h3>
-                      <p className="text-gray-600">{companyName}</p>
-                      <p className="text-sm text-gray-500">{job.location}</p>
-                      <p className="text-sm mt-2 text-gray-700 line-clamp-3">
-                        {job.description}
-                      </p>
+                  return (
+                    <div
+                      key={job.id}
+                      className="flex-shrink-0 w-64 h-64 bg-white rounded-lg shadow-md border border-gray-200 p-4 relative hover:border-[#6096B4] hover:bg-[#f9fbfc] transition cursor-pointer"
+                      onClick={() => router.push(`/jobs/${job.id}`)}
+                    >
+                      {/* Logo top-right */}
+                      <img
+                        src={logoUrl}
+                        alt={`${companyName} logo`}
+                        className="absolute top-4 right-4 w-12 h-12 object-contain rounded"
+                        onError={(e) =>
+                          ((e.currentTarget as HTMLImageElement).src =
+                            "/precise_logo.jpeg")
+                        }
+                      />
+
+                      {/* Text content with right padding */}
+                      <div className="pr-20">
+                        <h3 className="text-xl font-semibold text-gray-800">
+                          {job.title}
+                        </h3>
+                        <p className="text-gray-600">{companyName}</p>
+                        <p className="text-sm text-gray-500">{job.location}</p>
+                        <p className="text-sm mt-2 text-gray-700 line-clamp-3">
+                          {job.description}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+
+              {/* Right scroll button */}
+              <button
+                onClick={scrollRight}
+                aria-label="Scroll right"
+                className="absolute right-0 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-100"
+                style={{ top: "50%", transform: "translateY(-50%)" }}
+              >
+                <ChevronRight size={24} />
+              </button>
             </div>
           )}
         </div>

@@ -30,7 +30,7 @@ export default function CompaniesPage() {
     sortBy: "name" as "name" | "location",
     sortOrder: "asc" as "asc" | "desc",
     page: 1,
-    pageSize: 6,
+    pageSize: 9,
   });
 
   const totalPages = Math.ceil(total / filters.pageSize);
@@ -81,7 +81,7 @@ export default function CompaniesPage() {
             {companies.map((c) => (
               <li
                 key={c.id}
-                className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition cursor-pointer w-full min-h-[160px] relative flex flex-col justify-between"
+                className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition cursor-pointer w-full min-h-[160px] relative flex flex-col justify-between overflow-hidden"
               >
                 <a
                   href={`/companies/${c.id}`}
@@ -99,7 +99,7 @@ export default function CompaniesPage() {
                           }) ?? "/precise_logo.jpeg"
                         }
                         alt={`${c.admin.name} logo`}
-                        className="w-12 h-12 object-contain"
+                        className="w-12 h-12 object-cover rounded-md"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src =
                             "/precise_logo.jpeg";
@@ -109,7 +109,7 @@ export default function CompaniesPage() {
                       <img
                         src="/precise_logo.jpeg"
                         alt="Default logo"
-                        className="w-12 h-12 object-contain"
+                        className="w-12 h-12 object-cover rounded-md"
                       />
                     )}
                   </div>

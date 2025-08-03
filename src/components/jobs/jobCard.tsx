@@ -14,13 +14,13 @@ export function JobCard({ job }: JobCardProps) {
   return (
     <div
       className="relative bg-white border border-gray-200 rounded-lg shadow-sm p-4 cursor-pointer hover:border-2
-                 hover:border-[#6096B4] hover:bg-[#f9fbfc] transition h-[200px]"
+             hover:border-[#6096B4] hover:bg-[#f9fbfc] transition min-h-[200px] max-h-[250px] overflow-hidden"
     >
       {/* Logo top-right */}
       <img
         src={logoUrl}
         alt={`${companyName} logo`}
-        className="absolute top-4 right-4 w-12 h-12 object-contain rounded"
+        className="absolute top-4 right-4 w-12 h-12 object-cover rounded"
         onError={(e) => {
           (e.currentTarget as HTMLImageElement).src = "/precise_logo.jpeg";
         }}
