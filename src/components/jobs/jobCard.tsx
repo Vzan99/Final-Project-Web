@@ -14,7 +14,7 @@ export function JobCard({ job }: JobCardProps) {
   return (
     <div
       className="relative bg-white border border-gray-200 rounded-lg shadow-sm p-4 cursor-pointer hover:border-2
-                 hover:border-[#6096B4] hover:bg-[#f9fbfc] transition h-[175px]"
+                 hover:border-[#6096B4] hover:bg-[#f9fbfc] transition h-[200px]"
     >
       {/* Logo top-right */}
       <img

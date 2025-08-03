@@ -129,7 +129,7 @@ export default function ApplyJobModal({
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Cover Letter (optional)
+                    Cover Letter (optional) maximum 500 characters
                   </label>
                   <Field
                     as="textarea"
