@@ -31,7 +31,7 @@ export default function CompanyForm({
       onSubmit={(values) => onSubmit(values)}
       enableReinitialize
     >
-      {({ setFieldValue, values }) => (
+      {({ setFieldValue, values, isSubmitting }) => (
         <Form>
           {/* Company Name */}
           <div>
@@ -168,10 +168,10 @@ export default function CompanyForm({
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1]"
-              disabled={loading}
+              className="px-4 py-2 rounded bg-[#89A8B2] text-white hover:bg-[#7a98a1] disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={loading || isSubmitting}
             >
-              {loading ? "Saving..." : "Save Changes"}
+              {loading || isSubmitting ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </Form>

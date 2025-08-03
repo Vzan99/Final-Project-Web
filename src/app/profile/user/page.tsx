@@ -298,7 +298,14 @@ export default function UserProfilePage() {
                 <p>
                   Birth Date:{" "}
                   {profile?.profile?.birthDate
-                    ? new Date(profile?.profile.birthDate).toLocaleDateString()
+                    ? new Date(profile.profile.birthDate).toLocaleDateString(
+                        "en-GB",
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
+                      )
                     : "Not specified"}
                 </p>
               </SectionCard>
@@ -359,11 +366,11 @@ export default function UserProfilePage() {
                       <li key={exp.id || i}>
                         <span className="font-semibold">{exp.title}</span> at{" "}
                         <span className="italic">{exp.companyName}</span> (
-                        {new Date(exp.startDate).toLocaleDateString()} -{" "}
+                        {new Date(exp.startDate).toLocaleDateString("en-GB")} -{" "}
                         {exp.currentlyWorking
                           ? "Present"
                           : exp.endDate
-                          ? new Date(exp.endDate).toLocaleDateString()
+                          ? new Date(exp.endDate).toLocaleDateString("en-GB")
                           : "N/A"}
                         )
                       </li>

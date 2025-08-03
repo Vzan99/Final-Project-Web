@@ -329,7 +329,7 @@ export default function JobSearchBar({
 
           {showemploymentTypeDropdown && (
             <div className="absolute z-10 mt-2 min-w-full w-max max-w-screen-sm border border-[#BDCDD6] bg-white shadow-lg rounded-md">
-              <div className="max-h-48 overflow-y-auto p-4 rounded-md scrollbar-hide">
+              <div className="p-4 rounded-md">
                 {filtersMeta?.employmentTypes.map(({ label, value }) => (
                   <label
                     key={value}
@@ -446,7 +446,7 @@ export default function JobSearchBar({
           </button>
           {showJobCategoryDropdown && (
             <div className="absolute z-10 mt-2 min-w-full w-max max-w-screen-sm border border-[#BDCDD6] bg-white shadow-lg rounded-md">
-              <div className="max-h-48 overflow-y-auto p-4 rounded-md scrollbar-hide">
+              <div className="p-4 rounded-md">
                 {filtersMeta?.jobCategories.map(({ label, value }) => (
                   <label
                     key={value}

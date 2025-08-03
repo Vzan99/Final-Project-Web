@@ -7,6 +7,7 @@ import API from "@/lib/axios";
 import { experienceSchema } from "@/schemas/profile/user/experienceSchema";
 import { EmploymentType, LocationType } from "@/types/userprofile";
 import { UserProfileData } from "@/types/userprofile";
+import toFriendlyName from "@/utils/friendly";
 
 type ExperienceFormProps = {
   initialData: UserProfileData | null;
@@ -116,7 +117,9 @@ export default function ExperienceForm({
                           className="mt-1 block w-full border rounded px-3 py-2"
                         >
                           {Object.values(EmploymentType).map((type) => (
-                            <option key={type}>{type}</option>
+                            <option key={type} value={type}>
+                              {toFriendlyName(type)}
+                            </option>
                           ))}
                         </Field>
                       </div>
@@ -132,7 +135,9 @@ export default function ExperienceForm({
                           className="mt-1 block w-full border rounded px-3 py-2"
                         >
                           {Object.values(LocationType).map((type) => (
-                            <option key={type}>{type}</option>
+                            <option key={type} value={type}>
+                              {toFriendlyName(type)}
+                            </option>
                           ))}
                         </Field>
                       </div>

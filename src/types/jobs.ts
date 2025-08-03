@@ -18,6 +18,9 @@ export type Job = {
   location: string;
   salary: number;
   jobType: string;
+  employmentType: string;
+  jobCategory: string;
+  deadline: string;
   experienceLevel: string;
   isRemote: boolean;
   status: string;

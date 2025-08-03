@@ -13,6 +13,7 @@ import SocialShare from "@/components/socialShare";
 import { useSelector } from "react-redux";
 import { RootState } from "@/lib/redux/store";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
+import toFriendlyName from "@/utils/friendly";
 
 function isProfileComplete(user: RootState["auth"]["user"] | null) {
   if (!user || !user.profile) return false;
@@ -61,28 +62,17 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
   useEffect(() => {
     if (!job) return;
 
-    if (!isUserVerifiedAndAllowed) {
-      setIsSaved(false);
-      setHasApplied(false);
-      setTestStatus(null);
-      setSuggestedJobs([]);
-      setIsLoading(false);
-      return;
-    }
-
     let isMounted = true;
 
     const fetchAllData = async () => {
       try {
-        const savedPromise = API.get("/jobs/saved", { withCredentials: true })
-          .then((res) => {
-            const savedJobs = Array.isArray(res.data) ? res.data : [];
-            if (isMounted) setIsSaved(savedJobs.some((j) => j.id === job.id));
-          })
-          .catch((err) => {
-            console.error("Fetch saved jobs error:", err);
-            if (isMounted) setIsSaved(false);
-          });
+        if (!isUserVerifiedAndAllowed) {
+          setIsSaved(false);
+          setHasApplied(false);
+          setTestStatus(null);
+        }
+
+        const tasks: Promise<any>[] = [];
 
         const suggestedPromise = API.get(
           `/jobs/company/${job.company?.id}/suggestions`,
@@ -97,36 +87,49 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
           .catch((err) => {
             console.error("Fetch suggested jobs error:", err);
           });
+        tasks.push(suggestedPromise);
 
-        const testPromise = job.hasTest
-          ? API.get(`/pre-selection-tests/${job.id}/pre-selection-submitted`, {
-              withCredentials: true,
-            })
-              .then((res) => {
-                if (isMounted) setTestStatus(res.data.data);
-              })
-              .catch((err) => {
-                console.error("Fetch test status error:", err);
-              })
-          : Promise.resolve();
-
-        const appliedPromise = API.get(`/applications/${job.id}/status`, {
-          withCredentials: true,
-        })
-          .then((res) => {
-            if (isMounted) setHasApplied(res.data.applied);
+        if (isUserVerifiedAndAllowed) {
+          const savedPromise = API.get("/jobs/saved", {
+            withCredentials: true,
           })
-          .catch((err) => {
-            console.error("Fetch application status error:", err);
-            if (isMounted) setHasApplied(false);
-          });
+            .then((res) => {
+              const savedJobs = Array.isArray(res.data) ? res.data : [];
+              if (isMounted) setIsSaved(savedJobs.some((j) => j.id === job.id));
+            })
+            .catch((err) => {
+              console.error("Fetch saved jobs error:", err);
+              if (isMounted) setIsSaved(false);
+            });
 
-        await Promise.all([
-          savedPromise,
-          suggestedPromise,
-          testPromise,
-          appliedPromise,
-        ]);
+          const testPromise = job.hasTest
+            ? API.get(
+                `/pre-selection-tests/${job.id}/pre-selection-submitted`,
+                { withCredentials: true }
+              )
+                .then((res) => {
+                  if (isMounted) setTestStatus(res.data.data);
+                })
+                .catch((err) => {
+                  console.error("Fetch test status error:", err);
+                })
+            : Promise.resolve();
+
+          const appliedPromise = API.get(`/applications/${job.id}/status`, {
+            withCredentials: true,
+          })
+            .then((res) => {
+              if (isMounted) setHasApplied(res.data.applied);
+            })
+            .catch((err) => {
+              console.error("Fetch application status error:", err);
+              if (isMounted) setHasApplied(false);
+            });
+
+          tasks.push(savedPromise, testPromise, appliedPromise);
+        }
+
+        await Promise.all(tasks);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -389,6 +392,29 @@ export function JobDetailsCard({ job }: JobDetailsCardProps) {
             {job.salary.toLocaleString()}
           </div>
         )}
+        <div>
+          <span className="font-semibold text-gray-700">Employment Type:</span>{" "}
+          {toFriendlyName(job.employmentType)}
+        </div>
+
+        <div>
+          <span className="font-semibold text-gray-700">Job Category:</span>{" "}
+          {toFriendlyName(job.jobCategory)}
+        </div>
+
+        <div>
+          <span className="font-semibold text-gray-700">
+            Application Deadline:
+          </span>{" "}
+          {job.deadline
+            ? new Date(job.deadline).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : "Not specified"}
+        </div>
+
         <div>
           <span className="font-semibold text-gray-700">Remote:</span>{" "}
           {job.isRemote ? "Yes" : "No"}

@@ -283,7 +283,7 @@ export default function JobListingsPage() {
       {isMobile ? (
         <>
           {selectedJob && !loadingJobDetails ? (
-            <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm scrollbar-hide">
               <JobDetailsCard job={selectedJob} />
               <div className="mt-4 flex justify-end">
                 <button
@@ -300,7 +300,7 @@ export default function JobListingsPage() {
               <JobDetailsSkeleton />
             </div>
           ) : (
-            <div className="h-[75vh] overflow-y-auto pr-2">
+            <div className="h-[75vh] overflow-y-auto pr-2 scrollbar-hide">
               {loading ? (
                 Array.from({ length: PAGE_SIZE }).map((_, i) => (
                   <JobCardSkeleton key={i} />
@@ -328,7 +328,7 @@ export default function JobListingsPage() {
         </>
       ) : (
         <div className="flex gap-6">
-          <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200">
+          <div className="w-full md:w-2/5 h-[75vh] overflow-y-auto pr-2 border-r border-gray-200 scrollbar-hide">
             {loading ? (
               Array.from({ length: PAGE_SIZE }).map((_, i) => (
                 <JobCardSkeleton key={i} />
@@ -357,7 +357,7 @@ export default function JobListingsPage() {
             />
           </div>
 
-          <div className="hidden md:block w-3/5 h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="hidden md:block w-3/5 h-[75vh] overflow-y-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm scrollbar-hide">
             {loadingJobDetails ? (
               <JobDetailsSkeleton />
             ) : selectedJob ? (
