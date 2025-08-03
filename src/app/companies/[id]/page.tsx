@@ -184,12 +184,13 @@ export default function CompanyDetailsPage() {
             {activeTab === "About" && (
               <div className="text-gray-700 space-y-4">
                 {company.description ? (
-                  <div
-                    className="prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{
-                      __html: company.description,
-                    }}
-                  />
+                  <div className="company-description text-gray-700 text-justify break-words">
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: company?.description || "<p>No description</p>",
+                      }}
+                    />
+                  </div>
                 ) : (
                   <p className="text-sm text-gray-500">
                     No company description provided.

@@ -7,7 +7,7 @@ import { resetPasswordSchema } from "@/schemas/auth/resetPassword";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
-import ResetPasswordSkeleton from "@/components/loadingSkeleton/resetPasswordSkeleton";
+import Spinner from "@/components/loadingSkeleton/spinner";
 
 export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
@@ -16,13 +16,18 @@ export default function ResetPasswordPage() {
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) {
       toast.error("Invalid or missing reset token.");
       router.replace("/auth/login");
+    } else {
+      setLoading(false);
     }
   }, [token, router]);
+
+  if (loading) return <Spinner />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f1f0e8] px-4">
@@ -57,6 +62,7 @@ export default function ResetPasswordPage() {
         >
           {({ isSubmitting }) => (
             <Form className="space-y-4">
+              {/* New Password */}
               <div>
                 <label className="block mb-1 font-medium text-gray-700">
                   New Password
@@ -84,6 +90,7 @@ export default function ResetPasswordPage() {
                 />
               </div>
 
+              {/* Confirm Password */}
               <div>
                 <label className="block mb-1 font-medium text-gray-700">
                   Confirm New Password

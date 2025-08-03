@@ -8,6 +8,7 @@ type Props = {
   children: React.ReactNode;
   allowedRoles?: string[];
   requireVerified?: boolean;
+  requireUnverified?: boolean;
   requireSubscriptionStatus?: "ACTIVE" | "INACTIVE" | "PENDING";
   requireSubscriptionType?: "STANDARD" | "PROFESSIONAL";
   fallback?: React.ReactNode;
@@ -17,6 +18,7 @@ export default function ProtectedRoute({
   children,
   allowedRoles,
   requireVerified = false,
+  requireUnverified = false,
   requireSubscriptionStatus,
   requireSubscriptionType,
   fallback = null,
@@ -37,8 +39,13 @@ export default function ProtectedRoute({
       return;
     }
 
-    if (requireVerified && user.role === "USER" && !user.isVerified) {
+    if (requireVerified && !user.isVerified) {
       router.replace("/auth/unverified-email");
+      return;
+    }
+
+    if (requireUnverified && user.isVerified) {
+      router.replace("/unauthorized");
       return;
     }
 
@@ -62,6 +69,7 @@ export default function ProtectedRoute({
     user,
     allowedRoles,
     requireVerified,
+    requireUnverified,
     requireSubscriptionStatus,
     requireSubscriptionType,
     router,
@@ -72,7 +80,8 @@ export default function ProtectedRoute({
     loading ||
     !user ||
     (allowedRoles && !allowedRoles.includes(user.role)) ||
-    (requireVerified && user.role === "USER" && !user.isVerified) ||
+    (requireVerified && !user.isVerified) ||
+    (requireUnverified && user.isVerified) ||
     (requireSubscriptionStatus &&
       user.subscription?.status !== requireSubscriptionStatus) ||
     (requireSubscriptionType &&
