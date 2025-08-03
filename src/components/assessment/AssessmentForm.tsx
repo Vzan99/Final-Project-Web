@@ -3,6 +3,7 @@
 import { Formik, Form, Field, FieldArray, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import API from "@/lib/axios";
+import toast from "react-hot-toast";
 
 type Question = {
   question: string;
@@ -81,15 +82,15 @@ export default function AssessmentForm({
 
       if (isEdit && editData) {
         await API.put(`/assessments/${editData.id}`, payload);
-        alert("Assessment updated!");
+        toast.success("Assessment updated!");
         onFinishEdit?.();
       } else {
         await API.post("/assessments", payload);
-        alert("Assessment created!");
+        toast.success("Assessment created!");
         onCreated?.();
       }
     } catch {
-      alert("Failed to submit assessment.");
+      toast.error("Failed to submit assessment.");
     }
   };
 

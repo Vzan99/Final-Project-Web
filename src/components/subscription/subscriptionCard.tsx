@@ -12,7 +12,7 @@ export default function SubscriptionCard() {
   useEffect(() => {
     API.get("/subscriptions/user/me")
       .then((res) => setSubscription(res.data))
-      .catch((err) => console.error(err));
+      .catch(() => {});
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -37,7 +37,7 @@ export default function SubscriptionCard() {
           {subscription.expiredAt && (
             <p className="text-sm text-gray-600 mt-2">
               Expires at:{" "}
-              {new Date(subscription.expiredAt).toLocaleDateString()}
+              {new Date(subscription.expiredAt).toLocaleDateString("id-ID")}
             </p>
           )}
           {subscription.status !== "ACTIVE" && (
