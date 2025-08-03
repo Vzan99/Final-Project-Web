@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { changeEmailSchema } from "@/schemas/settings/change-email";
 import ConfirmModal from "@/components/confirmModal";
+import { useAppSelector } from "@/lib/redux/hooks";
 
 export default function ChangeEmailForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,11 +17,13 @@ export default function ChangeEmailForm() {
     password: string;
   } | null>(null);
 
+  const currentUser = useAppSelector((state) => state.auth.user);
+
   return (
     <>
       <Formik
         initialValues={{ newEmail: "", password: "" }}
-        validationSchema={changeEmailSchema}
+        validationSchema={changeEmailSchema(currentUser?.email || "")}
         onSubmit={async (values, { setSubmitting }) => {
           setFormValues(values);
           setShowModal(true);
