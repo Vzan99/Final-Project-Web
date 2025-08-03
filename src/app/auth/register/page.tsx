@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import RegisterForm from "./registerForm";
+import RegisterForm from "@/components/auth/registerForm";
 import Image from "next/image";
 import RegisterPageSkeleton from "@/components/loadingSkeleton/registerPageSkeleton";
 

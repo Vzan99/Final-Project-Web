@@ -63,7 +63,7 @@ export default function SavedJobsPage() {
       requireVerified={true}
       fallback={<SavedJobsSkeleton />}
     >
-      <div className="max-w-screen-lg mx-auto px-4 py-8 h-screen">
+      <div className="max-w-screen-lg mx-auto px-4 py-8 h-full min-h-[70vh]">
         <h1 className="text-2xl font-bold mb-6 text-[#6096B4]">Saved Jobs</h1>
 
         {loading ? (

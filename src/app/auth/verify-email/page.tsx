@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import API from "@/lib/axios";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { logoutUser } from "@/lib/redux/features/authSlice";
@@ -28,7 +29,6 @@ export default function VerifyEmailPage() {
           setMessage("Email verified successfully! Redirecting to login...");
 
           await dispatch(logoutUser()).unwrap();
-
           setVerified(true);
 
           setTimeout(() => {
@@ -54,7 +54,15 @@ export default function VerifyEmailPage() {
           Email Verification
         </h1>
         <p className="text-gray-700 text-base mb-6">{message}</p>
-        {!verified && (
+        {!token && (
+          <Link
+            href="/"
+            className="mt-2 inline-block bg-[#6096B4] text-white px-6 py-2 rounded-lg hover:bg-[#93BFCF] transition-colors"
+          >
+            Go back to Home
+          </Link>
+        )}
+        {!verified && token && (
           <p className="text-sm text-gray-500">
             If you are not redirected automatically, please refresh or try
             again.

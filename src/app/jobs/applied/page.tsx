@@ -37,7 +37,7 @@ export default function AppliedJobsPage() {
 
   const [selectedStatus, setSelectedStatus] = useState<Status | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 5;
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function AppliedJobsPage() {
       requireVerified={true}
       fallback={<AppliedJobsSkeleton />}
     >
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 h-screen">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 h-full min-h-[70vh]">
         <h1 className="text-2xl font-bold text-[#497187] mb-4">Applied Jobs</h1>
 
         {/* Filter Tabs */}
