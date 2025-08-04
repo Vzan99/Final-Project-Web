@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Final Project: Job Board App
+Deskripsi Singkat
+Job Board App adalah platform untuk menghubungkan pencari kerja dengan perusahaan. Aplikasi ini mendukung berbagai fitur seperti posting lowongan, lamaran kerja, CV generator, skill assessment, dan sistem subscription berbayar. Proyek ini dikerjakan oleh 2 developer dengan pembagian fitur sesuai role: User, Admin (Perusahaan), dan Developer (Tim App).
 
-## Getting Started
+Repository
+Backend (Express, PostgreSQL, Prisma): Final-Project-API
 
-First, run the development server:
+Frontend (Next.js, Tailwind, Redux): Final-Project-Web
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Fitur Utama
+1. User Authentication & Profile
+Registrasi: sebagai pencari kerja atau perusahaan
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Login dengan email/password
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Verifikasi email dan reset password
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Update profil + upload foto (validasi ukuran/format)
 
-## Learn More
+Role-based access: USER, ADMIN, DEVELOPER
 
-To learn more about Next.js, take a look at the following resources:
+2. Landing Page & Job Discovery
+Hero section, job filter, discovery by lokasi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Preview 5 lowongan terbaru
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Filtering, sorting, dan pencarian berdasarkan lokasi, kategori, tanggal
 
-## Deploy on Vercel
+Detail job lengkap + tombol apply/save
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Detail & list semua perusahaan
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Job Application System
+Upload CV + input ekspektasi gaji
+
+Dashboard lamaran: status, detail, jadwal interview
+
+Notifikasi interview via email
+
+Riwayat lamaran user
+
+4. Skill Assessment
+Soal multiple choice (25 soal)
+
+Hanya untuk user subscribed
+
+Waktu 30 menit, nilai lulus ≥ 75
+
+Dapat sertifikat PDF dan badge ke profil
+
+Sistem verifikasi sertifikat via kode unik
+
+5. Account Subscription System
+2 Tipe: STANDARD (25K) & PROFESSIONAL (100K)
+
+Fitur premium: CV Generator, Skill Assessment, Priority Review
+
+Payment: Upload bukti transfer atau Midtrans Snap
+
+Masa aktif 30 hari, pengingat otomatis H-1 via email
+
+Approval oleh developer jika manual
+
+6. CV Generator
+Hanya untuk user subscribed
+
+Form input tambahan: LinkedIn, Career Summary, dsb
+
+Preview + download PDF
+
+Format CV ATS-friendly
+
+7. Company Review
+Ulasan anonim + estimasi gaji
+
+Rating aspek (culture, work-life, career path)
+
+Hanya oleh user yang diverifikasi bekerja di perusahaan tersebut
+
+8. Job Posting Management (Admin)
+CRUD lowongan kerja
+
+Filter dan sorting data job
+
+Kelola daftar pelamar, status lamaran
+
+Preview CV & jadwal wawancara
+
+Reminder via email H-1
+
+9. Analytics Dashboard (Developer/Admin)
+Demografi user: usia, jenis kelamin, lokasi
+
+Trend gaji & minat pelamar
+
+Statistik subscription & lencana skill
+
+Tech Stack
+Area	Stack
+Frontend	Next.js 13+, TypeScript, TailwindCSS, Redux Toolkit, Formik + Yup
+Backend	Express.js, Node.js, PostgreSQL, Prisma ORM, Zod Validation
+Auth	JWT, Role-based access
+Upload	Multer, Cloudinary
+Payment	Midtrans Snap, Manual proof upload
+PDF & Badge	React-PDF, QR code verification, custom badge system
+
