@@ -245,34 +245,38 @@ export default function UserProfilePage() {
               {/* Badge Section */}
               {(profile?.subscription || profile?.assessments?.length) && (
                 <div className="mt-4">
-                  <h2 className="text-lg font-semibold text-gray-700 mb-1">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-2">
                     Badges
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {/* Subscription Badge */}
                     {profile.subscription?.status === "ACTIVE" && (
-                      <span className="inline-block bg-yellow-200 text-yellow-800 text-sm px-3 py-1 rounded-full font-medium">
+                      <span
+                        title="Subscription"
+                        className="relative inline-flex items-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-white text-sm px-4 py-1 rounded-full font-semibold shadow-md hover:shadow-lg transition"
+                      >
                         {profile.subscription.type === "PROFESSIONAL"
                           ? "PRO"
                           : "STANDARD"}
                       </span>
                     )}
 
-                    {/* Assessment Badges */}
-                    {profile.assessments?.map(
-                      (a: {
-                        id: string;
-                        badge: string;
-                        assessment: { name: string };
-                      }) => (
-                        <span
-                          key={a.id}
-                          className="inline-block bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium"
-                        >
-                          {a.badge} - {a.assessment.name}
-                        </span>
-                      )
-                    )}
+                    {/* Unique Skill Badges */}
+                    {[
+                      ...new Set(
+                        (profile.assessments || [])
+                          .filter((a) => a.badge)
+                          .map((a) => a.badge!)
+                      ),
+                    ].map((badge, index) => (
+                      <span
+                        key={index}
+                        title="Skill Assessment"
+                        className="relative inline-flex items-center bg-sky-100 text-sky-800 text-sm px-3 py-1 rounded-full font-medium border border-sky-300 hover:bg-sky-200 transition"
+                      >
+                        {badge}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}

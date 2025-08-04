@@ -77,7 +77,7 @@ export default function ReviewList({
 
           <div className="space-y-1 text-sm text-gray-700">
             <RatingRow
-              label="🌟 Rating Umum:"
+              label="Rating Umum:"
               value={rev.rating}
               name={`r-${rev.id}`}
             />

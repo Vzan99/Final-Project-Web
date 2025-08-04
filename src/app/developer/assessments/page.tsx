@@ -3,18 +3,26 @@
 import { useEffect, useState } from "react";
 import AssessmentForm from "@/components/assessment/AssessmentForm";
 import API from "@/lib/axios";
-import clsx from "clsx";
+import { Pagination } from "@/components/pagination";
 
 export default function DeveloperAssessmentPage() {
   const [assessments, setAssessments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewing, setViewing] = useState<any | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 5;
 
   const fetchAssessments = async () => {
     try {
-      const res = await API.get("/assessments/developer/all");
-      setAssessments(res.data);
+      const res = await API.get("/assessments/developer/all", {
+        params: { page, pageSize },
+      });
+      const items = res.data.assessments || res.data || [];
+      const total = res.data.total ?? items.length;
+      setAssessments(items);
+      setTotalPages(Math.ceil(total / pageSize));
     } catch (err) {
       console.error("Failed to fetch assessments", err);
     } finally {
@@ -27,7 +35,7 @@ export default function DeveloperAssessmentPage() {
     try {
       await API.delete(`/assessments/${id}`);
       fetchAssessments();
-    } catch (err) {
+    } catch {
       alert("Failed to delete assessment");
     }
   };
@@ -39,7 +47,7 @@ export default function DeveloperAssessmentPage() {
 
   useEffect(() => {
     fetchAssessments();
-  }, []);
+  }, [page]);
 
   return (
     <main className="p-6 max-w-5xl mx-auto space-y-12">
@@ -64,44 +72,52 @@ export default function DeveloperAssessmentPage() {
         ) : assessments.length === 0 ? (
           <p className="text-gray-500">No assessments found.</p>
         ) : (
-          <ul className="space-y-4">
-            {assessments.map((a) => (
-              <li key={a.id} className="border rounded p-4 shadow-sm">
-                <h3 className="font-bold">{a.name}</h3>
-                {a.description && (
-                  <p className="text-sm text-gray-600 mb-1">{a.description}</p>
-                )}
-                <p className="text-sm text-gray-700">
-                  Time limit: {a.timeLimit} minutes | Passing score:{" "}
-                  {a.passingScore ?? 75}
-                </p>
-                <div className="mt-2 flex gap-3 text-sm">
-                  <button
-                    onClick={() => setViewing(a)}
-                    className="text-blue-600 hover:underline"
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleEdit(a)}
-                    className="text-yellow-600 hover:underline"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(a.id)}
-                    className="text-red-600 hover:underline"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="space-y-4">
+              {assessments.map((a) => (
+                <li key={a.id} className="border rounded p-4 shadow-sm">
+                  <h3 className="font-bold">{a.name}</h3>
+                  {a.description && (
+                    <p className="text-sm text-gray-600 mb-1">
+                      {a.description}
+                    </p>
+                  )}
+                  <p className="text-sm text-gray-700">
+                    Time limit: {a.timeLimit} minutes | Passing score:{" "}
+                    {a.passingScore ?? 75}
+                  </p>
+                  <div className="mt-2 flex gap-3 text-sm">
+                    <button
+                      onClick={() => setViewing(a)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => handleEdit(a)}
+                      className="text-yellow-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(a.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={(p) => setPage(p)}
+            />
+          </>
         )}
       </section>
 
-      {/* View Modal */}
       {viewing && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
           <div className="bg-white max-w-2xl w-full rounded-xl p-6 relative max-h-[90vh] overflow-y-auto">
