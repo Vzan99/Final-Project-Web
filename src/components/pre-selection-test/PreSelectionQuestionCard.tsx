@@ -14,15 +14,18 @@ export default function PreSelectionQuestionCard({
   onChange,
 }: Props) {
   return (
-    <div className="border border-gray-200 p-4 rounded-lg bg-white shadow-sm">
-      <p className="font-medium text-gray-800 mb-3">
-        {index + 1}. {question}
-      </p>
-      <div className="space-y-2">
+    <div className="border border-gray-300 p-4 rounded-lg shadow-sm mb-6 bg-white">
+      <label className="font-semibold block mb-2 text-[#1a1a1a]">
+        Question {index + 1}
+      </label>
+
+      <p className="text-sm text-gray-800 mb-3">{question}</p>
+
+      <div className="grid grid-cols-1 gap-3">
         {options.map((opt, i) => (
           <label
             key={i}
-            className="flex items-center gap-2 cursor-pointer text-gray-700"
+            className="flex items-center gap-3 cursor-pointer text-gray-700"
           >
             <input
               type="radio"
@@ -31,9 +34,9 @@ export default function PreSelectionQuestionCard({
               checked={value === i}
               onChange={() => onChange(i)}
               required
-              className="accent-blue-600"
+              className="accent-[#6096B4]"
             />
-            <span>{opt}</span>
+            <span className="text-sm">{opt}</span>
           </label>
         ))}
       </div>

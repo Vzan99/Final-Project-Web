@@ -22,12 +22,14 @@ export default function PreSelectionAnswerForm() {
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const formik = useFormik({
     initialValues: { answers: Array(25).fill(undefined) },
     validationSchema: preSelectionAnswerSchema,
     onSubmit: async (values) => {
+      setIsSubmitting(true);
       try {
         await API.post(
           `/pre-selection-tests/jobs/${id}/pre-selection-test/submit`,
@@ -37,6 +39,8 @@ export default function PreSelectionAnswerForm() {
         router.push(`/jobs`);
       } catch (err: any) {
         toast.error(err?.response?.data?.message || "Failed to submit test.");
+      } finally {
+        setIsSubmitting(false);
       }
     },
   });
@@ -116,9 +120,10 @@ export default function PreSelectionAnswerForm() {
         ) : (
           <button
             type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+            disabled={isSubmitting}
           >
-            Submit
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
         )}
       </div>
