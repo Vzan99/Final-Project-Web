@@ -118,10 +118,10 @@ export default function ApplicantCard({
         return (
           <button
             onClick={() => handleStatusChange("REVIEWED")}
-            disabled={loading}
+            disabled={!!actionLoading}
             className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
           >
-            Mark as Reviewed
+            {actionLoading === "REVIEWED" ? "Marking..." : "Mark as Reviewed"}
           </button>
         );
       case "REVIEWED":
@@ -129,17 +129,19 @@ export default function ApplicantCard({
           <>
             <button
               onClick={() => handleStatusChange("INTERVIEW")}
-              disabled={loading}
+              disabled={!!actionLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
             >
-              Invite to Interview
+              {actionLoading === "INTERVIEW"
+                ? "Inviting..."
+                : "Invite to Interview"}
             </button>
             <button
               onClick={() => setShowRejectDialog(true)}
               disabled={loading}
               className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
             >
-              Reject
+              {actionLoading === "REJECTED" ? "Rejecting..." : "Reject"}
             </button>
           </>
         );
@@ -158,22 +160,53 @@ export default function ApplicantCard({
           <>
             <button
               onClick={() => handleStatusChange("ACCEPTED")}
-              disabled={loading}
+              disabled={!!actionLoading}
               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
             >
-              Accept
+              {actionLoading === "ACCEPTED" ? "Accepting..." : "Accept"}
             </button>
             <button
               onClick={() => setShowRejectDialog(true)}
               disabled={loading}
               className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
             >
-              Reject
+              {actionLoading === "REJECTED" ? "Rejecting..." : "Reject"}
             </button>
           </>
         );
       default:
         return null;
+    }
+  };
+  const handleDownloadCV = async (url: string, userName: string) => {
+    try {
+      const downloadUrl = url.includes("?")
+        ? `${url}&fl_attachment`
+        : `${url}?fl_attachment`;
+
+      const response = await fetch(downloadUrl);
+      const blob = await response.blob();
+
+      const mimeToExt: Record<string, string> = {
+        "application/pdf": "pdf",
+        "application/msword": "doc",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          "docx",
+      };
+
+      const ext = mimeToExt[blob.type] || "pdf";
+      const fileName = `cv-${userName.replace(/\s+/g, "_")}.${ext}`;
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      toast.error("Failed to Download CV.");
     }
   };
 
@@ -196,6 +229,7 @@ export default function ApplicantCard({
                 width: 64,
                 height: 64,
                 crop: "fill",
+              }) ?? "/default-avatar.png"
               }) ?? "/default-avatar.png"
             }
             alt={applicant.user.name}
@@ -298,7 +332,7 @@ export default function ApplicantCard({
                   {applicant.user.profile!.skills!.map((s, i) => (
                     <span
                       key={i}
-                      className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full"
+                      className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full break-words"
                     >
                       {s}
                     </span>

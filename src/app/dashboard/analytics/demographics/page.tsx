@@ -29,13 +29,15 @@ export default function UserDemographicsPage() {
   useEffect(() => {
     API.get("/analytics/user-demographics")
       .then((res) => setData(res.data.data))
-      .catch(() => toast.error("Gagal memuat data demografi"));
+      .catch(() => toast.error("Failed to load demographic data"));
   }, []);
 
   if (!data) {
     return (
-      <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
-        <h1 className="text-3xl font-bold text-[#6096B4]">User Demographics</h1>
+      <div className="p-4 md:p-6 bg-[#EEE9DA] min-h-screen space-y-6 md:space-y-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#6096B4]">
+          User Demographics
+        </h1>
         <DemographicsSkeleton />
         <DemographicsSkeleton />
         <DemographicsSkeleton />
@@ -59,69 +61,79 @@ export default function UserDemographicsPage() {
   }));
 
   return (
-    <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8">
-      <h1 className="text-3xl font-bold text-[#6096B4]">User Demographics</h1>
+    <div className="p-4 md:p-6 bg-[#EEE9DA] min-h-screen space-y-6 md:space-y-8">
+      <h1 className="text-2xl md:text-3xl font-bold text-[#6096B4]">
+        User Demographics
+      </h1>
 
       {/* Age Chart */}
-      <div className="bg-white border rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-          Kelompok Usia
+      <div className="bg-white border rounded-lg shadow p-4 md:p-6">
+        <h2 className="text-base md:text-lg font-semibold text-[#1a1a1a] mb-3 md:mb-4">
+          Age Group
         </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={ageData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="w-full h-[250px] md:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={ageData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Gender Chart */}
-      <div className="bg-white border rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">Gender</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={genderData}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={100}
-              label
-            >
-              {genderData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="bg-white border rounded-lg shadow p-4 md:p-6">
+        <h2 className="text-base md:text-lg font-semibold text-[#1a1a1a] mb-3 md:mb-4">
+          Gender
+        </h2>
+        <div className="w-full h-[250px] md:h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={genderData}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={100}
+                label
+              >
+                {genderData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Location Chart */}
-      <div className="bg-white border rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-[#1a1a1a] mb-4">
-          Lokasi Pengguna
+      <div className="bg-white border rounded-lg shadow p-4 md:p-6 overflow-x-auto">
+        <h2 className="text-base md:text-lg font-semibold text-[#1a1a1a] mb-3 md:mb-4">
+          User Location
         </h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={locationData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis
-              dataKey="name"
-              angle={-30}
-              textAnchor="end"
-              interval={0}
-              height={80}
-            />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="w-full h-[250px] md:h-[300px] min-w-[320px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={locationData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis
+                dataKey="name"
+                angle={-30}
+                textAnchor="end"
+                interval={0}
+                height={80}
+              />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="value" fill="#82ca9d" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

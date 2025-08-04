@@ -43,7 +43,7 @@ export default function InterviewSchedulePage() {
       setInterviews(res.data.data);
       setTotal(res.data.total);
     } catch (err) {
-      toast.error("Gagal mengambil data interview.");
+      toast.error("Failed to fetch interview data.");
     } finally {
       setLoading(false);
     }
@@ -54,32 +54,33 @@ export default function InterviewSchedulePage() {
   }, [statusFilter, sort, page]);
 
   return (
-    <div className="p-6 bg-[#EEE9DA] min-h-screen">
-      <header className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-3xl font-bold text-[#6096B4]">
-          Interview Schedule
-        </h1>
-      </header>
+    <div className="p-4 sm:px-6 sm:py-8 bg-[#EEE9DA] min-h-screen space-y-6 overflow-x-hidden">
+      <h1 className="text-xl sm:text-3xl font-bold text-[#6096B4] text-center sm:text-left">
+        Interview Schedule
+      </h1>
 
-      <div className="bg-white border rounded-lg shadow p-6 mb-6">
+      {/* Create Form */}
+      <div className="bg-white border rounded-lg shadow p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
         {loading ? (
           <InterviewFormSkeleton />
         ) : (
-          <CreateInterviewForm onCreated={fetchInterviews} />
+          <div className="max-w-screen-md mx-auto w-full">
+            <CreateInterviewForm onCreated={fetchInterviews} />
+          </div>
         )}
       </div>
 
       {/* Filter + Sort */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
         <select
           value={statusFilter}
           onChange={(e) => {
             setPage(1);
             setStatusFilter(e.target.value);
           }}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
         >
-          <option value="">Semua Status</option>
+          <option value="">All Statuses</option>
           <option value="SCHEDULED">Scheduled</option>
           <option value="RESCHEDULED">Rescheduled</option>
           <option value="COMPLETED">Completed</option>
@@ -89,15 +90,15 @@ export default function InterviewSchedulePage() {
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as any)}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2 text-sm"
         >
-          <option value="dateTime_asc">Tanggal ↑</option>
-          <option value="dateTime_desc">Tanggal ↓</option>
+          <option value="dateTime_asc">Date ↑</option>
+          <option value="dateTime_desc">Date ↓</option>
         </select>
       </div>
 
       {/* Table + Pagination */}
-      <div className="bg-white border rounded-lg shadow p-6">
+      <div className="bg-white border rounded-lg shadow p-4 sm:p-6 overflow-x-auto max-w-full">
         {loading ? (
           <InterviewListSkeleton />
         ) : (
@@ -105,24 +106,26 @@ export default function InterviewSchedulePage() {
             <InterviewListTable data={interviews} onUpdated={fetchInterviews} />
 
             {/* Pagination */}
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-4 py-2 border rounded disabled:opacity-50"
-              >
-                Prev
-              </button>
-              <span className="px-3 py-2 text-sm">
+            <div className="mt-4 flex flex-col sm:flex-row justify-between items-center gap-3 text-sm">
+              <div>
                 Page {page} of {Math.ceil(total / limit)}
-              </span>
-              <button
-                disabled={page >= Math.ceil(total / limit)}
-                onClick={() => setPage((p) => p + 1)}
-                className="px-4 py-2 border rounded disabled:opacity-50"
-              >
-                Next
-              </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Prev
+                </button>
+                <button
+                  disabled={page >= Math.ceil(total / limit)}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </>
         )}

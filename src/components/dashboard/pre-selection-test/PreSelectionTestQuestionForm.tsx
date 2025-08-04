@@ -44,7 +44,7 @@ export default function PreSelectionTestQuestionForm({
       const jobId = Array.isArray(id) ? id[0] : id;
 
       if (!jobId || typeof jobId !== "string") {
-        alert("Job ID tidak valid.");
+        alert("Job ID is not valid.");
         return;
       }
       try {
@@ -62,7 +62,7 @@ export default function PreSelectionTestQuestionForm({
         alert("Pre-selection test berhasil disimpan!");
         router.push(`/dashboard/jobs/${jobId}`);
       } catch (err: any) {
-        alert(err?.response?.data?.message || "Terjadi kesalahan.");
+        alert(err?.response?.data?.message || "Something Wrong.");
       }
     },
   });
@@ -79,7 +79,7 @@ export default function PreSelectionTestQuestionForm({
       <h2 className="text-3xl font-bold text-[#6096B4]">
         {mode === "edit"
           ? "Edit Pre-Selection Test"
-          : "Buat Pre-Selection Test"}
+          : "Create Pre-Selection Test"}
       </h2>
 
       {formik.values.questions.slice(start, end).map((_, idx) => (
@@ -93,22 +93,38 @@ export default function PreSelectionTestQuestionForm({
       <div className="flex justify-between items-center">
         <button
           type="button"
-          onClick={() => setPage((p) => Math.max(0, p - 1))}
+          onClick={() => {
+            setPage((p) => {
+              const prevPage = Math.max(0, p - 1);
+              if (prevPage !== p) {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+              return prevPage;
+            });
+          }}
           disabled={page === 0}
           className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50 text-sm"
         >
-          Sebelumnya
+          Prev
         </button>
         <div className="text-sm text-gray-700">
-          Halaman {page + 1} / {maxPage}
+          Page {page + 1} of {maxPage}
         </div>
         <button
           type="button"
-          onClick={() => setPage((p) => Math.min(maxPage - 1, p + 1))}
+          onClick={() => {
+            setPage((p) => {
+              const nextPage = Math.min(maxPage - 1, p + 1);
+              if (nextPage !== p) {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+              return nextPage;
+            });
+          }}
           disabled={page === maxPage - 1}
           className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 disabled:opacity-50 text-sm"
         >
-          Selanjutnya
+          Next
         </button>
       </div>
 
@@ -120,6 +136,13 @@ export default function PreSelectionTestQuestionForm({
           {mode === "edit" ? "Update Soal" : "Submit Soal"}
         </button>
       )}
+      <button
+        type="button"
+        onClick={() => router.push(`/dashboard/jobs/${jobId}`)}
+        className="w-full mt-6 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-md font-medium text-sm transition"
+      >
+        Cancel
+      </button>
     </form>
   );
 }

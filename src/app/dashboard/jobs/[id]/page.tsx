@@ -71,22 +71,23 @@ export default function JobDetailPage() {
   }, [id, router]);
 
   if (loading) return <AdminJobDetailSkeleton />;
-  if (!job) return <p>Job not found.</p>;
+  if (!job)
+    return <p className="text-center text-gray-600 mt-10">Job not found.</p>;
 
   return (
-    <div className="p-6 bg-[#EEE9DA] min-h-screen">
+    <div className="p-4 sm:p-6 md:p-8 bg-[#EEE9DA] min-h-screen">
       <header className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
         <h1 className="text-3xl font-bold text-[#6096B4]">{job.title}</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => router.push(`/dashboard/jobs/${job.id}/edit`)}
-            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 text-sm font-medium"
+            className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 text-sm font-medium transition"
           >
             ✏️ Edit Job
           </button>
           <button
             onClick={() => router.push(`/dashboard/jobs/${job.id}/applicants`)}
-            className="bg-[#6096B4] text-white px-4 py-2 rounded hover:bg-[#4d7a96] text-sm font-medium"
+            className="bg-[#6096B4] text-white px-4 py-2 rounded hover:bg-[#4d7a96] text-sm font-medium transition"
           >
             👥 View Applicants
           </button>
@@ -99,7 +100,7 @@ export default function JobDetailPage() {
                   }`
                 )
               }
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm font-medium"
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm font-medium transition"
             >
               🧪 {hasExistingTest ? "Edit Pre-Test" : "Add Pre-Test"}
             </button>
@@ -107,7 +108,8 @@ export default function JobDetailPage() {
         </div>
       </header>
 
-      <div className="grid gap-4 bg-white p-6 rounded shadow">
+      <div className="grid gap-6 bg-white p-6 rounded-xl shadow-md">
+        {/* Tags */}
         <div className="flex flex-wrap gap-2 text-sm">
           <span className="bg-[#EEE0C9] text-[#1a1a1a] px-3 py-1 rounded-xl font-medium">
             {formatJobCategory(job.jobCategory)}
@@ -137,7 +139,8 @@ export default function JobDetailPage() {
           </span>
         </div>
 
-        <div className="text-sm text-gray-700 space-y-1">
+        {/* Metadata */}
+        <div className="text-sm text-gray-700 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-2">
           <p>
             <strong>📍 Location:</strong> {job.location}
           </p>
@@ -153,8 +156,12 @@ export default function JobDetailPage() {
           </p>
         </div>
 
+        {/* Description */}
         <div>
-          <p className="text-gray-800 whitespace-pre-line leading-relaxed">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">
+            Job Description
+          </h3>
+          <p className="text-gray-800 whitespace-pre-line leading-relaxed text-sm sm:text-base">
             {job.description}
           </p>
         </div>

@@ -14,7 +14,6 @@ interface Props {
 }
 
 export default function PreSelectionQuestionCard({ index, formik }: Props) {
-  // Type-safe access with guards
   const rawError = formik.errors.questions?.[index];
   const rawTouched = formik.touched.questions?.[index];
 
@@ -33,12 +32,12 @@ export default function PreSelectionQuestionCard({ index, formik }: Props) {
   return (
     <div className="border border-gray-300 p-4 rounded-lg shadow-sm mb-6 bg-white">
       <label className="font-semibold block mb-2 text-[#1a1a1a]">
-        Pertanyaan {index + 1}
+        Questions {index + 1}
       </label>
       <textarea
         {...formik.getFieldProps(`questions[${index}].question`)}
         className="w-full border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#6096B4]"
-        placeholder="Tulis pertanyaan..."
+        placeholder="question..."
       />
       {touched.question && error.question && (
         <p className="text-red-500 text-sm mt-1">{error.question}</p>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import API from "@/lib/axios";
@@ -28,15 +29,19 @@ interface Job {
 
 export default function JobManagementPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, loading } = useAppSelector((state) => state.auth);
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const searchParams = useSearchParams();
+  const initialPage = parseInt(searchParams.get("page") || "1");
+
   const [filters, setFilters] = useState({
     title: "",
     status: "",
-    page: 1,
+    page: initialPage,
     limit: 5,
   });
 
@@ -97,13 +102,20 @@ export default function JobManagementPage() {
   ) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1");
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const changePage = (direction: "next" | "prev") => {
-    setFilters((prev) => ({
-      ...prev,
-      page: direction === "next" ? prev.page + 1 : Math.max(1, prev.page - 1),
-    }));
+    const newPage =
+      direction === "next" ? filters.page + 1 : Math.max(1, filters.page - 1);
+    setFilters((prev) => ({ ...prev, page: newPage }));
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const isInitialLoading = loading || (isLoading && jobs.length === 0);

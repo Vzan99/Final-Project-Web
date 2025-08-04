@@ -6,9 +6,9 @@ export const preSelectionAnswerSchema = yup.object().shape({
     .of(
       yup
         .number()
-        .min(0, "Pilih jawaban")
-        .max(3, "Pilih jawaban")
-        .required("Jawaban wajib diisi")
+        .min(0, "Select Answer")
+        .max(3, "Select Answer")
+        .required("Answer is required")
     )
-    .length(25, "Harus menjawab 25 soal"),
+    .length(25, "You must answer all 25 questions"),
 });
