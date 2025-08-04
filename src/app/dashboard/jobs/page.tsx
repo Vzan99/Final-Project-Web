@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSearchParams, usePathname } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import debounce from "lodash.debounce";
+
 import API from "@/lib/axios";
 import { useAppSelector } from "@/lib/redux/hooks";
 import JobCard from "@/components/dashboard/jobs/JobCard";
@@ -30,17 +31,19 @@ interface Job {
 export default function JobManagementPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, loading } = useAppSelector((state) => state.auth);
+
+  const initialPage = parseInt(searchParams.get("page") || "1");
+  const initialTitle = searchParams.get("title") || "";
+  const initialStatus = searchParams.get("status") || "";
 
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const searchParams = useSearchParams();
-  const initialPage = parseInt(searchParams.get("page") || "1");
-
   const [filters, setFilters] = useState({
-    title: "",
-    status: "",
+    title: initialTitle,
+    status: initialStatus,
     page: initialPage,
     limit: 5,
   });
@@ -97,16 +100,48 @@ export default function JobManagementPage() {
     );
   };
 
-  const handleFilterChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  const handleStatusFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({ ...prev, [name]: value, page: 1 }));
+    const value = e.target.value;
+    setFilters((prev) => ({ ...prev, status: value, page: 1 }));
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", "1");
+    if (value) {
+      params.set("status", value);
+    } else {
+      params.delete("status");
+    }
     router.push(`${pathname}?${params.toString()}`);
   };
+
+  const debounceTitleSearch = debounce((value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    const currentTitle = params.get("title") || "";
+
+    if (currentTitle === value.trim()) return;
+    setFilters((prev) => ({ ...prev, title: value, page: 1 }));
+
+    params.set("page", "1");
+    if (value.trim()) {
+      params.set("title", value);
+    } else {
+      params.delete("title");
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  }, 500);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    debounceTitleSearch(value);
+  };
+
+  useEffect(() => {
+    return () => {
+      debounceTitleSearch.cancel(); // cleanup
+    };
+  }, []);
 
   const changePage = (direction: "next" | "prev") => {
     const newPage =
@@ -152,15 +187,15 @@ export default function JobManagementPage() {
         <input
           type="text"
           name="title"
-          value={filters.title}
-          onChange={handleFilterChange}
+          defaultValue={filters.title}
+          onChange={handleTitleChange}
           placeholder="Search by title"
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full sm:w-auto"
         />
         <select
           name="status"
           value={filters.status}
-          onChange={handleFilterChange}
+          onChange={handleStatusFilterChange}
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full sm:w-auto"
         >
           <option value="">All Status</option>

@@ -26,6 +26,7 @@ export default function PreSelectionTestQuestionForm({
   const { id } = useParams();
   const router = useRouter();
   const [page, setPage] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const pageSize = 5;
 
   const formik = useFormik({
@@ -47,6 +48,7 @@ export default function PreSelectionTestQuestionForm({
         alert("Job ID is not valid.");
         return;
       }
+      setIsSubmitting(true);
       try {
         if (mode === "create") {
           await API.post("/pre-selection-tests", {
@@ -59,10 +61,12 @@ export default function PreSelectionTestQuestionForm({
           });
         }
 
-        alert("Pre-selection test berhasil disimpan!");
+        alert("Pre-selection successfuly saved!");
         router.push(`/dashboard/jobs/${jobId}`);
       } catch (err: any) {
         alert(err?.response?.data?.message || "Something Wrong.");
+      } finally {
+        setIsSubmitting(false);
       }
     },
   });
@@ -131,9 +135,16 @@ export default function PreSelectionTestQuestionForm({
       {page === maxPage - 1 && (
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full bg-[#6096B4] hover:bg-[#4d7a96] text-white py-2 rounded-md font-medium text-sm transition"
         >
-          {mode === "edit" ? "Update Soal" : "Submit Soal"}
+          {isSubmitting
+            ? mode === "edit"
+              ? "Updating..."
+              : "Submitting..."
+            : mode === "edit"
+            ? "Update Test"
+            : "Submit Test"}
         </button>
       )}
       <button
