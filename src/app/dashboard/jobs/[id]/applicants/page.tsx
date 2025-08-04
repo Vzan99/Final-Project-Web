@@ -134,18 +134,27 @@ export default function ApplicantListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#EEE9DA] p-8">
-      <div className="bg-white p-6 rounded-xl shadow space-y-6 text-[#1a1a1a]">
-        <h1 className="text-3xl font-bold text-[#6096B4]">Applicants</h1>
+    <div className="p-4 sm:p-6 md:p-8 bg-[#EEE9DA] min-h-screen">
+      <div className="bg-white p-6 rounded-xl shadow-md space-y-6 text-[#1a1a1a]">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#6096B4]">
+            Applicants
+          </h1>
+        </div>
+
+        {/* Filter Form */}
         <ApplicantFilterForm
           filters={filters}
           onChange={setFilters}
           educationOptions={educationOptions}
         />
+
+        {/* Applicant List */}
         {filteredApplicants.length === 0 ? (
           <p className="text-gray-600">No applicants found.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="max-w-full sm:max-w-2xl mx-auto">
             {filteredApplicants.map((app) => (
               <ApplicantCard
                 key={app.id}
@@ -158,19 +167,21 @@ export default function ApplicantListPage() {
             ))}
           </div>
         )}
-        <div className="flex justify-center items-center space-x-4 mt-6">
+
+        {/* Pagination */}
+        <div className="flex justify-center items-center space-x-4 pt-4 border-t border-gray-200">
           <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
             Previous
           </button>
-          <span>
+          <span className="text-sm">
             Page {page} of {totalPages}
           </span>
           <button
-            className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+            className="px-4 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >

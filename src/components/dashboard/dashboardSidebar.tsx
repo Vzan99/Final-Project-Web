@@ -48,7 +48,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 min-h-screen bg-[#EEE0C9] border-r border-gray-300 p-4 text-[#1a1a1a]">
+    <div className="h-full w-full p-4 text-[#1a1a1a]">
       <h1 className="text-2xl font-bold mb-6 text-[#6096B4]">Dashboard</h1>
       <nav className="flex flex-col gap-2">
         {links.map((link) => (
@@ -66,6 +66,6 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
-    </aside>
+    </div>
   );
 }

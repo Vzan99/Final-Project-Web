@@ -24,7 +24,6 @@ export default function EditJobPage() {
   const handleSubmit = async (values: any) => {
     try {
       await API.patch(`/jobs/${id}`, values);
-      toast.success("Job updated!");
       router.push("/dashboard/jobs");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to update job");

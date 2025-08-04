@@ -11,20 +11,23 @@ interface Props {
   onUpdated: () => void;
 }
 
-export default function InterviewListTable({ data, onUpdated }: Props) {
-  const [loadingId, setLoadingId] = useState<string | null>(null);
+export default function InterviewListCard({ data, onUpdated }: Props) {
+  const [loadingId, setLoadingId] = useState<{
+    id: string;
+    type: string;
+  } | null>(null);
   const [selectedInterview, setSelectedInterview] =
     useState<InterviewItem | null>(null);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus interview ini?")) return;
+    if (!confirm("Delete this interview ?")) return;
     try {
-      setLoadingId(id);
+      setLoadingId({ id, type: "delete" });
       await API.delete(`/interviews/${id}`);
       toast.success("Interview berhasil dihapus.");
       onUpdated();
     } catch {
-      toast.error("Gagal menghapus interview.");
+      toast.error("Failed to delete interview.");
     } finally {
       setLoadingId(null);
     }
@@ -34,122 +37,117 @@ export default function InterviewListTable({ data, onUpdated }: Props) {
     id: string,
     status: "COMPLETED" | "CANCELLED"
   ) => {
-    if (
-      !confirm(`Yakin ingin mengubah status interview ini menjadi ${status}?`)
-    )
-      return;
+    if (!confirm(`Change status to ${status}?`)) return;
     try {
-      setLoadingId(id);
+      setLoadingId({ id, type: status.toLowerCase() });
       await API.patch(`/interviews/${id}/status`, { status });
-      toast.success(`Status berhasil diubah menjadi ${status}`);
+      toast.success(`Status changed to ${status}`);
       onUpdated();
     } catch {
-      toast.error("Gagal mengubah status interview.");
+      toast.error("Failed to change status.");
     } finally {
       setLoadingId(null);
     }
   };
 
   return (
-    <div className="overflow-x-auto border rounded-lg shadow bg-white">
-      <table className="w-full table-auto">
-        <thead className="bg-[#6096B4] text-white">
-          <tr>
-            <th className="px-5 py-3 text-left text-sm font-semibold">
-              Pelamar
-            </th>
-            <th className="px-5 py-3 text-left text-sm font-semibold">Job</th>
-            <th className="px-5 py-3 text-left text-sm font-semibold">
-              Tanggal
-            </th>
-            <th className="px-5 py-3 text-left text-sm font-semibold">
-              Lokasi
-            </th>
-            <th className="px-5 py-3 text-left text-sm font-semibold">
-              Status
-            </th>
-            <th className="px-5 py-3 text-left text-sm font-semibold">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.length === 0 ? (
-            <tr>
-              <td
-                colSpan={6}
-                className="text-center py-6 text-gray-500 text-sm"
-              >
-                Belum ada jadwal interview.
-              </td>
-            </tr>
-          ) : (
-            data.map((item) => (
-              <tr key={item.id} className="border-t hover:bg-gray-50">
-                <td className="px-5 py-3">
-                  <div className="font-semibold text-gray-800">
-                    {item.user.name}
-                  </div>
-                  <div className="text-sm text-gray-600">{item.user.email}</div>
-                </td>
-                <td className="px-5 py-3 text-gray-700 font-medium">
-                  {item.job.title}
-                </td>
-                <td className="px-5 py-3 text-gray-700">
-                  {new Date(item.dateTime).toLocaleString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </td>
-                <td className="px-5 py-3 text-gray-700">
-                  {item.location || "-"}
-                </td>
-                <td className="px-5 py-3">
-                  <span className="uppercase text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-5 py-3 space-x-2">
-                  {!["COMPLETED", "CANCELLED"].includes(item.status) && (
-                    <button
-                      onClick={() => setSelectedInterview(item)}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-white text-sm px-5 py-2 rounded-lg font-medium transition"
-                    >
-                      Edit
-                    </button>
-                  )}
+    <div className="grid gap-4">
+      {data.length === 0 ? (
+        <div className="text-center text-gray-500 text-sm py-6">
+          No interview schedules available.
+        </div>
+      ) : (
+        data.map((item) => (
+          <div
+            key={item.id}
+            className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 space-y-3"
+          >
+            {/* User Info & Status */}
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">
+                  {item.user.name}
+                </p>
+                <p className="text-xs text-gray-500">{item.user.email}</p>
+              </div>
+              <span className="mt-2 sm:mt-0 text-xs font-semibold uppercase bg-blue-100 text-blue-800 px-2 py-1 rounded self-start sm:self-auto">
+                {item.status}
+              </span>
+            </div>
+
+            {/* Job, Date & Time, Location */}
+            <div className="text-sm text-gray-700 space-y-1">
+              <p>
+                <span className="font-medium text-gray-600">Job:</span>{" "}
+                {item.job.title}
+              </p>
+              <p>
+                <span className="font-medium text-gray-600">Date & Time:</span>{" "}
+                {new Date(item.dateTime).toLocaleString("id-ID", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+              <p>
+                <span className="font-medium text-gray-600">Location:</span>{" "}
+                {item.location || "-"}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {!["COMPLETED", "CANCELLED"].includes(item.status) && (
+                <button
+                  onClick={() => setSelectedInterview(item)}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-4 py-1 rounded-md transition"
+                >
+                  Edit
+                </button>
+              )}
+
+              {["COMPLETED", "CANCELLED"].includes(item.status) && (
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  disabled={loadingId?.id === item.id}
+                  className="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-1 rounded-md transition disabled:opacity-50"
+                >
+                  {loadingId?.id === item.id && loadingId?.type === "delete"
+                    ? "Deleting..."
+                    : "Delete"}
+                </button>
+              )}
+
+              {!["COMPLETED", "CANCELLED"].includes(item.status) && (
+                <>
                   <button
-                    onClick={() => handleDelete(item.id)}
-                    disabled={loadingId === item.id}
-                    className="bg-red-600 hover:bg-red-700 text-white text-sm px-5 py-2 rounded-lg font-medium transition disabled:opacity-50"
+                    onClick={() => handleUpdateStatus(item.id, "COMPLETED")}
+                    disabled={loadingId?.id === item.id}
+                    className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-1 rounded-md transition disabled:opacity-50"
                   >
-                    Hapus
+                    {loadingId?.id === item.id &&
+                    loadingId?.type === "completed"
+                      ? "Completing..."
+                      : "Complete"}
                   </button>
-                  {!["COMPLETED", "CANCELLED"].includes(item.status) && (
-                    <>
-                      <button
-                        onClick={() => handleUpdateStatus(item.id, "COMPLETED")}
-                        disabled={loadingId === item.id}
-                        className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
-                      >
-                        Tandai Selesai
-                      </button>
-                      <button
-                        onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
-                        disabled={loadingId === item.id}
-                        className="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition disabled:opacity-50"
-                      >
-                        Batalkan
-                      </button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                  <button
+                    onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
+                    disabled={loadingId?.id === item.id}
+                    className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-4 py-1 rounded-md transition disabled:opacity-50"
+                  >
+                    {loadingId?.id === item.id &&
+                    loadingId?.type === "cancelled"
+                      ? "Cancelling..."
+                      : "Cancel"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        ))
+      )}
 
       {selectedInterview && (
         <EditInterviewModal

@@ -7,6 +7,7 @@ import { preSelectionAnswerSchema } from "./preSelectionAnswerSchema";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
 import PreSelectionQuestionCard from "./PreSelectionQuestionCard";
+import PreSelectionTestAnswerSkeleton from "./PreSelectionTestAnswerSkeleton";
 
 interface Question {
   question: string;
@@ -17,7 +18,7 @@ interface Question {
 const QUESTIONS_PER_PAGE = 5;
 
 export default function PreSelectionAnswerForm() {
-  const { id } = useParams(); // jobId
+  const { id } = useParams();
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,10 +33,10 @@ export default function PreSelectionAnswerForm() {
           `/pre-selection-tests/jobs/${id}/pre-selection-test/submit`,
           values
         );
-        toast.success("Tes berhasil dikirim!");
+        toast.success("Test successfully sent!");
         router.push(`/jobs`);
       } catch (err: any) {
-        toast.error(err?.response?.data?.message || "Gagal submit tes.");
+        toast.error(err?.response?.data?.message || "Failed to submit test.");
       }
     },
   });
@@ -43,12 +44,12 @@ export default function PreSelectionAnswerForm() {
   useEffect(() => {
     API.get(`/pre-selection-tests/jobs/${id}/pre-selection-test`)
       .then((res) => setQuestions(res.data.data.questions))
-      .catch(() => toast.error("Gagal memuat soal"))
+      .catch(() => toast.error("Failed to load test"))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <p>Loading...</p>;
-  if (!questions.length) return <p>Soal tidak tersedia.</p>;
+  if (loading) return <PreSelectionTestAnswerSkeleton />;
+  if (!questions.length) return <p>No question available.</p>;
 
   const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
   const startIndex = (currentPage - 1) * QUESTIONS_PER_PAGE;
@@ -87,33 +88,37 @@ export default function PreSelectionAnswerForm() {
       <div className="flex justify-between items-center mt-6">
         <button
           type="button"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => {
+            setCurrentPage((prev) => Math.max(prev - 1, 1));
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
           disabled={currentPage === 1}
           className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 disabled:opacity-50 transition-colors"
         >
-          Sebelumnya
+          Prev
         </button>
 
         <p className="text-gray-600 text-sm">
-          Halaman {currentPage} dari {totalPages}
+          Page {currentPage} of {totalPages}
         </p>
 
         {currentPage < totalPages ? (
           <button
             type="button"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
+            onClick={() => {
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
-            Selanjutnya
+            Next
           </button>
         ) : (
           <button
             type="submit"
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
           >
-            Submit Jawaban
+            Submit
           </button>
         )}
       </div>

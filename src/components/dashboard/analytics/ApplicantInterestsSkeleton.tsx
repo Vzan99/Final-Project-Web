@@ -1,8 +1,6 @@
 export default function ApplicantInterestsSkeleton() {
   return (
     <div className="p-6 bg-[#EEE9DA] min-h-screen space-y-8 animate-pulse">
-      <div className="h-8 w-1/3 bg-gray-300 rounded" />
-
       {/* Tabel Skeleton */}
       <div className="bg-white border rounded-lg shadow p-6 space-y-4">
         <div className="h-6 w-1/4 bg-gray-300 rounded" />

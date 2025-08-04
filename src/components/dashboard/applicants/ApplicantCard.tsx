@@ -9,45 +9,6 @@ import { Applicant } from "@/types/applicant";
 import RejectDialog from "./rejectDialog";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
-// interface Applicant {
-//   id: string;
-//   status: string;
-//   expectedSalary: number;
-//   cvFile: string;
-//   coverLetter?: string;
-//   appliedAt: string;
-
-//   user: {
-//     id: string;
-//     name: string;
-//     email: string;
-//     profile?: {
-//       photoUrl?: string | null;
-//       birthDate?: string;
-//       gender?: string;
-//       address?: string;
-//       education?: string;
-//       skills?: string[];
-//     };
-//   };
-
-//   job: {
-//     id: string;
-//     title: string;
-//   };
-
-//   test?: {
-//     score?: number;
-//     passed?: boolean;
-//     submittedAt?: string;
-//   };
-
-//   subscriptionType?: string;
-//   interviewStatus?: string;
-// }
-
-// components/dashboard/applicants/ApplicantCard.tsx
-
 interface ApplicantCardProps {
   applicant: Applicant;
   onStatusUpdate?: (newStatus: string) => void;
@@ -63,6 +24,7 @@ export default function ApplicantCard({
   const [showDetail, setShowDetail] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const calculateAge = (birthDate: string) => {
     const dob = new Date(birthDate);
@@ -73,6 +35,7 @@ export default function ApplicantCard({
   const handleStatusChange = async (status: string) => {
     try {
       setLoading(true);
+      setActionLoading(status);
       await API.patch(`/applications/${applicant.id}/status`, { status });
       toast.success(`Status updated to ${status}`);
       onStatusUpdate?.(status);
@@ -80,6 +43,7 @@ export default function ApplicantCard({
       toast.error(err.response?.data?.message || "Failed to update status");
     } finally {
       setLoading(false);
+      setActionLoading(null);
       setRejectLoading(false);
       setShowRejectDialog(false);
     }
@@ -92,7 +56,7 @@ export default function ApplicantCard({
       await handleStatusChange("REJECTED");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to reject applicant");
-      setRejectLoading(false); // only reset if error
+      setRejectLoading(false);
     }
   };
 
@@ -118,10 +82,10 @@ export default function ApplicantCard({
         return (
           <button
             onClick={() => handleStatusChange("REVIEWED")}
-            disabled={loading}
+            disabled={!!actionLoading}
             className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm"
           >
-            Mark as Reviewed
+            {actionLoading === "REVIEWED" ? "Marking..." : "Mark as Reviewed"}
           </button>
         );
       case "REVIEWED":
@@ -129,17 +93,19 @@ export default function ApplicantCard({
           <>
             <button
               onClick={() => handleStatusChange("INTERVIEW")}
-              disabled={loading}
+              disabled={!!actionLoading}
               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
             >
-              Invite to Interview
+              {actionLoading === "INTERVIEW"
+                ? "Inviting..."
+                : "Invite to Interview"}
             </button>
             <button
               onClick={() => setShowRejectDialog(true)}
               disabled={loading}
               className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
             >
-              Reject
+              {actionLoading === "REJECTED" ? "Rejecting..." : "Reject"}
             </button>
           </>
         );
@@ -158,22 +124,53 @@ export default function ApplicantCard({
           <>
             <button
               onClick={() => handleStatusChange("ACCEPTED")}
-              disabled={loading}
+              disabled={!!actionLoading}
               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
             >
-              Accept
+              {actionLoading === "ACCEPTED" ? "Accepting..." : "Accept"}
             </button>
             <button
               onClick={() => setShowRejectDialog(true)}
               disabled={loading}
               className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
             >
-              Reject
+              {actionLoading === "REJECTED" ? "Rejecting..." : "Reject"}
             </button>
           </>
         );
       default:
         return null;
+    }
+  };
+  const handleDownloadCV = async (url: string, userName: string) => {
+    try {
+      const downloadUrl = url.includes("?")
+        ? `${url}&fl_attachment`
+        : `${url}?fl_attachment`;
+
+      const response = await fetch(downloadUrl);
+      const blob = await response.blob();
+
+      const mimeToExt: Record<string, string> = {
+        "application/pdf": "pdf",
+        "application/msword": "doc",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          "docx",
+      };
+
+      const ext = mimeToExt[blob.type] || "pdf";
+      const fileName = `cv-${userName.replace(/\s+/g, "_")}.${ext}`;
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      toast.error("Failed to Download CV.");
     }
   };
 
@@ -226,13 +223,14 @@ export default function ApplicantCard({
 
         {/* CV Link */}
         <div>
-          <Link
-            href={applicant.cvFile}
-            target="_blank"
-            className="text-sm text-[#6096B4] hover:underline"
+          <button
+            onClick={() =>
+              handleDownloadCV(applicant.cvFile, applicant.user.name)
+            }
+            className="text-sm text-[#6096B4] hover:underline hover:text-[#4a7b96] transition-colors"
           >
-            View CV
-          </Link>
+            Download CV
+          </button>
         </div>
 
         {/* Toggle details */}
@@ -298,7 +296,7 @@ export default function ApplicantCard({
                   {applicant.user.profile!.skills!.map((s, i) => (
                     <span
                       key={i}
-                      className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full"
+                      className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full break-words"
                     >
                       {s}
                     </span>

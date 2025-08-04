@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useFormik } from "formik";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { jobSchema } from "./JobSchema";
 import debounce from "lodash.debounce";
@@ -72,6 +73,7 @@ export default function JobForm({
   onSubmit,
   isEdit = false,
 }: JobFormProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [suggestions, setSuggestions] = useState<
@@ -96,6 +98,9 @@ export default function JobForm({
     );
   }, 300);
 
+  if (initialValues.deadline) {
+    initialValues.deadline = initialValues.deadline.split("T")[0];
+  }
   const formik = useFormik<JobFormValues>({
     initialValues: { ...defaultValues, ...initialValues },
     validationSchema: jobSchema,
@@ -226,10 +231,22 @@ export default function JobForm({
         <div>
           <label className="block font-semibold text-[#1a1a1a]">Salary</label>
           <input
-            type="number"
+            type="text"
             name="salary"
-            value={formik.values.salary ?? ""}
-            onChange={formik.handleChange}
+            value={
+              formik.values.salary !== undefined
+                ? formik.values.salary.toLocaleString("en-US")
+                : ""
+            }
+            onChange={(e) => {
+              const rawValue = e.target.value.replace(/,/g, "");
+              const parsed = parseInt(rawValue, 10);
+              if (!isNaN(parsed)) {
+                formik.setFieldValue("salary", parsed);
+              } else {
+                formik.setFieldValue("salary", undefined);
+              }
+            }}
             className="w-full border px-3 py-2 rounded mt-1 text-sm focus:ring-[#6096B4] focus:border-[#6096B4]"
           />
           {formik.errors.salary && (
@@ -391,19 +408,29 @@ export default function JobForm({
         </div>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-[#6096B4] text-white px-5 py-2 rounded-lg hover:bg-[#4d7a96] transition font-medium"
-        >
-          {loading
-            ? isEdit
-              ? "Updating..."
-              : "Submitting..."
-            : isEdit
-            ? "Update Job"
-            : "Create Job"}
-        </button>
+        <div className="flex justify-between items-center pt-4">
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/jobs")}
+            className="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition font-medium"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-[#6096B4] text-white px-5 py-2 rounded-lg hover:bg-[#4d7a96] transition font-medium"
+          >
+            {loading
+              ? isEdit
+                ? "Updating..."
+                : "Submitting..."
+              : isEdit
+              ? "Update Job"
+              : "Create Job"}
+          </button>
+        </div>
       </form>
     </div>
   );

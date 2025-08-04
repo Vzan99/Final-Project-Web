@@ -5,17 +5,17 @@ export const preSelectionTestSchema = yup.object().shape({
     .array()
     .of(
       yup.object().shape({
-        question: yup.string().trim().required("Pertanyaan tidak boleh kosong"),
+        question: yup.string().trim().required("Question must not be empty"),
         options: yup
           .array()
-          .of(yup.string().trim().required("Opsi harus diisi"))
-          .length(4, "Harus ada 4 opsi jawaban"),
+          .of(yup.string().trim().required("All options must be filled in"))
+          .length(4, "HThere must be 4 answer options"),
         correctIndex: yup
           .number()
-          .required("Jawaban benar harus dipilih")
+          .required("A correct answer must be selected")
           .min(0)
           .max(3),
       })
     )
-    .length(25, "Harus ada 25 pertanyaan"),
+    .length(25, "There must be 25 questions"),
 });

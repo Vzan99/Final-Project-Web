@@ -21,7 +21,7 @@ export default function EditInterviewModal({
 
   const formik = useFormik({
     initialValues: {
-      dateTime: interview.dateTime.slice(0, 16), // format for datetime-local
+      dateTime: interview.dateTime.slice(0, 16),
       location: interview.location ?? "",
       notes: interview.notes ?? "",
     },
@@ -29,10 +29,10 @@ export default function EditInterviewModal({
       try {
         setLoading(true);
         await API.patch(`/interviews/${interview.id}`, values);
-        toast.success("Interview berhasil diperbarui.");
+        toast.success("Interview updated successfully.");
         onUpdated();
       } catch {
-        toast.error("Gagal memperbarui interview.");
+        toast.error("Failed to update interview.");
       } finally {
         setLoading(false);
       }
@@ -40,8 +40,8 @@ export default function EditInterviewModal({
   });
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg relative overflow-y-auto max-h-[90vh]">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 text-lg"
@@ -54,7 +54,7 @@ export default function EditInterviewModal({
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">
-              Tanggal & Waktu
+              Date & Time
             </label>
             <input
               type="datetime-local"
@@ -67,7 +67,7 @@ export default function EditInterviewModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Lokasi (opsional)
+              Location (optional)
             </label>
             <input
               type="text"
@@ -80,7 +80,7 @@ export default function EditInterviewModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Catatan (opsional)
+              Notes (optional)
             </label>
             <textarea
               name="notes"
@@ -90,20 +90,20 @@ export default function EditInterviewModal({
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-sm"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm"
             >
-              {loading ? "Menyimpan..." : "Simpan Perubahan"}
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </form>
