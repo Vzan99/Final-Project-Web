@@ -9,45 +9,6 @@ import { Applicant } from "@/types/applicant";
 import RejectDialog from "./rejectDialog";
 import { getCloudinaryImageUrl } from "@/lib/cloudinary";
 
-// interface Applicant {
-//   id: string;
-//   status: string;
-//   expectedSalary: number;
-//   cvFile: string;
-//   coverLetter?: string;
-//   appliedAt: string;
-
-//   user: {
-//     id: string;
-//     name: string;
-//     email: string;
-//     profile?: {
-//       photoUrl?: string | null;
-//       birthDate?: string;
-//       gender?: string;
-//       address?: string;
-//       education?: string;
-//       skills?: string[];
-//     };
-//   };
-
-//   job: {
-//     id: string;
-//     title: string;
-//   };
-
-//   test?: {
-//     score?: number;
-//     passed?: boolean;
-//     submittedAt?: string;
-//   };
-
-//   subscriptionType?: string;
-//   interviewStatus?: string;
-// }
-
-// components/dashboard/applicants/ApplicantCard.tsx
-
 interface ApplicantCardProps {
   applicant: Applicant;
   onStatusUpdate?: (newStatus: string) => void;
@@ -63,6 +24,7 @@ export default function ApplicantCard({
   const [showDetail, setShowDetail] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [rejectLoading, setRejectLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const calculateAge = (birthDate: string) => {
     const dob = new Date(birthDate);
@@ -73,6 +35,7 @@ export default function ApplicantCard({
   const handleStatusChange = async (status: string) => {
     try {
       setLoading(true);
+      setActionLoading(status);
       await API.patch(`/applications/${applicant.id}/status`, { status });
       toast.success(`Status updated to ${status}`);
       onStatusUpdate?.(status);
@@ -80,6 +43,7 @@ export default function ApplicantCard({
       toast.error(err.response?.data?.message || "Failed to update status");
     } finally {
       setLoading(false);
+      setActionLoading(null);
       setRejectLoading(false);
       setShowRejectDialog(false);
     }
@@ -92,7 +56,7 @@ export default function ApplicantCard({
       await handleStatusChange("REJECTED");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to reject applicant");
-      setRejectLoading(false); // only reset if error
+      setRejectLoading(false);
     }
   };
 
@@ -230,7 +194,6 @@ export default function ApplicantCard({
                 height: 64,
                 crop: "fill",
               }) ?? "/default-avatar.png"
-              }) ?? "/default-avatar.png"
             }
             alt={applicant.user.name}
             className="w-16 h-16 rounded-full object-cover border"
@@ -260,13 +223,14 @@ export default function ApplicantCard({
 
         {/* CV Link */}
         <div>
-          <Link
-            href={applicant.cvFile}
-            target="_blank"
-            className="text-sm text-[#6096B4] hover:underline"
+          <button
+            onClick={() =>
+              handleDownloadCV(applicant.cvFile, applicant.user.name)
+            }
+            className="text-sm text-[#6096B4] hover:underline hover:text-[#4a7b96] transition-colors"
           >
-            View CV
-          </Link>
+            Download CV
+          </button>
         </div>
 
         {/* Toggle details */}
