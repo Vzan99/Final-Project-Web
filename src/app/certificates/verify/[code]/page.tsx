@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "@/lib/axios";
-import ProtectedRoute from "@/components/protectedRoute";
 import Spinner from "@/components/loadingSkeleton/spinner";
 
 type CertificateData = {
@@ -30,7 +29,7 @@ export default function CertificateVerificationPage() {
     if (!code) return;
 
     axios
-      .get(`/certificates/verify/${code}`)
+      .get(`/assessments/certificates/verify/${code}`)
       .then((res) => setData(res.data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -90,7 +89,7 @@ export default function CertificateVerificationPage() {
             )}
             {data.id && (
               <a
-                href={`${process.env.NEXT_PUBLIC_API_BASE_URL}/certificates/download/${data.id}`}
+                href={`/api/certificates/download/${data.id}`}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
                 target="_blank"
                 rel="noopener noreferrer"

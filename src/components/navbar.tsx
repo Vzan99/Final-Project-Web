@@ -343,12 +343,21 @@ export default function Navbar() {
                       </button>
                       <button
                         onClick={() =>
-                          handleProtectedNavigation("/subscriptions")
+                          handleProtectedNavigation("/subscription")
                         }
                         className="block text-sm hover:text-[#497187]"
                       >
-                        Subscriptions
+                        Subscription
                       </button>
+                      <button
+                        onClick={() =>
+                          handleProtectedNavigation("/assessments")
+                        }
+                        className="block text-sm hover:text-[#497187]"
+                      >
+                        Skill Assessments
+                      </button>
+
                       <button
                         onClick={() => handleProtectedNavigation("/settings")}
                         className="block text-sm hover:text-[#497187]"
