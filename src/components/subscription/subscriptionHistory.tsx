@@ -23,30 +23,36 @@ export default function SubscriptionHistory() {
         <p className="text-gray-600">No subscription history found.</p>
       ) : (
         <ul className="space-y-4">
-          {history.map((sub, i) => (
-            <li key={i} className="border-b pb-2">
-              <p className="font-semibold">
-                {sub.type} - Rp{sub.amount.toLocaleString("id-ID")}
-              </p>
-              <p className="text-sm text-gray-600">
-                {new Date(sub.startDate).toLocaleDateString("id-ID")} -{" "}
-                {new Date(sub.endDate).toLocaleDateString("id-ID")}
-              </p>
-              <p className="text-sm">
-                Status:{" "}
-                <span
-                  className={
-                    sub.paymentStatus === "PAID"
-                      ? "text-green-600"
-                      : "text-yellow-500"
-                  }
-                >
-                  {sub.paymentStatus}
-                </span>{" "}
-                {sub.isApproved ? "✓ Approved" : "⏳ Pending approval"}
-              </p>
-            </li>
-          ))}
+          {history
+            .sort(
+              (a, b) =>
+                new Date(b.startDate).getTime() -
+                new Date(a.startDate).getTime()
+            )
+            .map((sub, i) => (
+              <li key={i} className="border-b pb-2">
+                <p className="font-semibold">
+                  {sub.type} - Rp{sub.amount.toLocaleString("id-ID")}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {new Date(sub.startDate).toLocaleDateString("id-ID")} -{" "}
+                  {new Date(sub.endDate).toLocaleDateString("id-ID")}
+                </p>
+                <p className="text-sm">
+                  Status:{" "}
+                  <span
+                    className={
+                      sub.paymentStatus === "PAID"
+                        ? "text-green-600"
+                        : "text-yellow-500"
+                    }
+                  >
+                    {sub.paymentStatus}
+                  </span>{" "}
+                  {sub.isApproved ? "Approved" : "Pending approval"}
+                </p>
+              </li>
+            ))}
         </ul>
       )}
     </div>

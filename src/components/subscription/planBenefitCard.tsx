@@ -1,10 +1,4 @@
-type Plan = {
-  type: "STANDARD" | "PROFESSIONAL";
-  price: number;
-  features: string[];
-};
-
-const plans: Plan[] = [
+const plans = [
   {
     type: "STANDARD",
     price: 25000,

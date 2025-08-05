@@ -34,6 +34,11 @@ export default function SubscriptionCard() {
           <p className={`font-medium ${getStatusColor(subscription.status)}`}>
             {subscription.status}
           </p>
+          {subscription.type && (
+            <p className="text-sm text-gray-700 mt-1">
+              Plan: {subscription.type}
+            </p>
+          )}
           {subscription.expiredAt && (
             <p className="text-sm text-gray-600 mt-2">
               Expires at:{" "}

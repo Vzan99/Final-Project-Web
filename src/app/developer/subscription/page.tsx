@@ -33,13 +33,21 @@ export default function DeveloperSubscriptionPage() {
     }
   };
 
+  const handleReject = async (id: string) => {
+    try {
+      await API.patch(`/subscriptions/developer/${id}/reject`);
+      setPendingSubs((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      alert("Failed to reject subscription");
+    }
+  };
+
   if (loading) return <p className="p-6">Loading...</p>;
   if (!analytics)
     return <p className="p-6 text-red-600">Failed to load data.</p>;
 
   return (
     <div className="max-w-5xl mx-auto mt-10 space-y-8 p-6">
-      {/* Approval Panel */}
       <div className="bg-white p-6 rounded-2xl shadow-md">
         <h3 className="text-xl font-bold mb-4">Pending Approvals</h3>
         {pendingSubs.length === 0 ? (
@@ -54,7 +62,7 @@ export default function DeveloperSubscriptionPage() {
                       {sub.user.name} ({sub.user.email})
                     </p>
                     <p className="text-sm text-gray-600">
-                      Plan: {sub.type} — Rp{sub.amount.toLocaleString("id-ID")}{" "}
+                      Plan: {sub.type} – Rp{sub.amount.toLocaleString("id-ID")}{" "}
                       via {sub.paymentMethod}
                     </p>
                   </div>
@@ -69,6 +77,12 @@ export default function DeveloperSubscriptionPage() {
                   className="mt-3 px-4 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700"
                 >
                   Approve
+                </button>
+                <button
+                  onClick={() => handleReject(sub.id)}
+                  className="mt-3 px-4 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 ml-2"
+                >
+                  Reject
                 </button>
               </li>
             ))}

@@ -42,7 +42,6 @@ export default function SubscriptionUpgradeForm() {
         onClose: () => toast("You closed the payment popup."),
       });
     } catch (error) {
-      console.error("Midtrans error", error);
       toast.error("Failed to initiate payment.");
     }
   };
@@ -58,9 +57,7 @@ export default function SubscriptionUpgradeForm() {
     formData.append("paymentProof", proof);
 
     try {
-      await API.post("/subscriptions/user/subscribe", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await API.post("/subscriptions/user/subscribe", formData);
       toast.success("Subscription submitted! Awaiting approval.");
       router.push("/subscription");
     } catch (err: any) {
