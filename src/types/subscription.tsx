@@ -2,18 +2,23 @@ export type SubscriptionType = "STANDARD" | "PROFESSIONAL";
 
 export type SubscriptionStatus = "ACTIVE" | "INACTIVE" | "PENDING";
 
+export type PaymentStatus = "PENDING" | "PAID";
+
 export type Subscription = {
   type: SubscriptionType;
   startDate: string;
   endDate: string;
   amount: number;
   isApproved: boolean;
-  paymentStatus: "PENDING" | "PAID";
+  paymentStatus: PaymentStatus;
 };
 
 export type MySubscription = {
   status: SubscriptionStatus;
   expiredAt?: string;
+  type?: SubscriptionType;
+  startDate?: string;
+  endDate?: string;
 };
 
 export type Analytics = {
@@ -32,7 +37,7 @@ export type PendingSubscription = {
   paymentMethod: string;
   paymentProof: string;
   isApproved: boolean;
-  paymentStatus: "PENDING" | "PAID";
+  paymentStatus: PaymentStatus;
   user: {
     name: string;
     email: string;
