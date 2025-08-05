@@ -88,44 +88,55 @@ export default function PreSelectionAnswerForm() {
         })}
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-6">
-        <button
-          type="button"
-          onClick={() => {
-            setCurrentPage((prev) => Math.max(prev - 1, 1));
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-          disabled={currentPage === 1}
-          className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 disabled:opacity-50 transition-colors"
-        >
-          Prev
-        </button>
-
-        <p className="text-gray-600 text-sm">
-          Page {currentPage} of {totalPages}
-        </p>
-
-        {currentPage < totalPages ? (
+      {/* Pagination + Cancel Controls */}
+      <div className="flex flex-col lg:flex-row justify-between items-center mt-6 gap-4">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => {
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+              setCurrentPage((prev) => Math.max(prev - 1, 1));
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 disabled:opacity-50 transition-colors"
           >
-            Next
+            Prev
           </button>
-        ) : (
-          <button
-            type="submit"
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting..." : "Submit"}
-          </button>
-        )}
+
+          <p className="text-gray-600 text-sm">
+            Page {currentPage} of {totalPages}
+          </p>
+
+          {currentPage < totalPages ? (
+            <button
+              type="button"
+              onClick={() => {
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
+            </button>
+          )}
+        </div>
+
+        {/* Cancel Button */}
+        <button
+          type="button"
+          onClick={() => router.push(`/jobs`)}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+        >
+          Cancel
+        </button>
       </div>
     </form>
   );

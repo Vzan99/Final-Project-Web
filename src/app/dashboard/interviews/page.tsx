@@ -60,11 +60,11 @@ export default function InterviewSchedulePage() {
       </h1>
 
       {/* Create Form */}
-      <div className="bg-white border rounded-lg shadow p-4 sm:p-6 w-full max-w-full overflow-x-hidden">
+      <div className="w-full px-4">
         {loading ? (
           <InterviewFormSkeleton />
         ) : (
-          <div className="max-w-screen-md mx-auto w-full">
+          <div className="bg-white border rounded-xl shadow-lg p-6 sm:p-8 w-full">
             <CreateInterviewForm onCreated={fetchInterviews} />
           </div>
         )}
@@ -113,6 +113,13 @@ export default function InterviewSchedulePage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   disabled={page === 1}
+                  onClick={() => setPage(1)}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  First
+                </button>
+                <button
+                  disabled={page === 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   className="px-4 py-2 border rounded disabled:opacity-50"
                 >
@@ -124,6 +131,13 @@ export default function InterviewSchedulePage() {
                   className="px-4 py-2 border rounded disabled:opacity-50"
                 >
                   Next
+                </button>
+                <button
+                  disabled={page >= Math.ceil(total / limit)}
+                  onClick={() => setPage(Math.ceil(total / limit))}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Last
                 </button>
               </div>
             </div>

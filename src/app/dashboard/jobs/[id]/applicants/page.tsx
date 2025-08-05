@@ -46,7 +46,7 @@ export default function ApplicantListPage() {
     if (jobId) {
       API.get(`/applications/jobs/${jobId}/applicants`)
         .then((res) => {
-          const { hasTest, applicants } = res.data.data;
+          const { hasTest, applicants, totalPages } = res.data.data;
           setHasTest(hasTest);
           setApplicants(applicants);
           setTotalPages(totalPages);
@@ -154,7 +154,7 @@ export default function ApplicantListPage() {
         {filteredApplicants.length === 0 ? (
           <p className="text-gray-600">No applicants found.</p>
         ) : (
-          <div className="max-w-full sm:max-w-2xl mx-auto">
+          <div className="flex flex-col gap-4">
             {filteredApplicants.map((app) => (
               <ApplicantCard
                 key={app.id}
@@ -171,7 +171,14 @@ export default function ApplicantListPage() {
         {/* Pagination */}
         <div className="flex justify-center items-center space-x-4 pt-4 border-t border-gray-200">
           <button
-            className="px-4 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            className="px-3 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            onClick={() => setPage(1)}
+            disabled={page === 1}
+          >
+            First
+          </button>
+          <button
+            className="px-3 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
@@ -181,11 +188,18 @@ export default function ApplicantListPage() {
             Page {page} of {totalPages}
           </span>
           <button
-            className="px-4 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            className="px-3 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >
             Next
+          </button>
+          <button
+            className="px-3 py-2 bg-gray-200 text-sm rounded disabled:opacity-50 hover:bg-gray-300 transition"
+            onClick={() => setPage(totalPages)}
+            disabled={page === totalPages}
+          >
+            Last
           </button>
         </div>
       </div>
