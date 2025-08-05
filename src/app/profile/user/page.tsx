@@ -243,7 +243,8 @@ export default function UserProfilePage() {
                 {profile?.profile?.about || "No description provided."}
               </p>
               {/* Badge Section */}
-              {(profile?.subscription || profile?.assessments?.length) && (
+              {(profile?.subscription?.status === "ACTIVE" ||
+                (profile?.assessments && profile.assessments.length > 0)) && (
                 <div className="mt-4">
                   <h2 className="text-lg font-semibold text-gray-700 mb-2">
                     Badges
@@ -265,7 +266,7 @@ export default function UserProfilePage() {
                     {[
                       ...new Set(
                         (profile.assessments || [])
-                          .filter((a) => a.badge)
+                          .filter((a) => a.badge && a.badge.trim() !== "")
                           .map((a) => a.badge!)
                       ),
                     ].map((badge, index) => (
