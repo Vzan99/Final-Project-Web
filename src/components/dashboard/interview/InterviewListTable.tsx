@@ -5,6 +5,7 @@ import EditInterviewModal from "./EditInterviewModal";
 import { useState } from "react";
 import API from "@/lib/axios";
 import { toast } from "react-toastify";
+import Link from "next/link";
 
 interface Props {
   data: InterviewItem[];

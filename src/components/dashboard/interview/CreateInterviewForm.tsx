@@ -85,23 +85,21 @@ export default function CreateInterviewForm({ onCreated }: Props) {
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="space-y-4 w-full max-w-2xl mx-auto px-4 sm:px-6 text-sm sm:text-base"
+      className="bg-white rounded-xl border border-gray-200 shadow-lg p-6 sm:p-8 w-full space-y-6 text-sm sm:text-base"
     >
-      <h2 className="text-lg sm:text-xl font-semibold text-[#6096B4] text-center sm:text-left">
+      <h2 className="text-xl font-semibold text-[#6096B4] border-b pb-2">
         Create Interview Schedule
       </h2>
 
       {/* Select Job & Applicant */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block font-medium mb-1 text-sm sm:text-base">
-            Select Job
-          </label>
+          <label className="block font-medium mb-1">Select Job</label>
           <select
             name="jobId"
             value={formik.values.jobId}
             onChange={formik.handleChange}
-            className={`${inputClass} w-full text-sm sm:text-base`}
+            className={`${inputClass} w-full`}
           >
             <option value="">Select a job</option>
             {jobs.map((job) => (
@@ -113,15 +111,13 @@ export default function CreateInterviewForm({ onCreated }: Props) {
         </div>
 
         <div>
-          <label className="block font-medium mb-1 text-sm sm:text-base">
-            Select Applicant
-          </label>
+          <label className="block font-medium mb-1">Select Applicant</label>
           <select
             name="userId"
             value={formik.values.userId}
             onChange={formik.handleChange}
             disabled={!formik.values.jobId}
-            className={`${inputClass} w-full text-sm sm:text-base`}
+            className={`${inputClass} w-full`}
           >
             <option value="">Select applicant</option>
             {applicants.map((user, idx) => (
@@ -136,51 +132,46 @@ export default function CreateInterviewForm({ onCreated }: Props) {
       {/* Date & Location */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block font-medium mb-1 text-sm sm:text-base">
-            Date & Time
-          </label>
+          <label className="block font-medium mb-1">Date & Time</label>
           <input
             type="datetime-local"
             name="dateTime"
             value={formik.values.dateTime}
             onChange={formik.handleChange}
-            className={`${inputClass} w-full text-sm sm:text-base`}
+            className={`${inputClass} w-full`}
           />
         </div>
 
         <div>
-          <label className="block font-medium mb-1 text-sm sm:text-base">
-            Location (Optional)
-          </label>
+          <label className="block font-medium mb-1">Location (Optional)</label>
           <input
             type="text"
             name="location"
             value={formik.values.location}
             onChange={formik.handleChange}
-            className={`${inputClass} w-full text-sm sm:text-base`}
+            className={`${inputClass} w-full`}
           />
         </div>
       </div>
 
       {/* Notes */}
       <div>
-        <label className="block font-medium mb-1 text-sm sm:text-base">
-          Notes (Optional)
-        </label>
+        <label className="block font-medium mb-1">Notes (Optional)</label>
         <textarea
           name="notes"
           value={formik.values.notes}
           onChange={formik.handleChange}
-          className={`${inputClass} w-full text-sm sm:text-base`}
+          className={`${inputClass} w-full resize-none min-h-[100px]`}
+          placeholder="Additional information..."
         />
       </div>
 
       {/* Submit */}
-      <div className="pt-2 flex justify-center sm:justify-start">
+      <div className="pt-2 flex justify-end">
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#6096B4] text-white px-4 py-2 rounded-md text-sm hover:bg-[#4d7a96] transition disabled:opacity-50 w-full sm:w-auto"
+          className="bg-[#6096B4] text-white px-5 py-2.5 rounded-md text-sm hover:bg-[#4d7a96] transition disabled:opacity-50"
         >
           {loading ? "Saving..." : "Create Interview"}
         </button>

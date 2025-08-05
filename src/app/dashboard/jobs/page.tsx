@@ -153,6 +153,14 @@ export default function JobManagementPage() {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const changePageTo = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const isInitialLoading = loading || (isLoading && jobs.length === 0);
 
   if (isInitialLoading) {
@@ -230,7 +238,15 @@ export default function JobManagementPage() {
       </section>
 
       {/* Pagination Controls */}
-      <nav className="flex justify-center mt-6 gap-2">
+      <nav className="flex justify-center mt-6 gap-2 flex-wrap">
+        <button
+          onClick={() => changePageTo(1)}
+          disabled={filters.page === 1}
+          className="px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-100 disabled:opacity-50"
+        >
+          First
+        </button>
+
         <button
           onClick={() => changePage("prev")}
           disabled={filters.page === 1}
@@ -249,6 +265,14 @@ export default function JobManagementPage() {
           className="px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-100 disabled:opacity-50"
         >
           Next
+        </button>
+
+        <button
+          onClick={() => changePageTo(pagination.lastPage)}
+          disabled={filters.page >= pagination.lastPage}
+          className="px-4 py-2 border border-gray-300 rounded bg-white text-sm hover:bg-gray-100 disabled:opacity-50"
+        >
+          Last
         </button>
       </nav>
     </div>
