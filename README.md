@@ -100,4 +100,5 @@ Proyek ini dikerjakan oleh 2 developer dengan pembagian fitur sesuai role: **Use
 
 > Silakan lihat petunjuk instalasi masing-masing di repository:
 > - [API Setup](https://github.com/Vzan99/Final-Project-API#readme)
-> - [Frontend Setup](https://github.com/Vzan99/Final-Project-Web#readme)
+> - [WEB Setup](https://github.com/Vzan99/Final-Project-Web#readme)
+> - [Vercel](https://precise-web-ochre.vercel.app/)
